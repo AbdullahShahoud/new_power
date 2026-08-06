@@ -64,6 +64,10 @@ final Map<String, String> enUS = {
   'notifications_empty_title': 'No notifications yet',
   'notifications_empty_subtitle':
       'You\'ll be notified here about updates on your projects and visits.',
+  'products_title': 'Products',
+  'products_empty_title': 'No products yet',
+  'products_empty_subtitle':
+      'The product catalog will appear here so you can browse it during visits and quotes.',
 
   // User roles (GET /auth/me `role`)
   'role_representative': 'Representative',

@@ -79,6 +79,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             Expanded(
               child: PageView.builder(
+                reverse: context.isArabic,
                 controller: _pageController,
                 itemCount: pages.length,
                 onPageChanged: (i) => setState(() => _currentPage = i),
@@ -89,10 +90,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // Dots
+            // Dots — first dot starts from the left in Arabic, from the
+            // right in English (explicit per-locale request, opposite of
+            // the default RTL/LTR mirroring).
             Padding(
               padding: EdgeInsets.only(bottom: 10.h),
               child: Row(
+                textDirection: context.isArabic
+                    ? TextDirection.ltr
+                    : TextDirection.rtl,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   pages.length,
@@ -162,14 +168,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     )
                   : Row(
                       children: [
-                        TextButton(
-                          onPressed: _finishOnboarding,
-                          child: Text(
-                            context.tr('skip'),
-                            style: context.textStyles.smMedium,
-                          ),
-                        ),
-                        const Spacer(),
                         GestureDetector(
                           onTap: () => _next(context),
                           child: Container(
@@ -195,6 +193,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               color: colors.white,
                               size: 28.sp,
                             ),
+                          ),
+                        ),
+                        const Spacer(),
+
+                        TextButton(
+                          onPressed: _finishOnboarding,
+                          child: Text(
+                            context.tr('skip'),
+                            style: context.textStyles.smMedium,
                           ),
                         ),
                       ],

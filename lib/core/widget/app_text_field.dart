@@ -86,7 +86,7 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return ShakeAnimation(
+    final field = ShakeAnimation(
       shake: _hasError && widget.enableMicroFeedback,
       child: GlowAnimation(
         isActive: _isFocused && !_hasError && widget.enableMicroFeedback,
@@ -143,7 +143,10 @@ class _AppTextFieldState extends State<AppTextField> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.field),
-              borderSide: BorderSide(color: context.colors.brand300, width: 2.w),
+              borderSide: BorderSide(
+                color: context.colors.brand300,
+                width: 2.w,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.field),
@@ -160,5 +163,15 @@ class _AppTextFieldState extends State<AppTextField> {
         ),
       ),
     );
+
+    // A forced textDirection (e.g. manager code / phone: always LTR content
+    // regardless of app language) needs to wrap the whole field, not just
+    // the TextFormField's own `textDirection` param — that alone only
+    // affects text flow, not the hint/decoration layout which otherwise
+    // still follows the ambient (possibly RTL) Directionality.
+    if (widget.textDirection != null) {
+      return Directionality(textDirection: widget.textDirection!, child: field);
+    }
+    return field;
   }
 }

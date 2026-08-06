@@ -14,6 +14,9 @@ class Routes {
   // auth.md: one endpoint (/auth/verify-otp) serves all three flows.
   static const String verifyOtpScreen = '/verifyOtp';
 
-  // Home — tabbed shell (Home, Projects, Notifications, Profile)
+  // Home — tabbed shell (Home, Projects, Products, Profile)
   static const String homeScreen = '/home';
+
+  // Pushed from the Home tab's notification bell (not a bottom-bar tab).
+  static const String notificationsScreen = '/notifications';
 }

@@ -7,6 +7,7 @@ import '../../features/auth/ui/screens/login_screen.dart';
 import '../../features/auth/ui/screens/register_screen.dart';
 import '../../features/auth/ui/screens/reset_password_screen.dart';
 import '../../features/home/ui/main_screen.dart';
+import '../../features/home/ui/screens/notifications_screen.dart';
 import '../../features/onboarding/ui/onboarding_screen.dart';
 import '../widget/startup_error_screen.dart';
 
@@ -39,6 +40,8 @@ class AppRouter {
       // ========================== Home ===================================
       case Routes.homeScreen:
         return _fadeRoute(const MainScreen(), settings);
+      case Routes.notificationsScreen:
+        return _slideRoute(const NotificationsScreen(), settings);
       default:
         return null;
     }

@@ -66,6 +66,10 @@ final Map<String, String> arSY = {
   'notifications_empty_title': 'لا توجد إشعارات بعد',
   'notifications_empty_subtitle':
       'ستصلك هنا إشعارات حول التحديثات على مشاريعك وزياراتك.',
+  'products_title': 'المنتجات',
+  'products_empty_title': 'لا توجد منتجات بعد',
+  'products_empty_subtitle':
+      'سيظهر هنا كتالوج المنتجات لتتمكن من تصفحه أثناء الزيارات والعروض.',
 
   // User roles (GET /auth/me `role`)
   'role_representative': 'مندوب',
