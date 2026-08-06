@@ -135,8 +135,8 @@ class _LoginScreenBodyState extends State<_LoginScreenBody> {
                             verticalSpace(22.h),
                             _buildCreateAccountLink(),
                             verticalSpace(120.h),
-                            _buildDeviceLinkedInfo(),
-                            verticalSpace(24.h),
+                            // _buildDeviceLinkedInfo(),
+                            // verticalSpace(24.h),
                           ],
                         ),
                       ),
@@ -246,22 +246,22 @@ class _LoginScreenBodyState extends State<_LoginScreenBody> {
     );
   }
 
-  Widget _buildDeviceLinkedInfo() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.lock_outline, color: context.colors.ink400, size: 18.sp),
-        horizontalSpace(8.w),
-        Flexible(
-          child: Text(
-            context.tr('device_linked_info'),
-            textAlign: TextAlign.center,
-            style: context.textStyles.xsMedium,
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildDeviceLinkedInfo() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.center,
+  //     children: [
+  //       Icon(Icons.lock_outline, color: context.colors.ink400, size: 18.sp),
+  //       horizontalSpace(8.w),
+  //       Flexible(
+  //         child: Text(
+  //           context.tr('device_linked_info'),
+  //           textAlign: TextAlign.center,
+  //           style: context.textStyles.xsMedium,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   void _handleStateChanges(BuildContext context, LoginState state) {
     state.whenOrNull(
@@ -303,7 +303,6 @@ class _LoginScreenBodyState extends State<_LoginScreenBody> {
         _emailController.text.trim(),
         _passwordController.text,
       );
-      _passwordController.clear();
     }
   }
 }

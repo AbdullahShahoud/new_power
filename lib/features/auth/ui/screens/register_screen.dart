@@ -12,7 +12,7 @@ import '../../../../core/routing/routes.dart';
 import '../../../../core/theming/app_colors.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/app_button.dart';
-import '../../../../core/widget/app_logo.dart';
+// import '../../../../core/widget/app_logo.dart';
 import '../../../../core/widget/app_text_field.dart';
 import '../../data/models/register_request.dart';
 import '../../logic/register_cubit/register_cubit.dart';
@@ -261,6 +261,9 @@ class _RegisterScreenBodyState extends State<_RegisterScreenBody> {
         AppTextField(
           hintText: context.tr('manager_code_hint'),
           controller: _managerCodeController,
+          // Manager codes are always Latin/English content regardless of
+          // app language — force LTR.
+          textDirection: TextDirection.ltr,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return context.tr('error_empty_field');

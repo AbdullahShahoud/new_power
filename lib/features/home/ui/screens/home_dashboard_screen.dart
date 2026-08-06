@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/helpers/extensions.dart';
 import '../../../../core/helpers/spacing.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/routing/routes.dart';
 import '../../../../core/theming/app_colors.dart';
 import '../../../../core/theming/app_radius.dart';
 import '../../../../core/theming/app_shadows.dart';
@@ -31,22 +33,11 @@ class HomeDashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.tr('welcome'),
-                          style: context.textStyles.smRegular,
-                        ),
-                        // Text(
-                        //   context.tr('app_name'),
-                        //   style: context.textStyles.xl2Semibold,
-                        // ),
-                      ],
-                    ),
-                  ),
                   AppLogo(height: 28.h),
+                  _NotificationBellButton(
+                    onTap: () =>
+                        context.pushNamed(Routes.notificationsScreen),
+                  ),
                 ],
               ),
               verticalSpace(24.h),
@@ -81,6 +72,39 @@ class HomeDashboardScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bell icon opening [Routes.notificationsScreen]. A small tinted circle
+/// (Card-recipe-adjacent: brand50 bg, radius-full) rather than a bare
+/// `Icons.notifications` glyph, matching the rest of the design system's
+/// icon treatment (see the Profile screen's avatar/settings icons).
+class _NotificationBellButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _NotificationBellButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 40.w,
+        height: 40.w,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: colors.brand50,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+        child: Icon(
+          Icons.notifications_none_rounded,
+          color: colors.brand600,
+          size: 20.sp,
         ),
       ),
     );

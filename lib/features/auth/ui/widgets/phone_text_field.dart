@@ -56,75 +56,85 @@ class PhoneTextFieldState extends State<PhoneTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return ShakeAnimation(
-      shake: _hasError,
-      child: GlowAnimation(
-        isActive: _isFocused && !_hasError,
-        glowColor: context.colors.brand100,
-        continuous: true,
-        child: TextFormField(
-          key: _formFieldKey,
-          focusNode: _focusNode,
-          controller: widget.controller,
-          validator: (value) {
-            final error = widget.validator?.call(value);
-            if (mounted) {
-              setState(() => _hasError = error != null);
-              if (_hasError) {
-                HapticFeedback.heavyImpact();
+    // Phone numbers are always Western-digit/LTR content regardless of app
+    // language — force LTR on the whole field (text flow + prefix icon
+    // placement + hint alignment), not just the TextFormField's internal
+    // text direction.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ShakeAnimation(
+        shake: _hasError,
+        child: GlowAnimation(
+          isActive: _isFocused && !_hasError,
+          glowColor: context.colors.brand100,
+          continuous: true,
+          child: TextFormField(
+            key: _formFieldKey,
+            focusNode: _focusNode,
+            controller: widget.controller,
+            validator: (value) {
+              final error = widget.validator?.call(value);
+              if (mounted) {
+                setState(() => _hasError = error != null);
+                if (_hasError) {
+                  HapticFeedback.heavyImpact();
+                }
               }
-            }
-            return error;
-          },
-          onChanged: (value) {
-            if (_hasError) {
-              setState(() => _hasError = false);
-            }
-          },
-          keyboardType: TextInputType.phone,
-          style: context.textStyles.smRegular,
-          textDirection: TextDirection.ltr,
-          autofillHints: const [AutofillHints.telephoneNumber],
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]')),
-          ],
-          decoration: InputDecoration(
-            hintText: widget.hintText,
-            hintStyle: context.textStyles.smRegular.copyWith(
-              color: context.colors.ink400,
-            ),
-            filled: true,
-            fillColor: context.colors.surface,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 10.h,
-            ),
-            prefixIcon: GestureDetector(
-              onTap: () => _showCountryPicker(context),
-              child: _CountryCodePrefix(
-                flag: _selected.flag,
-                code: _selected.dialCode,
+              return error;
+            },
+            onChanged: (value) {
+              if (_hasError) {
+                setState(() => _hasError = false);
+              }
+            },
+            keyboardType: TextInputType.phone,
+            style: context.textStyles.smRegular,
+            textDirection: TextDirection.ltr,
+            autofillHints: const [AutofillHints.telephoneNumber],
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]')),
+            ],
+            decoration: InputDecoration(
+              hintText: widget.hintText,
+              hintStyle: context.textStyles.smRegular.copyWith(
+                color: context.colors.ink400,
               ),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.field),
-              borderSide: BorderSide(color: context.colors.ink200),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.field),
-              borderSide: BorderSide(color: context.colors.ink200),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.field),
-              borderSide: BorderSide(color: context.colors.brand300, width: 2.w),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.field),
-              borderSide: BorderSide(color: context.colors.error, width: 2.w),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.field),
-              borderSide: BorderSide(color: context.colors.error, width: 2.w),
+              filled: true,
+              fillColor: context.colors.surface,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 10.h,
+              ),
+              prefixIcon: GestureDetector(
+                onTap: () => _showCountryPicker(context),
+                child: _CountryCodePrefix(
+                  flag: _selected.flag,
+                  code: _selected.dialCode,
+                ),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.field),
+                borderSide: BorderSide(color: context.colors.ink200),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.field),
+                borderSide: BorderSide(color: context.colors.ink200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.field),
+                borderSide: BorderSide(
+                  color: context.colors.brand300,
+                  width: 2.w,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.field),
+                borderSide: BorderSide(color: context.colors.error, width: 2.w),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.field),
+                borderSide: BorderSide(color: context.colors.error, width: 2.w),
+              ),
             ),
           ),
         ),

@@ -8,15 +8,17 @@ import '../../../core/theming/app_shadows.dart';
 import '../../../core/theming/styles.dart';
 import '../../../core/widget/animated_indexed_stack.dart';
 import 'screens/home_dashboard_screen.dart';
-import 'screens/notifications_screen.dart';
+import 'screens/products_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/projects_screen.dart';
 
-/// Post-login shell: four tabs (Home, Projects, Notifications, Profile) over
-/// an on-brand floating bottom bar. Replaces the old wallet-app MainScreen
-/// (QR scanner, payments/wallet tabs, realtime sockets, PIN re-auth) — none
-/// of that exists in this app; NewPower is a construction-sales-ops tool,
-/// not a wallet.
+/// Post-login shell: four tabs (Home, Projects, Products, Profile) over
+/// an on-brand floating bottom bar. Notifications moved off the tab bar —
+/// it's reached via the bell icon on the Home tab instead (see
+/// `Routes.notificationsScreen`). Replaces the old wallet-app MainScreen (QR
+/// scanner, payments/wallet tabs, realtime sockets, PIN re-auth) — none of
+/// that exists in this app; NewPower is a construction-sales-ops tool, not
+/// a wallet.
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -31,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
   static const _tabs = [
     HomeDashboardScreen(),
     ProjectsScreen(),
-    NotificationsScreen(),
+    ProductsScreen(),
     ProfileScreen(),
   ];
 
@@ -100,9 +102,9 @@ const _navTabs = [
     labelKey: 'projects_title',
   ),
   _NavTab(
-    icon: Icons.notifications_none_rounded,
-    activeIcon: Icons.notifications_rounded,
-    labelKey: 'notifications_title',
+    icon: Icons.inventory_2_outlined,
+    activeIcon: Icons.inventory_2_rounded,
+    labelKey: 'products_title',
   ),
   _NavTab(
     icon: Icons.person_outline_rounded,
