@@ -57,6 +57,13 @@ dependencies:
   flutter_native_splash: ^2.4.3
   smooth_page_indicator: ^1.1.0
   carousel_slider: ^5.0.0
+  geolocator: ^14.0.2
+  image_picker: ^1.2.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  connectivity_plus: ^6.1.5
+  shimmer: ^3.0.0
+  google_maps_flutter: ^2.9.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -78,6 +85,7 @@ dev_dependencies:
   json_serializable: ^6.11.1
   retrofit_generator: 10.1.4
   flutter_launcher_icons: ^0.14.4
+  bloc_test: ^10.0.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

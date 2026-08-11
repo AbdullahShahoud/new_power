@@ -47,5 +47,11 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>NewPower uses your location to pin the building you're registering and to record where a visit took place.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>NewPower uses your camera to photograph the building and site visits.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>NewPower needs access to your photo library to attach existing photos to a project.</string>
 	</dict>
 </plist>
