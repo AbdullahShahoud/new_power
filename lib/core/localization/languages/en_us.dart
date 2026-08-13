@@ -10,6 +10,11 @@ final Map<String, String> enUS = {
   'success': 'Success',
   'confirm': 'Confirm',
   'cancel': 'Cancel',
+  // Bottom-nav tab labels (main_screen.dart). `projects_title` and
+  // `products_title` live with their own features; these two have no
+  // feature section of their own.
+  'home': 'Home',
+  'profile': 'Profile',
   'action_cancel': 'Cancel',
   'exit_app': 'Exit App',
   'exit_app_confirmation': 'Are you sure you want to exit the app?',
@@ -49,6 +54,8 @@ final Map<String, String> enUS = {
   'device_linked_info': 'Your device is linked to your account',
   'login_pending_approval':
       'Your account is waiting for your sales manager to approve it.',
+  'login_role_not_allowed':
+      'This app is for sales representatives only. Use the management console with this account.',
   'login_2fa_not_supported':
       'Two-factor authentication accounts must sign in through the admin console.',
 
@@ -110,6 +117,8 @@ final Map<String, String> enUS = {
   'projects_register_unit_count_hint': 'Number of units',
   'projects_register_estimated_value': 'Estimated value (SAR)',
   'projects_register_estimated_value_hint': 'Estimated deal value',
+  'projects_register_estimated_value_required': 'Estimated value is required',
+  'projects_register_estimated_value_invalid': 'Enter a valid amount',
   'projects_register_notes': 'Notes',
   'projects_register_notes_hint': 'Anything else worth recording',
   'projects_register_optional': '(optional)',
@@ -128,6 +137,19 @@ final Map<String, String> enUS = {
   'projects_detail_error':
       'Couldn\'t load this project. Check your connection.',
   'projects_detail_photos': 'Photos',
+  'projects_detail_outside_territory': 'Outside territory',
+  'projects_detail_section_basic': 'Basic information',
+  'edit_project_cta': 'Edit',
+  'edit_project_title': 'Edit project',
+  'edit_project_submit': 'Save changes',
+  'edit_project_saved': 'Changes saved',
+  'edit_project_no_changes': 'Nothing has changed yet',
+  'projects_detail_section_stakeholders': 'Stakeholders',
+  'projects_detail_section_activities': 'Visits & activities',
+  'projects_detail_section_stage_status': 'Stage & status',
+  'projects_detail_section_images': 'Project images',
+  'projects_detail_section_history': 'Project history',
+  'projects_detail_section_outcome': 'Close the project',
   'projects_detail_territory': 'Territory',
   'projects_detail_stage': 'Stage',
   'projects_detail_stage_terminal_note':
@@ -246,6 +268,10 @@ final Map<String, String> enUS = {
   'log_activity_notes_error': 'Notes must be 20-4000 characters',
   'log_activity_persons_visit': 'Who did you meet? (at least one)',
   'log_activity_person_communication': 'Who did you speak with?',
+  // Read-only detail view states a fact; the form above asks a question.
+  // Separate keys so neither has to be phrased awkwardly for both uses.
+  'activity_detail_persons_visit': 'People you met',
+  'activity_detail_person_communication': 'Person you spoke with',
   'log_activity_persons_required': 'Select at least one person',
   'log_activity_persons_empty':
       'No contacts linked to this project yet — the stakeholder directory is coming in a future update.',
@@ -399,6 +425,40 @@ final Map<String, String> enUS = {
   'outcomes_list_error': 'Something went wrong loading your outcomes',
 
   'profile_my_outcomes': 'My outcomes',
+
+  // Account self-service (users.md `/users/me/*`)
+  'change_password_title': 'Change password',
+  'change_password_current': 'Current password',
+  'change_password_current_hint': 'Enter your current password',
+  'change_password_current_required': 'Enter your current password',
+  'change_password_incorrect_current': 'That password is not correct',
+  'change_password_new': 'New password',
+  'change_password_new_hint': 'At least 8 characters',
+  'change_password_confirm': 'Confirm new password',
+  'change_password_confirm_hint': 'Re-enter the new password',
+  'change_password_logout_others': 'Sign out other devices',
+  'change_password_logout_others_hint':
+      'Everywhere else you are signed in will be signed out. This device stays signed in.',
+  'change_password_same': 'The new password must differ from the current one',
+  'change_password_submit': 'Save password',
+  'change_password_success': 'Password changed',
+
+  'change_username_title': 'Change username',
+  'change_username_current': 'Current username',
+  'change_username_new': 'New username',
+  'change_username_new_hint': 'e.g. ahmad123456',
+  'change_username_rules':
+      '6–30 characters, lowercase letters and digits only.',
+  'change_username_length_error': 'Username must be 6–30 characters',
+  'change_username_format_error':
+      'Use lowercase letters and digits only, with no spaces',
+  'change_username_permanent':
+      'You can change your username only once, and it cannot be undone.',
+  'change_username_taken': 'That username is already taken',
+  'change_username_already_changed':
+      'You have already used your one username change',
+  'change_username_submit': 'Save username',
+  'change_username_success': 'Username updated',
   'profile_offline_queue': 'Pending sync',
 
   'log_activity_saved_offline':
@@ -472,6 +532,9 @@ final Map<String, String> enUS = {
 
   'add_stakeholder_cta': 'Add',
   'add_stakeholder_title': 'Add a stakeholder',
+  'add_stakeholder_person_name': 'Name',
+  'add_stakeholder_company_name': 'Company / customer',
+  'add_stakeholder_company_name_hint': 'Who do they work for?',
   'add_stakeholder_account': 'Company',
   'add_stakeholder_account_hint': 'Search for a company',
   'add_stakeholder_account_required': 'Please choose a company',
@@ -818,4 +881,10 @@ final Map<String, String> enUS = {
   'lang_french': 'Français',
   'lang_turkish': 'Türkçe',
   'lang_russian': 'Русский',
+
+  // Map picker (google_maps_flutter)
+  'map_picker_title': 'Choose a location',
+  'map_picker_hint':
+      'Long-press anywhere on the map to place a pin, or use the button to locate yourself.',
+  'map_picker_confirm': 'Confirm location',
 };

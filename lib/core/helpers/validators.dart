@@ -22,6 +22,10 @@ class AppValidators {
   // Password-reset code alphabet per auth.md: uppercase letters + digits only
   // (distinct from the numeric-only 6-digit OTP used for email/device/2FA).
   static final RegExp resetCodeRegex = RegExp(r'^[A-Z0-9]{6,20}$');
+  // `reason`/`note` forbidden characters — identical rule in
+  // projects-client-reference.md (stage/status/location/outcome reasons) and
+  // stakeholders.md (merge/archive/decision-maker reasons). One shared rule.
+  static final RegExp reasonForbiddenCharsRegex = RegExp('''[<>;"']''');
 
   static String? validateOptionalField(String? value, BuildContext context) {
     if (value != null && value.length > 100) {
@@ -150,5 +154,161 @@ class AppValidators {
     }
 
     return null;
+  }
+
+  // ── Network-layer (ArgumentError-throwing) validators ─────────────────────
+  // Used from model `.validate()` extensions before a request is sent — same
+  // pattern as LoginRequestValidation/RegisterRequestValidation in the auth
+  // module. No BuildContext available at that layer, so these return nothing
+  // and throw instead of returning a localized message.
+
+  /// Shared `reason`/`note` rule (projects-client-reference.md,
+  /// stakeholders.md): 10-500 chars after trimming, must not contain
+  /// `< > ; " '`. [fieldName] is used only in the thrown message.
+  static void validateReason(String value, {String fieldName = 'reason'}) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      throw ArgumentError('$fieldName cannot be empty');
+    }
+    if (trimmed.length < 10 || trimmed.length > 500) {
+      throw ArgumentError('$fieldName must be 10-500 characters');
+    }
+    if (reasonForbiddenCharsRegex.hasMatch(trimmed)) {
+      throw ArgumentError('$fieldName contains forbidden characters');
+    }
+  }
+
+  /// Decimal-degree latitude, WGS-84.
+  static void validateLatitude(num value) {
+    if (value < -90 || value > 90) {
+      throw ArgumentError('latitude must be between -90 and 90');
+    }
+  }
+
+  /// Decimal-degree longitude, WGS-84.
+  static void validateLongitude(num value) {
+    if (value < -180 || value > 180) {
+      throw ArgumentError('longitude must be between -180 and 180');
+    }
+  }
+
+  /// A coordinate pair of exactly `(0,0)` is a phone with no GPS fix, not a
+  /// real location on Earth (projects-client-reference.md `PROJECT_INVALID_LOCATION`).
+  static void validateCoordinates(num lat, num lng) {
+    validateLatitude(lat);
+    validateLongitude(lng);
+    if (lat == 0 && lng == 0) {
+      throw ArgumentError('location (0,0) looks like a missing GPS fix');
+    }
+  }
+
+  /// Money is always `amount` + ISO-4217 `currency` together — a currency is
+  /// required whenever an amount is present, never on its own. `amount` must
+  /// be non-negative with at most 2 decimal places.
+  static void validateMoney({
+    required num? amount,
+    required String? currency,
+    String fieldName = 'amount',
+  }) {
+    if (amount == null) return;
+    if (amount < 0) {
+      throw ArgumentError('$fieldName must be >= 0');
+    }
+    final cents = (amount * 100).round();
+    if ((cents / 100) != amount && (amount * 100 - cents).abs() > 0.001) {
+      throw ArgumentError('$fieldName must have at most 2 decimal places');
+    }
+    if (currency == null || currency.trim().isEmpty) {
+      throw ArgumentError('currency is required when $fieldName is present');
+    }
+    if (!RegExp(r'^[A-Z]{3}$').hasMatch(currency)) {
+      throw ArgumentError('currency must be a 3-letter ISO-4217 code');
+    }
+  }
+
+  /// UUID v4 — `personsMet[]`, `competitorAccountId`, `distributorAccountId`
+  /// and friends (projects-client-reference.md §1.10). A regex rather than
+  /// depending on the `uuid` package's own validator so this file has no
+  /// import beyond what it already needs.
+  static final RegExp uuidV4Regex = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  );
+
+  static void validateUuid(String value, {String fieldName = 'id'}) {
+    if (!uuidV4Regex.hasMatch(value)) {
+      throw ArgumentError('$fieldName must be a valid UUID v4');
+    }
+  }
+
+  /// Activity `notes` (create + edit) — `20…4000` chars, trimmed. A
+  /// distinct floor from [validateReason]'s `10…500` (a different domain
+  /// rule, not a parameterized reuse that would obscure the two), per
+  /// projects-implementation-map.md §4.
+  static void validateActivityNotes(
+    String value, {
+    String fieldName = 'notes',
+  }) {
+    final trimmed = value.trim();
+    if (trimmed.length < 20 || trimmed.length > 4000) {
+      throw ArgumentError('$fieldName must be 20-4000 characters');
+    }
+  }
+
+  /// Arabic-Indic digits `٠-٩` — stakeholders.md: "Phone numbers and
+  /// registration numbers accept western digits (`0-9`) only... an
+  /// Arabic-Indic value is refused rather than transliterated." Account
+  /// *names* are exempt (the server folds `٠-٩` onto `0-9` for matching).
+  static final RegExp arabicIndicDigitsRegex = RegExp(r'[٠-٩]');
+
+  /// stakeholders.md `POST /accounts` `name` — `ACCOUNT_INVALID_NAME`:
+  /// "blank, under 2 chars, over 200, control characters, or folds to
+  /// nothing." The folding itself is a server-side comparison-key concern
+  /// (diacritics, legal-form boilerplate) this client can't replicate
+  /// meaningfully — the length/control-character floor is what's checkable.
+  static void validateAccountName(String value, {String fieldName = 'name'}) {
+    final trimmed = value.trim();
+    if (trimmed.length < 2 || trimmed.length > 200) {
+      throw ArgumentError('$fieldName must be 2-200 characters');
+    }
+    if (trimmed.contains(RegExp(r'[\x00-\x1F\x7F]'))) {
+      throw ArgumentError('$fieldName contains control characters');
+    }
+  }
+
+  /// stakeholders.md `POST /accounts` `registrationNumber` (optional) —
+  /// western digits only; letters/digits once separators (`-`, `/`, space)
+  /// are stripped.
+  static void validateRegistrationNumber(
+    String value, {
+    String fieldName = 'registrationNumber',
+  }) {
+    if (arabicIndicDigitsRegex.hasMatch(value)) {
+      throw ArgumentError('$fieldName must use western digits only');
+    }
+    final stripped = value.replaceAll(RegExp(r'[\-/\s]'), '');
+    if (stripped.isEmpty || !RegExp(r'^[a-zA-Z0-9]+$').hasMatch(stripped)) {
+      throw ArgumentError('$fieldName must be letters and digits only');
+    }
+  }
+
+  /// stakeholders.md — a contact's/account's `phone` accepts western digits
+  /// only (same rule as [validateRegistrationNumber]'s digit script, not
+  /// its letters-only shape).
+  static void validateWesternPhone(String value, {String fieldName = 'phone'}) {
+    if (arabicIndicDigitsRegex.hasMatch(value)) {
+      throw ArgumentError('$fieldName must use western digits only');
+    }
+  }
+
+  /// stakeholders.md `POST /accounts/{id}/contacts` — `firstName`/`lastName`
+  /// are both required; no exact bounds are documented beyond
+  /// `CONTACT_INVALID_NAME` existing as a code, so this only guards against
+  /// an empty submission and an unreasonably long one, leaving the server
+  /// authoritative on the exact floor.
+  static void validateContactName(String value, {String fieldName = 'name'}) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty || trimmed.length > 100) {
+      throw ArgumentError('$fieldName must be 1-100 characters');
+    }
   }
 }

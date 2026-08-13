@@ -5,6 +5,21 @@ import '../../features/auth/logic/email_verification_cubit/email_verification_cu
 import '../../features/auth/logic/forgot_password_cubit/forgot_password_cubit.dart';
 import '../../features/auth/logic/login_cubit/login_cubit.dart';
 import '../../features/auth/logic/register_cubit/register_cubit.dart';
+import '../../features/projects/data/local/offline_queue_store.dart';
+import '../../features/projects/data/repo/activities_repository.dart';
+import '../../features/projects/data/repo/file_repository.dart';
+import '../../features/projects/data/repo/projects_repository.dart';
+import '../../features/projects/data/repo/outcomes_repository.dart';
+import '../../features/projects/data/repo/stakeholders_repository.dart';
+import '../../features/projects/logic/accounts_bloc/accounts_bloc.dart';
+import '../../features/projects/logic/activities_bloc/activities_bloc.dart';
+import '../../features/projects/logic/file_upload_bloc/file_upload_bloc.dart';
+import '../../features/projects/logic/offline_sync_bloc/offline_sync_bloc.dart';
+import '../../features/projects/logic/outcomes_bloc/outcomes_bloc.dart';
+import '../../features/projects/logic/projects_bloc/projects_bloc.dart';
+import '../../features/projects/logic/stakeholders_bloc/stakeholders_bloc.dart';
+import '../../features/user/data/repo/user_repository.dart';
+import '../../features/user/logic/account_settings_cubit/account_settings_cubit.dart';
 import '../localization/currency_manager.dart';
 import '../localization/language_manager.dart';
 import '../networking/api_service.dart';
@@ -59,6 +74,76 @@ Future<void> setupGetIt() async {
   );
   getIt.registerFactory<EmailVerificationCubit>(
     () => EmailVerificationCubit(getIt<AuthRepository>()),
+  );
+
+  // ========================== Projects (Phase 1) ==========================
+  // Both repositories sit on the same appDio-backed ApiService singleton
+  // registered above — DioFactory.getAppDio() was built for exactly this
+  // ("everything future"). FileRepository additionally takes the raw Dio
+  // instance directly for the one call that needs upload progress (see the
+  // note in api_service.dart).
+  getIt.registerLazySingleton<FileRepository>(
+    () => FileRepository(appDio, getIt<ApiService>()),
+  );
+  getIt.registerLazySingleton<ProjectsRepository>(
+    () => ProjectsRepository(getIt<ApiService>()),
+  );
+
+  getIt.registerFactory<FileUploadBloc>(
+    () => FileUploadBloc(getIt<FileRepository>()),
+  );
+  getIt.registerFactory<ProjectsBloc>(
+    () => ProjectsBloc(getIt<ProjectsRepository>()),
+  );
+
+  // ========================== Projects (Phase 2) ==========================
+  getIt.registerLazySingleton<ActivitiesRepository>(
+    () => ActivitiesRepository(getIt<ApiService>()),
+  );
+  getIt.registerFactory<ActivitiesBloc>(
+    () => ActivitiesBloc(getIt<ActivitiesRepository>()),
+  );
+
+  // ========================== Projects (Phase 3) ==========================
+  getIt.registerLazySingleton<OutcomesRepository>(
+    () => OutcomesRepository(getIt<ApiService>()),
+  );
+  getIt.registerFactory<OutcomesBloc>(
+    () => OutcomesBloc(getIt<OutcomesRepository>()),
+  );
+
+  // ========================== Projects (Phase 4) ==========================
+  // OfflineSyncBloc is a lazy singleton, not a per-screen factory — the
+  // queue has to exist and be syncable app-wide (main.dart's connectivity
+  // listener, the log-activity screen's enqueue, the queue viewer screen)
+  // regardless of which screen is currently open.
+  getIt.registerLazySingleton<OfflineQueueStore>(() => OfflineQueueStore());
+  getIt.registerLazySingleton<OfflineSyncBloc>(
+    () => OfflineSyncBloc(getIt<OfflineQueueStore>(), getIt<ActivitiesRepository>()),
+  );
+
+  // ========================== Projects (Phase 6) ==========================
+  // stakeholders.md. One repository, two Blocs split by UI usage:
+  // AccountsBloc backs the account/contact pickers, StakeholdersBloc backs
+  // a project's stakeholder-link/decision-maker sections.
+  getIt.registerLazySingleton<StakeholdersRepository>(
+    () => StakeholdersRepository(getIt<ApiService>()),
+  );
+  getIt.registerFactory<AccountsBloc>(
+    () => AccountsBloc(getIt<StakeholdersRepository>()),
+  );
+  getIt.registerFactory<StakeholdersBloc>(
+    () => StakeholdersBloc(getIt<StakeholdersRepository>()),
+  );
+
+  // ========================== User self-service ==========================
+  // users.md `/users/me/*`. Sits on the authApiService instance: these are
+  // identity routes, same as `/auth/me`, not feature data.
+  getIt.registerLazySingleton<UserRepository>(
+    () => UserRepository(getIt<ApiService>(instanceName: 'authApiService')),
+  );
+  getIt.registerFactory<AccountSettingsCubit>(
+    () => AccountSettingsCubit(getIt<UserRepository>()),
   );
 }
 
