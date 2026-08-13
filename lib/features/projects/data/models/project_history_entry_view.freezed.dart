@@ -245,8 +245,8 @@ return status(_that.id,_that.projectId,_that.fromStatus,_that.toStatus,_that.rea
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class ProjectStageHistoryEntryView implements ProjectHistoryEntryView {
   const ProjectStageHistoryEntryView({required this.id, required this.projectId, this.fromStage, required this.toStage, required this.source, this.note, required this.changedAt, this.changedBy, this.changedByUser, final  String? $type}): $type = $type ?? 'STAGE';
   factory ProjectStageHistoryEntryView.fromJson(Map<String, dynamic> json) => _$ProjectStageHistoryEntryViewFromJson(json);
@@ -346,8 +346,8 @@ $ActorViewCopyWith<$Res>? get changedByUser {
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class ProjectStatusHistoryEntryView implements ProjectHistoryEntryView {
   const ProjectStatusHistoryEntryView({required this.id, required this.projectId, required this.fromStatus, required this.toStatus, required this.reason, required this.changedAt, this.changedBy, this.changedByUser, final  String? $type}): $type = $type ?? 'STATUS';
   factory ProjectStatusHistoryEntryView.fromJson(Map<String, dynamic> json) => _$ProjectStatusHistoryEntryViewFromJson(json);

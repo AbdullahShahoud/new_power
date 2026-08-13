@@ -12,6 +12,12 @@ part 'register_account_request.g.dart';
 /// caller's role.
 @freezed
 abstract class RegisterAccountRequest with _$RegisterAccountRequest {
+  /// Optional-and-absent must actually be absent on the wire:
+  /// json_serializable emits every key by default, and this API rejects
+  /// present-but-null on validated optional fields (see
+  /// `SubmitWonRequest` for the case that surfaced it).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
   const factory RegisterAccountRequest({
     required String name,
     @Default(AccountType.company) AccountType type,

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 
 part 'project_image_view.freezed.dart';
@@ -15,6 +16,8 @@ part 'project_image_view.g.dart';
 /// never derive it from `images.length`.
 @Freezed(toStringOverride: false)
 abstract class ProjectImageView with _$ProjectImageView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ProjectImageView({
     required String key,
     required String name,

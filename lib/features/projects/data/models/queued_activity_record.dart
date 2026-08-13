@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'sync_activity_item.dart';
 
 part 'queued_activity_record.freezed.dart';
@@ -13,6 +14,8 @@ part 'queued_activity_record.g.dart';
 /// resubmit as a new logged activity.
 @freezed
 abstract class QueuedActivityRecord with _$QueuedActivityRecord {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory QueuedActivityRecord({
     required SyncActivityItem item,
     required DateTime queuedAt,

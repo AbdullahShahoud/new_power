@@ -13,16 +13,19 @@ _ProjectImageView _$ProjectImageViewFromJson(Map<String, dynamic> json) =>
       contentType: json['contentType'] as String,
       byteSize: (json['byteSize'] as num).toInt(),
       url: json['url'] as String?,
-      urlExpiresAt: json['urlExpiresAt'] == null
-          ? null
-          : DateTime.parse(json['urlExpiresAt'] as String),
+      urlExpiresAt: _$JsonConverterFromJson<String, DateTime>(
+        json['urlExpiresAt'],
+        const UtcDateTimeConverter().fromJson,
+      ),
       id: json['id'] as String,
       caption: json['caption'] as String?,
       exifLatitude: (json['exifLatitude'] as num?)?.toDouble(),
       exifLongitude: (json['exifLongitude'] as num?)?.toDouble(),
       exifDistanceM: (json['exifDistanceM'] as num?)?.toDouble(),
       sortOrder: (json['sortOrder'] as num).toInt(),
-      uploadedAt: DateTime.parse(json['uploadedAt'] as String),
+      uploadedAt: const UtcDateTimeConverter().fromJson(
+        json['uploadedAt'] as String,
+      ),
       uploadedBy: json['uploadedBy'] as String?,
       uploadedByUser: json['uploadedByUser'] == null
           ? null
@@ -36,14 +39,27 @@ Map<String, dynamic> _$ProjectImageViewToJson(_ProjectImageView instance) =>
       'contentType': instance.contentType,
       'byteSize': instance.byteSize,
       'url': instance.url,
-      'urlExpiresAt': instance.urlExpiresAt?.toIso8601String(),
+      'urlExpiresAt': _$JsonConverterToJson<String, DateTime>(
+        instance.urlExpiresAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'id': instance.id,
       'caption': instance.caption,
       'exifLatitude': instance.exifLatitude,
       'exifLongitude': instance.exifLongitude,
       'exifDistanceM': instance.exifDistanceM,
       'sortOrder': instance.sortOrder,
-      'uploadedAt': instance.uploadedAt.toIso8601String(),
+      'uploadedAt': const UtcDateTimeConverter().toJson(instance.uploadedAt),
       'uploadedBy': instance.uploadedBy,
       'uploadedByUser': instance.uploadedByUser,
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

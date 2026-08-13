@@ -218,8 +218,8 @@ return $default(_that.item,_that.queuedAt,_that.lastErrorCode,_that.lastErrorMes
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _QueuedActivityRecord implements QueuedActivityRecord {
   const _QueuedActivityRecord({required this.item, required this.queuedAt, this.lastErrorCode, this.lastErrorMessage});
   factory _QueuedActivityRecord.fromJson(Map<String, dynamic> json) => _$QueuedActivityRecordFromJson(json);

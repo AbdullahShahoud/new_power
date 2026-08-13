@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'activity_view.dart';
 import 'actor_view.dart';
 import 'enums.dart';
@@ -11,6 +12,8 @@ part 'project_detail_view.g.dart';
 /// `ProjectDetailView.stakeholders`); the directory/linking UI is Phase 6.
 @freezed
 abstract class PrimaryContactRefView with _$PrimaryContactRefView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory PrimaryContactRefView({
     required String contactId,
     required String accountId,
@@ -35,6 +38,8 @@ abstract class PrimaryContactRefView with _$PrimaryContactRefView {
 /// matching "a project's inline stakeholders are always the active ones").
 @freezed
 abstract class StakeholderRefView with _$StakeholderRefView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory StakeholderRefView({
     required String linkId,
     required String accountId,
@@ -57,6 +62,8 @@ abstract class StakeholderRefView with _$StakeholderRefView {
 
 @freezed
 abstract class DecisionMakerRefView with _$DecisionMakerRefView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory DecisionMakerRefView({
     required String contactId,
     required String contactName,
@@ -76,6 +83,8 @@ abstract class DecisionMakerRefView with _$DecisionMakerRefView {
 /// stays in the array with `url: null`.
 @freezed
 abstract class ProjectDetailView with _$ProjectDetailView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ProjectDetailView({
     required String id,
     required String name,

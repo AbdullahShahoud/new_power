@@ -212,8 +212,8 @@ return $default(_that.contactId,_that.accountId,_that.firstName,_that.lastName,_
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _PrimaryContactRefView implements PrimaryContactRefView {
   const _PrimaryContactRefView({required this.contactId, required this.accountId, required this.firstName, required this.lastName, this.position, this.phone, this.email});
   factory _PrimaryContactRefView.fromJson(Map<String, dynamic> json) => _$PrimaryContactRefViewFromJson(json);
@@ -523,8 +523,8 @@ return $default(_that.linkId,_that.accountId,_that.accountName,_that.accountType
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _StakeholderRefView implements StakeholderRefView {
   const _StakeholderRefView({required this.linkId, required this.accountId, required this.accountName, required this.accountType, required this.role, this.primaryContact, this.note, required this.startedAt, this.endedAt, this.isActive = true, this.replacedByLinkId, this.linkedBy, this.linkedByUser});
   factory _StakeholderRefView.fromJson(Map<String, dynamic> json) => _$StakeholderRefViewFromJson(json);
@@ -837,8 +837,8 @@ return $default(_that.contactId,_that.contactName,_that.accountId,_that.accountN
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _DecisionMakerRefView implements DecisionMakerRefView {
   const _DecisionMakerRefView({required this.contactId, required this.contactName, required this.accountId, required this.accountName});
   factory _DecisionMakerRefView.fromJson(Map<String, dynamic> json) => _$DecisionMakerRefViewFromJson(json);
@@ -1186,8 +1186,8 @@ return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.l
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ProjectDetailView implements ProjectDetailView {
   const _ProjectDetailView({required this.id, required this.name, required this.buildingType, required this.description, required this.latitude, required this.longitude, this.addressLine, this.territoryId, this.territory, this.outsideTerritory = false, required this.constructionPhase, required this.stage, required this.status, required this.ownerId, this.owner, this.unitCount, this.estimatedValue, this.currency, this.notes, this.lastActivityAt, this.nextActionAt, this.closedAt, this.closedBy, required this.version, this.createdBy, this.createdByUser, required this.createdAt, required this.updatedAt, required this.imageCount, final  List<ProjectImageView> images = const <ProjectImageView>[], final  List<ActivityView> activities = const <ActivityView>[], final  List<StakeholderRefView> stakeholders = const <StakeholderRefView>[], this.decisionMaker}): _images = images,_activities = activities,_stakeholders = stakeholders;
   factory _ProjectDetailView.fromJson(Map<String, dynamic> json) => _$ProjectDetailViewFromJson(json);

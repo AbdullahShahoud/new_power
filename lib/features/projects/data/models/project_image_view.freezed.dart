@@ -228,8 +228,8 @@ return $default(_that.key,_that.name,_that.contentType,_that.byteSize,_that.url,
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ProjectImageView implements ProjectImageView {
   const _ProjectImageView({required this.key, required this.name, required this.contentType, required this.byteSize, this.url, this.urlExpiresAt, required this.id, this.caption, this.exifLatitude, this.exifLongitude, this.exifDistanceM, required this.sortOrder, required this.uploadedAt, this.uploadedBy, this.uploadedByUser});
   factory _ProjectImageView.fromJson(Map<String, dynamic> json) => _$ProjectImageViewFromJson(json);

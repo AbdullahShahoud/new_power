@@ -15,7 +15,7 @@ ProjectStageHistoryEntryView _$ProjectStageHistoryEntryViewFromJson(
   toStage: $enumDecode(_$ProjectStageEnumMap, json['toStage']),
   source: $enumDecode(_$StageChangeSourceEnumMap, json['source']),
   note: json['note'] as String?,
-  changedAt: DateTime.parse(json['changedAt'] as String),
+  changedAt: const UtcDateTimeConverter().fromJson(json['changedAt'] as String),
   changedBy: json['changedBy'] as String?,
   changedByUser: json['changedByUser'] == null
       ? null
@@ -32,7 +32,7 @@ Map<String, dynamic> _$ProjectStageHistoryEntryViewToJson(
   'toStage': _$ProjectStageEnumMap[instance.toStage]!,
   'source': _$StageChangeSourceEnumMap[instance.source]!,
   'note': instance.note,
-  'changedAt': instance.changedAt.toIso8601String(),
+  'changedAt': const UtcDateTimeConverter().toJson(instance.changedAt),
   'changedBy': instance.changedBy,
   'changedByUser': instance.changedByUser,
   'kind': instance.$type,
@@ -65,7 +65,7 @@ ProjectStatusHistoryEntryView _$ProjectStatusHistoryEntryViewFromJson(
   fromStatus: $enumDecode(_$ProjectStatusEnumMap, json['fromStatus']),
   toStatus: $enumDecode(_$ProjectStatusEnumMap, json['toStatus']),
   reason: json['reason'] as String,
-  changedAt: DateTime.parse(json['changedAt'] as String),
+  changedAt: const UtcDateTimeConverter().fromJson(json['changedAt'] as String),
   changedBy: json['changedBy'] as String?,
   changedByUser: json['changedByUser'] == null
       ? null
@@ -81,7 +81,7 @@ Map<String, dynamic> _$ProjectStatusHistoryEntryViewToJson(
   'fromStatus': _$ProjectStatusEnumMap[instance.fromStatus]!,
   'toStatus': _$ProjectStatusEnumMap[instance.toStatus]!,
   'reason': instance.reason,
-  'changedAt': instance.changedAt.toIso8601String(),
+  'changedAt': const UtcDateTimeConverter().toJson(instance.changedAt),
   'changedBy': instance.changedBy,
   'changedByUser': instance.changedByUser,
   'kind': instance.$type,

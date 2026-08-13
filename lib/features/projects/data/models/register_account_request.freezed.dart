@@ -213,8 +213,8 @@ return $default(_that.name,_that.type,_that.registrationNumber,_that.phone,_that
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _RegisterAccountRequest implements RegisterAccountRequest {
   const _RegisterAccountRequest({required this.name, this.type = AccountType.company, this.registrationNumber, this.phone, this.email, this.city, this.addressLine, this.notes});
   factory _RegisterAccountRequest.fromJson(Map<String, dynamic> json) => _$RegisterAccountRequestFromJson(json);

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 import 'enums.dart';
 
@@ -11,6 +12,8 @@ part 'project_history_entry_view.g.dart';
 @Freezed(unionKey: 'kind')
 sealed class ProjectHistoryEntryView with _$ProjectHistoryEntryView {
   @FreezedUnionValue('STAGE')
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ProjectHistoryEntryView.stage({
     required String id,
     required String projectId,
@@ -24,6 +27,8 @@ sealed class ProjectHistoryEntryView with _$ProjectHistoryEntryView {
   }) = ProjectStageHistoryEntryView;
 
   @FreezedUnionValue('STATUS')
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ProjectHistoryEntryView.status({
     required String id,
     required String projectId,

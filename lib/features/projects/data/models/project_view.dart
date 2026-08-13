@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 import 'enums.dart';
+import 'project_image_view.dart';
 
 part 'project_view.freezed.dart';
 part 'project_view.g.dart';
@@ -10,6 +12,8 @@ part 'project_view.g.dart';
 /// nullable/optional: stripped entirely for a `REPRESENTATIVE` (§1.7).
 @freezed
 abstract class ProjectView with _$ProjectView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ProjectView({
     required String id,
     required String name,
@@ -49,6 +53,8 @@ abstract class ProjectView with _$ProjectView {
 /// present on a `near=` query; do not assume the key exists otherwise.
 @freezed
 abstract class ProjectSummaryView with _$ProjectSummaryView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ProjectSummaryView({
     required String id,
     required String name,
@@ -82,6 +88,15 @@ abstract class ProjectSummaryView with _$ProjectSummaryView {
     required int activityCount,
     required int stakeholderCount,
     double? distanceM,
+
+    /// §5 `GET /projects` documents list rows as carrying `imageCount` but
+    /// **no `images` array** ("fetch one project to get photos"). Modeled
+    /// as optional-with-empty-default anyway: if the backend does include
+    /// it, the list card shows a real thumbnail for free; if it doesn't,
+    /// this stays empty and the card falls back to a placeholder. The
+    /// alternative — one `GET /projects/{id}` per visible row just for a
+    /// thumbnail — is an N+1 the doc is explicitly steering away from.
+    @Default(<ProjectImageView>[]) List<ProjectImageView> images,
   }) = _ProjectSummaryView;
 
   factory ProjectSummaryView.fromJson(Map<String, dynamic> json) =>
