@@ -127,16 +127,19 @@ class _AppButtonState extends State<AppButton>
                         ),
                       )
                     : Row(
-                        mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (widget.icon != null) ...[
                             widget.icon!,
                             horizontalSpace(8),
                           ],
-                          Text(
-                            widget.text,
-                            style: textStyle.copyWith(color: foreground),
+                          Flexible(
+                            child: Text(
+                              widget.text,
+                              style: textStyle.copyWith(color: foreground),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
