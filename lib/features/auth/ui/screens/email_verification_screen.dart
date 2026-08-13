@@ -315,6 +315,16 @@ class _EmailVerificationBodyState extends State<_EmailVerificationBody> {
         );
         context.pushReplacementNamed(Routes.loginScreen);
       },
+      roleNotAllowed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('login_role_not_allowed')),
+            backgroundColor: context.colors.error,
+            duration: const Duration(seconds: 8),
+          ),
+        );
+        context.pushReplacementNamed(Routes.loginScreen);
+      },
       twoFactorSetupRequired: () {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.tr('login_2fa_not_supported'))),

@@ -7,10 +7,10 @@ import '../../../core/theming/app_radius.dart';
 import '../../../core/theming/app_shadows.dart';
 import '../../../core/theming/styles.dart';
 import '../../../core/widget/animated_indexed_stack.dart';
+import '../../projects/ui/screens/projects_list_screen.dart';
 import 'screens/home_dashboard_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/projects_screen.dart';
 
 /// Post-login shell: four tabs (Home, Projects, Products, Profile) over
 /// an on-brand floating bottom bar. Notifications moved off the tab bar —
@@ -32,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static const _tabs = [
     HomeDashboardScreen(),
-    ProjectsScreen(),
+    ProjectsListScreen(),
     ProductsScreen(),
     ProfileScreen(),
   ];

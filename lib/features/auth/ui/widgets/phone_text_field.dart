@@ -28,7 +28,13 @@ class PhoneTextField extends StatefulWidget {
 }
 
 class PhoneTextFieldState extends State<PhoneTextField> {
-  _CountryItem _selected = _countries.first;
+  /// Saudi Arabia is the app's home market, so it's the sensible default
+  /// rather than whatever happens to sit first in [_countries]. Falls back
+  /// to the first entry if the `SA` row is ever removed from the list.
+  _CountryItem _selected = _countries.firstWhere(
+    (country) => country.code == 'SA',
+    orElse: () => _countries.first,
+  );
   bool _hasError = false;
   bool _isFocused = false;
 

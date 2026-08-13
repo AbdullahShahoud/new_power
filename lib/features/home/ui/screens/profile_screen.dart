@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/di/dependency_injection.dart';
@@ -15,8 +16,11 @@ import '../../../../core/theming/app_shadows.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/theming/theme_notifier.dart';
 import '../../../../core/widget/app_button.dart';
+import '../../../../core/widget/pressable_scale.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/data/repo/auth_repository.dart';
+import '../../../projects/logic/offline_sync_bloc/offline_sync_bloc.dart';
+import '../../../projects/logic/offline_sync_bloc/offline_sync_state.dart';
 
 /// Profile tab — current user (`GET /auth/me`) plus logout. Was the whole of
 /// `home_placeholder_screen.dart` before the tabbed shell landed; folded in
@@ -113,6 +117,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   initials: _initials(_user!),
                                 ),
                                 verticalSpace(16.h),
+                                _AccountSettingsCard(
+                                  user: _user!,
+                                  onUsernameChanged: (username) => setState(
+                                    () => _user = _user!.copyWith(
+                                      username: username,
+                                      // The one-time change is now spent —
+                                      // stamp it locally so the row hides
+                                      // immediately, without re-fetching
+                                      // `GET /auth/me` just to learn that.
+                                      usernameChangedAt: DateTime.now(),
+                                    ),
+                                  ),
+                                ),
+                                verticalSpace(16.h),
+                                const _OutcomesLinkCard(),
+                                verticalSpace(16.h),
+                                const _OfflineQueueLinkCard(),
+                                verticalSpace(16.h),
                                 const _SettingsCard(),
                                 verticalSpace(24.h),
                                 AppButton(
@@ -208,6 +230,225 @@ String _roleLabel(BuildContext context, String role) {
       return context.tr('role_general_manager');
     default:
       return role;
+  }
+}
+
+/// Phase 3 entry point — `GET /outcomes`, scoped server-side to "my
+/// outcomes" for a rep. Same card recipe as [_SettingsCard] below it.
+class _OutcomesLinkCard extends StatelessWidget {
+  const _OutcomesLinkCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return PressableScale(
+      onTap: () => context.pushNamed(Routes.outcomesListScreen),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          boxShadow: AppShadows.card,
+        ),
+        child: SizedBox(
+          height: 56.h,
+          child: Row(
+            children: [
+              Icon(Icons.flag_outlined, size: 20.sp, color: colors.ink600),
+              horizontalSpace(12.w),
+              Expanded(
+                child: Text(
+                  context.tr('profile_my_outcomes'),
+                  style: context.textStyles.smMedium,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20.sp,
+                color: colors.ink400,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// users.md self-service — change password, and the one-time username
+/// change.
+///
+/// **There is no first/last-name change anywhere in the API.** `users.md`
+/// only accepts `firstName`/`lastName` on `POST /admin/users` (provisioning,
+/// `GENERAL_MANAGER`-only); no self-service route edits them. So the only
+/// "name" a rep can change is their username — offered once, permanently.
+class _AccountSettingsCard extends StatelessWidget {
+  final UserModel user;
+  final ValueChanged<String> onUsernameChanged;
+
+  const _AccountSettingsCard({
+    required this.user,
+    required this.onUsernameChanged,
+  });
+
+  /// users.md: "Check `usernameChangedAt` on `GET /auth/me` before offering
+  /// the option." Hiding a spent action beats letting a rep fill in a form
+  /// only to be told it was never available.
+  bool get _canChangeUsername => user.usernameChangedAt == null;
+
+  Future<void> _openUsername(BuildContext context) async {
+    final result = await context.pushNamed(
+      Routes.changeUsernameScreen,
+      arguments: {'currentUsername': user.username},
+    );
+    if (result is String) onUsernameChanged(result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadows.card,
+      ),
+      child: Column(
+        children: [
+          if (_canChangeUsername) ...[
+            _ActionRow(
+              icon: Icons.alternate_email_rounded,
+              label: context.tr('change_username_title'),
+              onTap: () => _openUsername(context),
+            ),
+            Divider(height: 1, color: colors.ink200),
+          ],
+          _ActionRow(
+            icon: Icons.lock_outline_rounded,
+            label: context.tr('change_password_title'),
+            onTap: () => context.pushNamed(Routes.changePasswordScreen),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A tappable settings row — same 56dp metric and layout as [_SettingsRow],
+/// but with a chevron and a tap target instead of a trailing control.
+class _ActionRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return PressableScale(
+      onTap: onTap,
+      child: SizedBox(
+        height: 56.h,
+        child: Row(
+          children: [
+            Icon(icon, size: 20.sp, color: colors.ink600),
+            horizontalSpace(12.w),
+            Expanded(
+              child: Text(label, style: context.textStyles.smMedium),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 20.sp,
+              color: colors.ink400,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Phase 4 entry point — the local activity queue (§10 Workflow 5). Reads
+/// the app-wide `OfflineSyncBloc` singleton directly (not via `BlocProvider`
+/// — it isn't scoped to this screen) purely to show a live pending-count
+/// badge; `OfflineQueueScreen` itself owns the full view.
+class _OfflineQueueLinkCard extends StatelessWidget {
+  const _OfflineQueueLinkCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return BlocBuilder<OfflineSyncBloc, OfflineSyncState>(
+      bloc: getIt<OfflineSyncBloc>(),
+      buildWhen: (previous, current) =>
+          previous.queuedItems.length != current.queuedItems.length,
+      builder: (context, state) {
+        final count = state.queuedItems.length;
+        return PressableScale(
+          onTap: () => context.pushNamed(Routes.offlineQueueScreen),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              boxShadow: AppShadows.card,
+            ),
+            child: SizedBox(
+              height: 56.h,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.cloud_upload_outlined,
+                    size: 20.sp,
+                    color: colors.ink600,
+                  ),
+                  horizontalSpace(12.w),
+                  Expanded(
+                    child: Text(
+                      context.tr('profile_offline_queue'),
+                      style: context.textStyles.smMedium,
+                    ),
+                  ),
+                  if (count > 0) ...[
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.statusFollowUp.badgeBg,
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: context.textStyles.xsSemibold.copyWith(
+                          color: colors.statusFollowUp.badgeText,
+                        ),
+                      ),
+                    ),
+                    horizontalSpace(8),
+                  ],
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20.sp,
+                    color: colors.ink400,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

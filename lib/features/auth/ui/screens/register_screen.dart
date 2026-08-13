@@ -400,8 +400,6 @@ class _RegisterScreenBodyState extends State<_RegisterScreenBody> {
         appVersion: '',
       );
       context.read<RegisterCubit>().register(request);
-      _passwordController.clear();
-      _confirmPasswordController.clear();
     }
   }
 }

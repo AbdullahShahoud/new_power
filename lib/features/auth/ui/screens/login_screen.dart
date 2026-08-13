@@ -284,6 +284,15 @@ class _LoginScreenBodyState extends State<_LoginScreenBody> {
           ),
         );
       },
+      roleNotAllowed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('login_role_not_allowed')),
+            backgroundColor: context.colors.error,
+            duration: const Duration(seconds: 8),
+          ),
+        );
+      },
       twoFactorSetupRequired: () {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.tr('login_2fa_not_supported'))),
