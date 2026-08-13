@@ -53,5 +53,7 @@
 		<string>NewPower uses your camera to photograph the building and site visits.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>NewPower needs access to your photo library to attach existing photos to a project.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>NewPower uses your microphone to record voice notes on a visit or call.</string>
 	</dict>
 </plist>

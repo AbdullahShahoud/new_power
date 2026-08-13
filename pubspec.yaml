@@ -62,6 +62,17 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   connectivity_plus: ^6.1.5
+  # Activity attachments: §Workflow 1 accepts photos, voice notes and
+  # PDF/Word, so capture needs more than image_picker alone.
+  record: ^5.2.1          # microphone capture (voice notes)
+  just_audio: ^0.9.42     # playback with a scrub bar
+  file_picker: ^8.1.7     # choosing PDFs / documents
+  open_filex: ^4.7.0      # handing a downloaded file to the OS viewer
+  # Already present transitively (via hive_flutter/record), declared
+  # explicitly because this app imports it directly for the voice-note
+  # temp path — relying on a transitive dep would break on any upstream
+  # bump that drops it.
+  path_provider: ^2.1.5
   shimmer: ^3.0.0
   google_maps_flutter: ^2.9.0
 

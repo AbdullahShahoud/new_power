@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Activity attachments: voice notes are recorded in-app (record
+         package). Playback and document picking need no permission. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
         android:label="NewPower"
         android:name="${applicationName}"
