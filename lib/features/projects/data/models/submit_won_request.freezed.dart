@@ -214,8 +214,8 @@ return $default(_that.distributorAccountId,_that.value,_that.currency,_that.sold
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
 class _SubmitWonRequest implements SubmitWonRequest {
   const _SubmitWonRequest({required this.distributorAccountId, this.value, this.currency, this.soldAt, final  List<ProductCategory> categories = const <ProductCategory>[], this.unitsSupplied, this.unitsTotal, this.buyerContactId, this.notes}): _categories = categories;
   factory _SubmitWonRequest.fromJson(Map<String, dynamic> json) => _$SubmitWonRequestFromJson(json);

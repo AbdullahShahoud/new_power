@@ -207,8 +207,8 @@ return $default(_that.contactId,_that.reason);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _SetDecisionMakerRequest implements SetDecisionMakerRequest {
   const _SetDecisionMakerRequest({required this.contactId, this.reason});
   factory _SetDecisionMakerRequest.fromJson(Map<String, dynamic> json) => _$SetDecisionMakerRequestFromJson(json);

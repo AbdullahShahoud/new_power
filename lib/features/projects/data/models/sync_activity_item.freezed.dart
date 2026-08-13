@@ -231,8 +231,8 @@ return $default(_that.projectId,_that.clientRef,_that.kind,_that.channel,_that.p
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
 class _SyncActivityItem implements SyncActivityItem {
   const _SyncActivityItem({required this.projectId, required this.clientRef, required this.kind, this.channel, required this.purpose, required this.outcome, required this.occurredAt, required this.notes, required final  List<String> personsMet, this.location, this.constructionPhaseObserved, this.competitorAccountId, this.nextActionAt, final  List<UploadedFileDto> files = const <UploadedFileDto>[]}): _personsMet = personsMet,_files = files;
   factory _SyncActivityItem.fromJson(Map<String, dynamic> json) => _$SyncActivityItemFromJson(json);

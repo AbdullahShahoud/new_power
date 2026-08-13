@@ -35,23 +35,26 @@ _RegisteredProjectView _$RegisteredProjectViewFromJson(
   estimatedValue: (json['estimatedValue'] as num?)?.toDouble(),
   currency: json['currency'] as String?,
   notes: json['notes'] as String?,
-  lastActivityAt: json['lastActivityAt'] == null
-      ? null
-      : DateTime.parse(json['lastActivityAt'] as String),
-  nextActionAt: json['nextActionAt'] == null
-      ? null
-      : DateTime.parse(json['nextActionAt'] as String),
-  closedAt: json['closedAt'] == null
-      ? null
-      : DateTime.parse(json['closedAt'] as String),
+  lastActivityAt: _$JsonConverterFromJson<String, DateTime>(
+    json['lastActivityAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
+  nextActionAt: _$JsonConverterFromJson<String, DateTime>(
+    json['nextActionAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
+  closedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['closedAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
   closedBy: json['closedBy'] as String?,
   version: (json['version'] as num).toInt(),
   createdBy: json['createdBy'] as String?,
   createdByUser: json['createdByUser'] == null
       ? null
       : ActorView.fromJson(json['createdByUser'] as Map<String, dynamic>),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  createdAt: const UtcDateTimeConverter().fromJson(json['createdAt'] as String),
+  updatedAt: const UtcDateTimeConverter().fromJson(json['updatedAt'] as String),
   imageCount: (json['imageCount'] as num).toInt(),
   activityCount: (json['activityCount'] as num).toInt(),
   stakeholderCount: (json['stakeholderCount'] as num).toInt(),
@@ -85,15 +88,24 @@ Map<String, dynamic> _$RegisteredProjectViewToJson(
   'estimatedValue': instance.estimatedValue,
   'currency': instance.currency,
   'notes': instance.notes,
-  'lastActivityAt': instance.lastActivityAt?.toIso8601String(),
-  'nextActionAt': instance.nextActionAt?.toIso8601String(),
-  'closedAt': instance.closedAt?.toIso8601String(),
+  'lastActivityAt': _$JsonConverterToJson<String, DateTime>(
+    instance.lastActivityAt,
+    const UtcDateTimeConverter().toJson,
+  ),
+  'nextActionAt': _$JsonConverterToJson<String, DateTime>(
+    instance.nextActionAt,
+    const UtcDateTimeConverter().toJson,
+  ),
+  'closedAt': _$JsonConverterToJson<String, DateTime>(
+    instance.closedAt,
+    const UtcDateTimeConverter().toJson,
+  ),
   'closedBy': instance.closedBy,
   'version': instance.version,
   'createdBy': instance.createdBy,
   'createdByUser': instance.createdByUser,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'updatedAt': instance.updatedAt.toIso8601String(),
+  'createdAt': const UtcDateTimeConverter().toJson(instance.createdAt),
+  'updatedAt': const UtcDateTimeConverter().toJson(instance.updatedAt),
   'imageCount': instance.imageCount,
   'activityCount': instance.activityCount,
   'stakeholderCount': instance.stakeholderCount,
@@ -148,6 +160,16 @@ const _$ProjectStatusEnumMap = {
   ProjectStatus.dormant: 'DORMANT',
   ProjectStatus.cancelled: 'CANCELLED',
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);
 
 _StakeholderLinkFailure _$StakeholderLinkFailureFromJson(
   Map<String, dynamic> json,

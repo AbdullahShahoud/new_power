@@ -74,13 +74,13 @@ Map<String, dynamic> _$RegisterProjectRequestToJson(
   'location': instance.location,
   'constructionPhase': _$ConstructionPhaseEnumMap[instance.constructionPhase]!,
   'files': instance.files,
-  'addressLine': instance.addressLine,
-  'unitCount': instance.unitCount,
-  'estimatedValue': instance.estimatedValue,
-  'currency': instance.currency,
+  'addressLine': ?instance.addressLine,
+  'unitCount': ?instance.unitCount,
+  'estimatedValue': ?instance.estimatedValue,
+  'currency': ?instance.currency,
   'stakeholders': instance.stakeholders,
-  'decisionMakerContactId': instance.decisionMakerContactId,
-  'notes': instance.notes,
+  'decisionMakerContactId': ?instance.decisionMakerContactId,
+  'notes': ?instance.notes,
 };
 
 const _$BuildingTypeEnumMap = {

@@ -62,10 +62,13 @@ _StakeholderLinkView _$StakeholderLinkViewFromJson(Map<String, dynamic> json) =>
               json['primaryContact'] as Map<String, dynamic>,
             ),
       note: json['note'] as String?,
-      startedAt: DateTime.parse(json['startedAt'] as String),
-      endedAt: json['endedAt'] == null
-          ? null
-          : DateTime.parse(json['endedAt'] as String),
+      startedAt: const UtcDateTimeConverter().fromJson(
+        json['startedAt'] as String,
+      ),
+      endedAt: _$JsonConverterFromJson<String, DateTime>(
+        json['endedAt'],
+        const UtcDateTimeConverter().fromJson,
+      ),
       endReason: json['endReason'] as String?,
       replacedByLinkId: json['replacedByLinkId'] as String?,
       isActive: json['isActive'] as bool? ?? true,
@@ -82,8 +85,11 @@ Map<String, dynamic> _$StakeholderLinkViewToJson(
   'primaryContactId': instance.primaryContactId,
   'primaryContact': instance.primaryContact,
   'note': instance.note,
-  'startedAt': instance.startedAt.toIso8601String(),
-  'endedAt': instance.endedAt?.toIso8601String(),
+  'startedAt': const UtcDateTimeConverter().toJson(instance.startedAt),
+  'endedAt': _$JsonConverterToJson<String, DateTime>(
+    instance.endedAt,
+    const UtcDateTimeConverter().toJson,
+  ),
   'endReason': instance.endReason,
   'replacedByLinkId': instance.replacedByLinkId,
   'isActive': instance.isActive,
@@ -100,3 +106,13 @@ const _$StakeholderRoleEnumMap = {
   StakeholderRole.siteSupervisor: 'SITE_SUPERVISOR',
   StakeholderRole.other: 'OTHER',
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

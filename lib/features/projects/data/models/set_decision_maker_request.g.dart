@@ -17,5 +17,5 @@ Map<String, dynamic> _$SetDecisionMakerRequestToJson(
   _SetDecisionMakerRequest instance,
 ) => <String, dynamic>{
   'contactId': instance.contactId,
-  'reason': instance.reason,
+  'reason': ?instance.reason,
 };

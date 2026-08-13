@@ -274,8 +274,8 @@ return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.l
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _RegisteredProjectView implements RegisteredProjectView {
   const _RegisteredProjectView({required this.id, required this.name, required this.buildingType, required this.description, required this.latitude, required this.longitude, this.addressLine, this.territoryId, this.territory, this.outsideTerritory = false, required this.constructionPhase, required this.stage, required this.status, required this.ownerId, this.owner, this.unitCount, this.estimatedValue, this.currency, this.notes, this.lastActivityAt, this.nextActionAt, this.closedAt, this.closedBy, required this.version, this.createdBy, this.createdByUser, required this.createdAt, required this.updatedAt, required this.imageCount, required this.activityCount, required this.stakeholderCount, this.distanceM, final  List<ProjectImageView> images = const <ProjectImageView>[]}): _images = images;
   factory _RegisteredProjectView.fromJson(Map<String, dynamic> json) => _$RegisteredProjectViewFromJson(json);
@@ -644,8 +644,8 @@ return $default(_that.accountId,_that.reason);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _StakeholderLinkFailure implements StakeholderLinkFailure {
   const _StakeholderLinkFailure({required this.accountId, required this.reason});
   factory _StakeholderLinkFailure.fromJson(Map<String, dynamic> json) => _$StakeholderLinkFailureFromJson(json);
@@ -920,8 +920,8 @@ return $default(_that.project,_that.nearbyProjects,_that.stakeholderLinkFailures
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _RegisterProjectResult implements RegisterProjectResult {
   const _RegisterProjectResult({required this.project, final  List<NearbyProjectCardView> nearbyProjects = const <NearbyProjectCardView>[], final  List<StakeholderLinkFailure> stakeholderLinkFailures = const <StakeholderLinkFailure>[]}): _nearbyProjects = nearbyProjects,_stakeholderLinkFailures = stakeholderLinkFailures;
   factory _RegisterProjectResult.fromJson(Map<String, dynamic> json) => _$RegisterProjectResultFromJson(json);

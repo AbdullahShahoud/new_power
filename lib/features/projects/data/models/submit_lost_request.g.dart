@@ -21,11 +21,11 @@ Map<String, dynamic> _$SubmitLostRequestToJson(_SubmitLostRequest instance) =>
     <String, dynamic>{
       'someoneElseWon': instance.someoneElseWon,
       'reason': _$LossReasonEnumMap[instance.reason]!,
-      'competitorPrice': instance.competitorPrice,
-      'currency': instance.currency,
-      'competitorAccountId': instance.competitorAccountId,
-      'narrative': instance.narrative,
-      'notes': instance.notes,
+      'competitorPrice': ?instance.competitorPrice,
+      'currency': ?instance.currency,
+      'competitorAccountId': ?instance.competitorAccountId,
+      'narrative': ?instance.narrative,
+      'notes': ?instance.notes,
     };
 
 const _$LossReasonEnumMap = {

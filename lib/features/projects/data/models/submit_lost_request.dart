@@ -11,6 +11,12 @@ part 'submit_lost_request.g.dart';
 /// (`PUT /projects/{id}/status`), not routed through this endpoint.
 @freezed
 abstract class SubmitLostRequest with _$SubmitLostRequest {
+  /// Optional-and-absent must actually be absent on the wire:
+  /// json_serializable emits every key by default, and this API rejects
+  /// present-but-null on validated optional fields (see
+  /// `SubmitWonRequest` for the case that surfaced it).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
   const factory SubmitLostRequest({
     @Default(true) bool someoneElseWon,
     required LossReason reason,

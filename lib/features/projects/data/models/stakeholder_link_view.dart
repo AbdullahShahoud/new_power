@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'enums.dart';
 
 part 'stakeholder_link_view.freezed.dart';
@@ -17,6 +18,8 @@ part 'stakeholder_link_view.g.dart';
 /// shapes genuinely differ, so forcing one type to parse both was the bug.
 @freezed
 abstract class StakeholderLinkAccountView with _$StakeholderLinkAccountView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory StakeholderLinkAccountView({
     required String id,
     required String name,
@@ -29,6 +32,8 @@ abstract class StakeholderLinkAccountView with _$StakeholderLinkAccountView {
 
 @freezed
 abstract class StakeholderLinkContactView with _$StakeholderLinkContactView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory StakeholderLinkContactView({
     required String id,
     required String accountId,
@@ -45,6 +50,8 @@ abstract class StakeholderLinkContactView with _$StakeholderLinkContactView {
 
 @freezed
 abstract class StakeholderLinkView with _$StakeholderLinkView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory StakeholderLinkView({
     required String id,
     required String projectId,

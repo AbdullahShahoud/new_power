@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import '../../../../core/helpers/validators.dart';
 import 'enums.dart';
 
@@ -11,6 +12,20 @@ part 'submit_won_request.g.dart';
 /// (`PROJECT_DISTRIBUTOR_NOT_FOUND`).
 @freezed
 abstract class SubmitWonRequest with _$SubmitWonRequest {
+  /// `includeIfNull: false` is load-bearing, not tidiness. json_serializable
+  /// emits *every* key by default, so an untouched optional field would go
+  /// out as an explicit `"currency": null` — and the server validates
+  /// present-but-null against its ISO-4217 rule and rejects the whole
+  /// request. "Omitted" and "explicitly null" are different statements to
+  /// this API (the same distinction the `omit` sentinel encodes on the PATCH
+  /// requests); optional-and-absent has to actually be absent.
+  ///
+  /// Must sit on the **constructor**, not the class — freezed owns the
+  /// class-level annotation and generation fails outright if it's moved
+  /// there. The `invalid_annotation_target` warning this raises is
+  /// suppressed per-file below; the generator honours it regardless.
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
   const factory SubmitWonRequest({
     required String distributorAccountId,
     double? value,

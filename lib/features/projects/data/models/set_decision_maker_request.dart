@@ -12,6 +12,12 @@ part 'set_decision_maker_request.g.dart';
 /// a value), so it only prompts for a reason when one is actually needed.
 @freezed
 abstract class SetDecisionMakerRequest with _$SetDecisionMakerRequest {
+  /// Optional-and-absent must actually be absent on the wire:
+  /// json_serializable emits every key by default, and this API rejects
+  /// present-but-null on validated optional fields (see
+  /// `SubmitWonRequest` for the case that surfaced it).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
   const factory SetDecisionMakerRequest({
     required String contactId,
     String? reason,

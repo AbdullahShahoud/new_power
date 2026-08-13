@@ -209,8 +209,8 @@ return $default(_that.newAccountId,_that.newPrimaryContactId,_that.note,_that.re
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _ReplaceStakeholderLinkRequest implements ReplaceStakeholderLinkRequest {
   const _ReplaceStakeholderLinkRequest({required this.newAccountId, this.newPrimaryContactId, this.note, required this.reason});
   factory _ReplaceStakeholderLinkRequest.fromJson(Map<String, dynamic> json) => _$ReplaceStakeholderLinkRequestFromJson(json);

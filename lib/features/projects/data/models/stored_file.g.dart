@@ -41,7 +41,7 @@ Map<String, dynamic> _$ProjectFileRefDtoToJson(_ProjectFileRefDto instance) =>
     <String, dynamic>{
       'key': instance.key,
       'name': instance.name,
-      'caption': instance.caption,
-      'exifLatitude': instance.exifLatitude,
-      'exifLongitude': instance.exifLongitude,
+      'caption': ?instance.caption,
+      'exifLatitude': ?instance.exifLatitude,
+      'exifLongitude': ?instance.exifLongitude,
     };

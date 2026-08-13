@@ -208,8 +208,8 @@ return $default(_that.id,_that.name,_that.type);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _StakeholderLinkAccountView implements StakeholderLinkAccountView {
   const _StakeholderLinkAccountView({required this.id, required this.name, required this.type});
   factory _StakeholderLinkAccountView.fromJson(Map<String, dynamic> json) => _$StakeholderLinkAccountViewFromJson(json);
@@ -481,8 +481,8 @@ return $default(_that.id,_that.accountId,_that.firstName,_that.lastName,_that.po
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _StakeholderLinkContactView implements StakeholderLinkContactView {
   const _StakeholderLinkContactView({required this.id, required this.accountId, required this.firstName, required this.lastName, this.position, this.phone, this.email});
   factory _StakeholderLinkContactView.fromJson(Map<String, dynamic> json) => _$StakeholderLinkContactViewFromJson(json);
@@ -789,8 +789,8 @@ return $default(_that.id,_that.projectId,_that.accountId,_that.account,_that.rol
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _StakeholderLinkView implements StakeholderLinkView {
   const _StakeholderLinkView({required this.id, required this.projectId, required this.accountId, required this.account, required this.role, this.primaryContactId, this.primaryContact, this.note, required this.startedAt, this.endedAt, this.endReason, this.replacedByLinkId, this.isActive = true});
   factory _StakeholderLinkView.fromJson(Map<String, dynamic> json) => _$StakeholderLinkViewFromJson(json);

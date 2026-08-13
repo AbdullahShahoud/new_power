@@ -499,8 +499,8 @@ return $default(_that.name,_that.buildingType,_that.description,_that.location,_
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _RegisterProjectRequest implements RegisterProjectRequest {
   const _RegisterProjectRequest({required this.name, required this.buildingType, required this.description, required this.location, required this.constructionPhase, required final  List<ProjectFileRefDto> files, this.addressLine, this.unitCount, this.estimatedValue, this.currency, final  List<ProjectStakeholderRefDto> stakeholders = const <ProjectStakeholderRefDto>[], this.decisionMakerContactId, this.notes}): _files = files,_stakeholders = stakeholders;
   factory _RegisterProjectRequest.fromJson(Map<String, dynamic> json) => _$RegisterProjectRequestFromJson(json);

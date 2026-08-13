@@ -19,7 +19,7 @@ Map<String, dynamic> _$ReplaceStakeholderLinkRequestToJson(
   _ReplaceStakeholderLinkRequest instance,
 ) => <String, dynamic>{
   'newAccountId': instance.newAccountId,
-  'newPrimaryContactId': instance.newPrimaryContactId,
-  'note': instance.note,
+  'newPrimaryContactId': ?instance.newPrimaryContactId,
+  'note': ?instance.note,
   'reason': instance.reason,
 };

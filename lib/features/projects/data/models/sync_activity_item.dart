@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import '../../../../core/helpers/validators.dart';
 import 'activity_location_dto.dart';
 import 'enums.dart';
@@ -15,6 +16,12 @@ part 'sync_activity_item.g.dart';
 /// (projects-implementation-map.md roadmap).
 @freezed
 abstract class SyncActivityItem with _$SyncActivityItem {
+  /// Optional-and-absent must actually be absent on the wire:
+  /// json_serializable emits every key by default, and this API rejects
+  /// present-but-null on validated optional fields (see
+  /// `SubmitWonRequest` for the case that surfaced it).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
   const factory SyncActivityItem({
     required String projectId,
     required String clientRef,

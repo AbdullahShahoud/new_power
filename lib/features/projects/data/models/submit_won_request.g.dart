@@ -11,9 +11,10 @@ _SubmitWonRequest _$SubmitWonRequestFromJson(Map<String, dynamic> json) =>
       distributorAccountId: json['distributorAccountId'] as String,
       value: (json['value'] as num?)?.toDouble(),
       currency: json['currency'] as String?,
-      soldAt: json['soldAt'] == null
-          ? null
-          : DateTime.parse(json['soldAt'] as String),
+      soldAt: _$JsonConverterFromJson<String, DateTime>(
+        json['soldAt'],
+        const UtcDateTimeConverter().fromJson,
+      ),
       categories:
           (json['categories'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$ProductCategoryEnumMap, e))
@@ -28,17 +29,25 @@ _SubmitWonRequest _$SubmitWonRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$SubmitWonRequestToJson(_SubmitWonRequest instance) =>
     <String, dynamic>{
       'distributorAccountId': instance.distributorAccountId,
-      'value': instance.value,
-      'currency': instance.currency,
-      'soldAt': instance.soldAt?.toIso8601String(),
+      'value': ?instance.value,
+      'currency': ?instance.currency,
+      'soldAt': ?_$JsonConverterToJson<String, DateTime>(
+        instance.soldAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'categories': instance.categories
           .map((e) => _$ProductCategoryEnumMap[e]!)
           .toList(),
-      'unitsSupplied': instance.unitsSupplied,
-      'unitsTotal': instance.unitsTotal,
-      'buyerContactId': instance.buyerContactId,
-      'notes': instance.notes,
+      'unitsSupplied': ?instance.unitsSupplied,
+      'unitsTotal': ?instance.unitsTotal,
+      'buyerContactId': ?instance.buyerContactId,
+      'notes': ?instance.notes,
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
 
 const _$ProductCategoryEnumMap = {
   ProductCategory.socketsSwitches: 'SOCKETS_SWITCHES',
@@ -51,3 +60,8 @@ const _$ProductCategoryEnumMap = {
   ProductCategory.accessories: 'ACCESSORIES',
   ProductCategory.other: 'OTHER',
 };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

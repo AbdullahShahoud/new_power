@@ -480,8 +480,8 @@ return $default(_that.key,_that.name,_that.caption,_that.exifLatitude,_that.exif
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
 class _ProjectFileRefDto implements ProjectFileRefDto {
   const _ProjectFileRefDto({required this.key, required this.name, this.caption, this.exifLatitude, this.exifLongitude});
   factory _ProjectFileRefDto.fromJson(Map<String, dynamic> json) => _$ProjectFileRefDtoFromJson(json);

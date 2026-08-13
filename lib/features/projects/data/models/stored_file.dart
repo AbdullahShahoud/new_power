@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 
 part 'stored_file.freezed.dart';
 part 'stored_file.g.dart';
@@ -36,6 +37,12 @@ abstract class StoredFileView with _$StoredFileView {
 /// from storage server-side.
 @freezed
 abstract class ProjectFileRefDto with _$ProjectFileRefDto {
+  /// Optional-and-absent must actually be absent on the wire:
+  /// json_serializable emits every key by default, and this API rejects
+  /// present-but-null on validated optional fields (see
+  /// `SubmitWonRequest` for the case that surfaced it).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
   const factory ProjectFileRefDto({
     required String key,
     required String name,

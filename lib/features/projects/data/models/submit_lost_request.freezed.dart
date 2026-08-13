@@ -212,8 +212,8 @@ return $default(_that.someoneElseWon,_that.reason,_that.competitorPrice,_that.cu
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _SubmitLostRequest implements SubmitLostRequest {
   const _SubmitLostRequest({this.someoneElseWon = true, required this.reason, this.competitorPrice, this.currency, this.competitorAccountId, this.narrative, this.notes});
   factory _SubmitLostRequest.fromJson(Map<String, dynamic> json) => _$SubmitLostRequestFromJson(json);

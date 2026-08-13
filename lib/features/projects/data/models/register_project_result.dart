@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 import 'enums.dart';
 import 'nearby_project_card_view.dart';
@@ -12,6 +13,8 @@ part 'register_project_result.g.dart';
 /// registration response's project card, with photos attached.
 @freezed
 abstract class RegisteredProjectView with _$RegisteredProjectView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory RegisteredProjectView({
     required String id,
     required String name,
@@ -56,6 +59,8 @@ abstract class RegisteredProjectView with _$RegisteredProjectView {
 /// (a link failure never fails the whole request — Workflow 2).
 @freezed
 abstract class StakeholderLinkFailure with _$StakeholderLinkFailure {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory StakeholderLinkFailure({
     required String accountId,
     required String reason,
@@ -71,6 +76,8 @@ abstract class StakeholderLinkFailure with _$StakeholderLinkFailure {
 /// offer "did you mean one of these?" after the fact.
 @freezed
 abstract class RegisterProjectResult with _$RegisterProjectResult {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory RegisterProjectResult({
     required RegisteredProjectView project,
     @Default(<NearbyProjectCardView>[])
