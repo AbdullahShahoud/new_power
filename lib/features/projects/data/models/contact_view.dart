@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 
 part 'contact_view.freezed.dart';
 part 'contact_view.g.dart';
@@ -8,6 +9,8 @@ part 'contact_view.g.dart';
 /// client never does its own ownership check on top.
 @freezed
 abstract class ContactView with _$ContactView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ContactView({
     required String id,
     required String accountId,

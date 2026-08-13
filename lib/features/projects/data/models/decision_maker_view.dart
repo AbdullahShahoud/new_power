@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'stakeholder_link_view.dart';
 
 part 'decision_maker_view.freezed.dart';
@@ -16,6 +17,8 @@ part 'decision_maker_view.g.dart';
 /// assumed to share this shape (only `PUT` has been observed directly).
 @freezed
 abstract class DecisionMakerView with _$DecisionMakerView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory DecisionMakerView({
     required String periodId,
     required String projectId,

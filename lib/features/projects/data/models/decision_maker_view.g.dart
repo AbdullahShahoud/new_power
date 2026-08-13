@@ -19,7 +19,7 @@ _DecisionMakerView _$DecisionMakerViewFromJson(Map<String, dynamic> json) =>
       contact: StakeholderLinkContactView.fromJson(
         json['contact'] as Map<String, dynamic>,
       ),
-      setAt: DateTime.parse(json['setAt'] as String),
+      setAt: const UtcDateTimeConverter().fromJson(json['setAt'] as String),
     );
 
 Map<String, dynamic> _$DecisionMakerViewToJson(_DecisionMakerView instance) =>
@@ -31,5 +31,5 @@ Map<String, dynamic> _$DecisionMakerViewToJson(_DecisionMakerView instance) =>
       'account': instance.account,
       'contactId': instance.contactId,
       'contact': instance.contact,
-      'setAt': instance.setAt.toIso8601String(),
+      'setAt': const UtcDateTimeConverter().toJson(instance.setAt),
     };

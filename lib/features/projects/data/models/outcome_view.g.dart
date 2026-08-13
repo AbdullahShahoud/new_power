@@ -17,9 +17,10 @@ _OutcomeView _$OutcomeViewFromJson(Map<String, dynamic> json) => _OutcomeView(
       ? null
       : CounterpartyView.fromJson(json['distributor'] as Map<String, dynamic>),
   value: (json['value'] as num?)?.toDouble(),
-  soldAt: json['soldAt'] == null
-      ? null
-      : DateTime.parse(json['soldAt'] as String),
+  soldAt: _$JsonConverterFromJson<String, DateTime>(
+    json['soldAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
   categories:
       (json['categories'] as List<dynamic>?)
           ?.map((e) => $enumDecode(_$ProductCategoryEnumMap, e))
@@ -37,21 +38,25 @@ _OutcomeView _$OutcomeViewFromJson(Map<String, dynamic> json) => _OutcomeView(
   narrative: json['narrative'] as String?,
   currency: json['currency'] as String?,
   notes: json['notes'] as String?,
-  submittedAt: DateTime.parse(json['submittedAt'] as String),
+  submittedAt: const UtcDateTimeConverter().fromJson(
+    json['submittedAt'] as String,
+  ),
   submittedBy: json['submittedBy'] as String?,
   submittedByUser: json['submittedByUser'] == null
       ? null
       : ActorView.fromJson(json['submittedByUser'] as Map<String, dynamic>),
-  confirmedAt: json['confirmedAt'] == null
-      ? null
-      : DateTime.parse(json['confirmedAt'] as String),
+  confirmedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['confirmedAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
   confirmedBy: json['confirmedBy'] as String?,
   confirmedByUser: json['confirmedByUser'] == null
       ? null
       : ActorView.fromJson(json['confirmedByUser'] as Map<String, dynamic>),
-  rejectedAt: json['rejectedAt'] == null
-      ? null
-      : DateTime.parse(json['rejectedAt'] as String),
+  rejectedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['rejectedAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
   rejectedBy: json['rejectedBy'] as String?,
   rejectedByUser: json['rejectedByUser'] == null
       ? null
@@ -70,7 +75,10 @@ Map<String, dynamic> _$OutcomeViewToJson(_OutcomeView instance) =>
       'distributorAccountId': instance.distributorAccountId,
       'distributor': instance.distributor,
       'value': instance.value,
-      'soldAt': instance.soldAt?.toIso8601String(),
+      'soldAt': _$JsonConverterToJson<String, DateTime>(
+        instance.soldAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'categories': instance.categories
           .map((e) => _$ProductCategoryEnumMap[e]!)
           .toList(),
@@ -84,13 +92,19 @@ Map<String, dynamic> _$OutcomeViewToJson(_OutcomeView instance) =>
       'narrative': instance.narrative,
       'currency': instance.currency,
       'notes': instance.notes,
-      'submittedAt': instance.submittedAt.toIso8601String(),
+      'submittedAt': const UtcDateTimeConverter().toJson(instance.submittedAt),
       'submittedBy': instance.submittedBy,
       'submittedByUser': instance.submittedByUser,
-      'confirmedAt': instance.confirmedAt?.toIso8601String(),
+      'confirmedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.confirmedAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'confirmedBy': instance.confirmedBy,
       'confirmedByUser': instance.confirmedByUser,
-      'rejectedAt': instance.rejectedAt?.toIso8601String(),
+      'rejectedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.rejectedAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'rejectedBy': instance.rejectedBy,
       'rejectedByUser': instance.rejectedByUser,
       'rejectionReason': instance.rejectionReason,
@@ -104,6 +118,11 @@ const _$OutcomeStatusEnumMap = {
   OutcomeStatus.confirmed: 'CONFIRMED',
   OutcomeStatus.rejected: 'REJECTED',
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
 
 const _$ProductCategoryEnumMap = {
   ProductCategory.socketsSwitches: 'SOCKETS_SWITCHES',
@@ -140,3 +159,8 @@ const _$ProjectStageEnumMap = {
   ProjectStage.won: 'WON',
   ProjectStage.lost: 'LOST',
 };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

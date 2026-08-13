@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import '../../../../core/helpers/validators.dart';
 
 part 'close_stakeholder_link_request.freezed.dart';
@@ -10,6 +11,12 @@ part 'close_stakeholder_link_request.g.dart';
 @freezed
 abstract class CloseStakeholderLinkRequest
     with _$CloseStakeholderLinkRequest {
+  /// Optional-and-absent must actually be absent on the wire:
+  /// json_serializable emits every key by default, and this API rejects
+  /// present-but-null on validated optional fields (see
+  /// `SubmitWonRequest` for the case that surfaced it).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
   const factory CloseStakeholderLinkRequest({
     required String reason,
     DateTime? endedAt,

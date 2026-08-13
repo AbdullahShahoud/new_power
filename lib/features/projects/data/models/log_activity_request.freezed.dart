@@ -229,8 +229,8 @@ return $default(_that.kind,_that.channel,_that.purpose,_that.outcome,_that.occur
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
 class _LogActivityRequest implements LogActivityRequest {
   const _LogActivityRequest({required this.kind, this.channel, required this.purpose, required this.outcome, required this.occurredAt, required this.notes, required final  List<String> personsMet, this.location, this.constructionPhaseObserved, this.competitorAccountId, this.nextActionAt, final  List<UploadedFileDto> files = const <UploadedFileDto>[]}): _personsMet = personsMet,_files = files;
   factory _LogActivityRequest.fromJson(Map<String, dynamic> json) => _$LogActivityRequestFromJson(json);

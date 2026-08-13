@@ -214,8 +214,8 @@ return $default(_that.id,_that.accountId,_that.firstName,_that.lastName,_that.po
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ContactView implements ContactView {
   const _ContactView({required this.id, required this.accountId, required this.firstName, required this.lastName, this.position, this.phone, this.email, this.isPrimary = false, this.archivedAt});
   factory _ContactView.fromJson(Map<String, dynamic> json) => _$ContactViewFromJson(json);

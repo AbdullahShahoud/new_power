@@ -207,8 +207,8 @@ return $default(_that.reason,_that.endedAt);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
 class _CloseStakeholderLinkRequest implements CloseStakeholderLinkRequest {
   const _CloseStakeholderLinkRequest({required this.reason, this.endedAt});
   factory _CloseStakeholderLinkRequest.fromJson(Map<String, dynamic> json) => _$CloseStakeholderLinkRequestFromJson(json);

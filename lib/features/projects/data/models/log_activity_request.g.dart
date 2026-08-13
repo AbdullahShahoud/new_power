@@ -12,7 +12,9 @@ _LogActivityRequest _$LogActivityRequestFromJson(Map<String, dynamic> json) =>
       channel: $enumDecodeNullable(_$ActivityChannelEnumMap, json['channel']),
       purpose: $enumDecode(_$ActivityPurposeEnumMap, json['purpose']),
       outcome: $enumDecode(_$ActivityOutcomeEnumMap, json['outcome']),
-      occurredAt: DateTime.parse(json['occurredAt'] as String),
+      occurredAt: const UtcDateTimeConverter().fromJson(
+        json['occurredAt'] as String,
+      ),
       notes: json['notes'] as String,
       personsMet: (json['personsMet'] as List<dynamic>)
           .map((e) => e as String)
@@ -27,9 +29,10 @@ _LogActivityRequest _$LogActivityRequestFromJson(Map<String, dynamic> json) =>
         json['constructionPhaseObserved'],
       ),
       competitorAccountId: json['competitorAccountId'] as String?,
-      nextActionAt: json['nextActionAt'] == null
-          ? null
-          : DateTime.parse(json['nextActionAt'] as String),
+      nextActionAt: _$JsonConverterFromJson<String, DateTime>(
+        json['nextActionAt'],
+        const UtcDateTimeConverter().fromJson,
+      ),
       files:
           (json['files'] as List<dynamic>?)
               ?.map((e) => UploadedFileDto.fromJson(e as Map<String, dynamic>))
@@ -40,17 +43,20 @@ _LogActivityRequest _$LogActivityRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$LogActivityRequestToJson(_LogActivityRequest instance) =>
     <String, dynamic>{
       'kind': _$ActivityKindEnumMap[instance.kind]!,
-      'channel': _$ActivityChannelEnumMap[instance.channel],
+      'channel': ?_$ActivityChannelEnumMap[instance.channel],
       'purpose': _$ActivityPurposeEnumMap[instance.purpose]!,
       'outcome': _$ActivityOutcomeEnumMap[instance.outcome]!,
-      'occurredAt': instance.occurredAt.toIso8601String(),
+      'occurredAt': const UtcDateTimeConverter().toJson(instance.occurredAt),
       'notes': instance.notes,
       'personsMet': instance.personsMet,
-      'location': instance.location,
+      'location': ?instance.location,
       'constructionPhaseObserved':
-          _$ConstructionPhaseEnumMap[instance.constructionPhaseObserved],
-      'competitorAccountId': instance.competitorAccountId,
-      'nextActionAt': instance.nextActionAt?.toIso8601String(),
+          ?_$ConstructionPhaseEnumMap[instance.constructionPhaseObserved],
+      'competitorAccountId': ?instance.competitorAccountId,
+      'nextActionAt': ?_$JsonConverterToJson<String, DateTime>(
+        instance.nextActionAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'files': instance.files,
     };
 
@@ -104,3 +110,13 @@ const _$ConstructionPhaseEnumMap = {
   ConstructionPhase.handover: 'HANDOVER',
   ConstructionPhase.completed: 'COMPLETED',
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

@@ -231,8 +231,8 @@ return $default(_that.periodId,_that.projectId,_that.linkId,_that.accountId,_tha
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _DecisionMakerView implements DecisionMakerView {
   const _DecisionMakerView({required this.periodId, required this.projectId, required this.linkId, required this.accountId, required this.account, required this.contactId, required this.contact, required this.setAt});
   factory _DecisionMakerView.fromJson(Map<String, dynamic> json) => _$DecisionMakerViewFromJson(json);

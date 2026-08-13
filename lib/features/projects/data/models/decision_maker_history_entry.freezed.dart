@@ -233,8 +233,8 @@ return $default(_that.periodId,_that.projectId,_that.linkId,_that.accountId,_tha
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _DecisionMakerHistoryEntry implements DecisionMakerHistoryEntry {
   const _DecisionMakerHistoryEntry({required this.periodId, required this.projectId, required this.linkId, required this.accountId, required this.account, required this.contactId, required this.contact, required this.setAt, this.endedAt, this.endReason});
   factory _DecisionMakerHistoryEntry.fromJson(Map<String, dynamic> json) => _$DecisionMakerHistoryEntryFromJson(json);

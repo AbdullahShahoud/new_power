@@ -20,10 +20,11 @@ _DecisionMakerHistoryEntry _$DecisionMakerHistoryEntryFromJson(
   contact: StakeholderLinkContactView.fromJson(
     json['contact'] as Map<String, dynamic>,
   ),
-  setAt: DateTime.parse(json['setAt'] as String),
-  endedAt: json['endedAt'] == null
-      ? null
-      : DateTime.parse(json['endedAt'] as String),
+  setAt: const UtcDateTimeConverter().fromJson(json['setAt'] as String),
+  endedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['endedAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
   endReason: json['endReason'] as String?,
 );
 
@@ -37,7 +38,20 @@ Map<String, dynamic> _$DecisionMakerHistoryEntryToJson(
   'account': instance.account,
   'contactId': instance.contactId,
   'contact': instance.contact,
-  'setAt': instance.setAt.toIso8601String(),
-  'endedAt': instance.endedAt?.toIso8601String(),
+  'setAt': const UtcDateTimeConverter().toJson(instance.setAt),
+  'endedAt': _$JsonConverterToJson<String, DateTime>(
+    instance.endedAt,
+    const UtcDateTimeConverter().toJson,
+  ),
   'endReason': instance.endReason,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

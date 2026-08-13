@@ -15,9 +15,10 @@ _ContactView _$ContactViewFromJson(Map<String, dynamic> json) => _ContactView(
   phone: json['phone'] as String?,
   email: json['email'] as String?,
   isPrimary: json['isPrimary'] as bool? ?? false,
-  archivedAt: json['archivedAt'] == null
-      ? null
-      : DateTime.parse(json['archivedAt'] as String),
+  archivedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['archivedAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$ContactViewToJson(_ContactView instance) =>
@@ -30,5 +31,18 @@ Map<String, dynamic> _$ContactViewToJson(_ContactView instance) =>
       'phone': instance.phone,
       'email': instance.email,
       'isPrimary': instance.isPrimary,
-      'archivedAt': instance.archivedAt?.toIso8601String(),
+      'archivedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.archivedAt,
+        const UtcDateTimeConverter().toJson,
+      ),
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

@@ -18,7 +18,7 @@ Map<String, dynamic> _$ChangeStatusRequestToJson(
 ) => <String, dynamic>{
   'status': _$ProjectStatusEnumMap[instance.status]!,
   'reason': instance.reason,
-  'expectedVersion': instance.expectedVersion,
+  'expectedVersion': ?instance.expectedVersion,
 };
 
 const _$ProjectStatusEnumMap = {

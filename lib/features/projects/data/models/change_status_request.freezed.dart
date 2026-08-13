@@ -208,8 +208,8 @@ return $default(_that.status,_that.reason,_that.expectedVersion);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _ChangeStatusRequest implements ChangeStatusRequest {
   const _ChangeStatusRequest({required this.status, required this.reason, this.expectedVersion});
   factory _ChangeStatusRequest.fromJson(Map<String, dynamic> json) => _$ChangeStatusRequestFromJson(json);

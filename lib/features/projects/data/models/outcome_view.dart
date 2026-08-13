@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 import 'counterparty_view.dart';
 import 'enums.dart';
@@ -13,6 +14,8 @@ part 'outcome_view.g.dart';
 /// still sees `confirmedAt`/`rejectedAt`/`rejectionReason`, just not by whom.
 @freezed
 abstract class OutcomeView with _$OutcomeView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory OutcomeView({
     required String id,
     required String projectId,

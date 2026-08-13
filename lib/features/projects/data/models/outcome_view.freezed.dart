@@ -298,8 +298,8 @@ return $default(_that.id,_that.projectId,_that.projectName,_that.type,_that.stat
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _OutcomeView implements OutcomeView {
   const _OutcomeView({required this.id, required this.projectId, required this.projectName, required this.type, required this.status, this.distributorAccountId, this.distributor, this.value, this.soldAt, final  List<ProductCategory> categories = const <ProductCategory>[], this.unitsSupplied, this.unitsTotal, this.buyerContactId, this.competitorAccountId, this.competitor, this.lossReason, this.competitorPrice, this.narrative, this.currency, this.notes, required this.submittedAt, this.submittedBy, this.submittedByUser, this.confirmedAt, this.confirmedBy, this.confirmedByUser, this.rejectedAt, this.rejectedBy, this.rejectedByUser, this.rejectionReason, required this.previousStage}): _categories = categories;
   factory _OutcomeView.fromJson(Map<String, dynamic> json) => _$OutcomeViewFromJson(json);
