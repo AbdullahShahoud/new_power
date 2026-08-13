@@ -17,18 +17,20 @@ _AccountView _$AccountViewFromJson(Map<String, dynamic> json) => _AccountView(
   addressLine: json['addressLine'] as String?,
   notes: json['notes'] as String?,
   isVerified: json['isVerified'] as bool,
-  verifiedAt: json['verifiedAt'] == null
-      ? null
-      : DateTime.parse(json['verifiedAt'] as String),
+  verifiedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['verifiedAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
   verifiedBy: json['verifiedBy'] as String?,
   verifiedByUser: json['verifiedByUser'] == null
       ? null
       : ActorView.fromJson(json['verifiedByUser'] as Map<String, dynamic>),
   contactCount: (json['contactCount'] as num?)?.toInt(),
   activeLinkCount: (json['activeLinkCount'] as num?)?.toInt(),
-  archivedAt: json['archivedAt'] == null
-      ? null
-      : DateTime.parse(json['archivedAt'] as String),
+  archivedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['archivedAt'],
+    const UtcDateTimeConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$AccountViewToJson(_AccountView instance) =>
@@ -43,15 +45,31 @@ Map<String, dynamic> _$AccountViewToJson(_AccountView instance) =>
       'addressLine': instance.addressLine,
       'notes': instance.notes,
       'isVerified': instance.isVerified,
-      'verifiedAt': instance.verifiedAt?.toIso8601String(),
+      'verifiedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.verifiedAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'verifiedBy': instance.verifiedBy,
       'verifiedByUser': instance.verifiedByUser,
       'contactCount': instance.contactCount,
       'activeLinkCount': instance.activeLinkCount,
-      'archivedAt': instance.archivedAt?.toIso8601String(),
+      'archivedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.archivedAt,
+        const UtcDateTimeConverter().toJson,
+      ),
     };
 
 const _$AccountTypeEnumMap = {
   AccountType.company: 'COMPANY',
   AccountType.individual: 'INDIVIDUAL',
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

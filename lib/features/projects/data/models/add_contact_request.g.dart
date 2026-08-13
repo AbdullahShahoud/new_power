@@ -20,8 +20,8 @@ Map<String, dynamic> _$AddContactRequestToJson(_AddContactRequest instance) =>
     <String, dynamic>{
       'firstName': instance.firstName,
       'lastName': instance.lastName,
-      'position': instance.position,
-      'phone': instance.phone,
-      'email': instance.email,
+      'position': ?instance.position,
+      'phone': ?instance.phone,
+      'email': ?instance.email,
       'isPrimary': instance.isPrimary,
     };

@@ -12,9 +12,10 @@ _AttentionItemView _$AttentionItemViewFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       reason: $enumDecode(_$AttentionReasonEnumMap, json['reason']),
       message: json['message'] as String,
-      dueAt: json['dueAt'] == null
-          ? null
-          : DateTime.parse(json['dueAt'] as String),
+      dueAt: _$JsonConverterFromJson<String, DateTime>(
+        json['dueAt'],
+        const UtcDateTimeConverter().fromJson,
+      ),
       daysWaiting: (json['daysWaiting'] as num).toInt(),
     );
 
@@ -24,7 +25,10 @@ Map<String, dynamic> _$AttentionItemViewToJson(_AttentionItemView instance) =>
       'name': instance.name,
       'reason': _$AttentionReasonEnumMap[instance.reason]!,
       'message': instance.message,
-      'dueAt': instance.dueAt?.toIso8601String(),
+      'dueAt': _$JsonConverterToJson<String, DateTime>(
+        instance.dueAt,
+        const UtcDateTimeConverter().toJson,
+      ),
       'daysWaiting': instance.daysWaiting,
     };
 
@@ -34,3 +38,13 @@ const _$AttentionReasonEnumMap = {
   AttentionReason.stageWithoutEvidence: 'STAGE_WITHOUT_EVIDENCE',
   AttentionReason.noActivity: 'NO_ACTIVITY',
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

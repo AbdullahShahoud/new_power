@@ -9,6 +9,12 @@ part 'add_contact_request.g.dart';
 /// the same transaction (server-side), not something this client computes.
 @freezed
 abstract class AddContactRequest with _$AddContactRequest {
+  /// Optional-and-absent must actually be absent on the wire:
+  /// json_serializable emits every key by default, and this API rejects
+  /// present-but-null on validated optional fields (see
+  /// `SubmitWonRequest` for the case that surfaced it).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
   const factory AddContactRequest({
     required String firstName,
     required String lastName,

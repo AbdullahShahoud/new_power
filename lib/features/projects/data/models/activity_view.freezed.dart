@@ -211,8 +211,8 @@ return $default(_that.contactId,_that.firstName,_that.lastName,_that.position,_t
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _PersonMetRefView implements PersonMetRefView {
   const _PersonMetRefView({required this.contactId, required this.firstName, required this.lastName, this.position, required this.accountId, required this.accountName});
   factory _PersonMetRefView.fromJson(Map<String, dynamic> json) => _$PersonMetRefViewFromJson(json);
@@ -488,8 +488,8 @@ return $default(_that.id,_that.key,_that.name,_that.contentType,_that.byteSize,_
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ActivityAttachmentView implements ActivityAttachmentView {
   const _ActivityAttachmentView({required this.id, required this.key, required this.name, required this.contentType, required this.byteSize, this.url, this.urlExpiresAt, required this.uploadedAt, this.uploadedBy});
   factory _ActivityAttachmentView.fromJson(Map<String, dynamic> json) => _$ActivityAttachmentViewFromJson(json);
@@ -802,8 +802,8 @@ return $default(_that.id,_that.projectId,_that.projectName,_that.kind,_that.chan
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ActivityView implements ActivityView {
   const _ActivityView({required this.id, required this.projectId, required this.projectName, required this.kind, this.channel, required this.purpose, required this.outcome, required this.occurredAt, required this.capturedAt, this.latitude, this.longitude, this.locationAccuracyM, this.locationVerified = false, this.constructionPhaseObserved, this.competitorAccountId, this.competitorName, required this.notes, final  List<PersonMetRefView> personsMet = const <PersonMetRefView>[], final  List<ActivityAttachmentView> attachments = const <ActivityAttachmentView>[], this.nextActionAt, this.nextActionDoneAt, this.backdated = false, this.backdateApprovedBy, this.editedAfterWindow = false, this.createdBy, this.createdByUser, required this.createdAt, required this.updatedAt}): _personsMet = personsMet,_attachments = attachments;
   factory _ActivityView.fromJson(Map<String, dynamic> json) => _$ActivityViewFromJson(json);

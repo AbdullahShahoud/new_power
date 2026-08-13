@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 import 'enums.dart';
 
@@ -11,6 +12,8 @@ part 'account_view.g.dart';
 /// beyond what those two show are modeled nullable rather than assumed.
 @freezed
 abstract class AccountView with _$AccountView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory AccountView({
     required String id,
     required String name,

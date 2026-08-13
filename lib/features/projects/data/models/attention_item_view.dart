@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'enums.dart';
 
 part 'attention_item_view.freezed.dart';
@@ -18,6 +19,8 @@ part 'attention_item_view.g.dart';
 /// does not call this yet (projects-implementation-map.md §10.2).
 @freezed
 abstract class AttentionItemView with _$AttentionItemView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory AttentionItemView({
     required String projectId,
     required String name,

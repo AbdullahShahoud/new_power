@@ -208,8 +208,8 @@ return $default(_that.stage,_that.note,_that.expectedVersion);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _ChangeStageRequest implements ChangeStageRequest {
   const _ChangeStageRequest({required this.stage, this.note, this.expectedVersion});
   factory _ChangeStageRequest.fromJson(Map<String, dynamic> json) => _$ChangeStageRequestFromJson(json);

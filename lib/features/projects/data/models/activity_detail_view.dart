@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'activity_view.dart';
 import 'actor_view.dart';
 import 'enums.dart';
@@ -13,6 +14,8 @@ part 'activity_detail_view.g.dart';
 /// reviser's name does not.
 @freezed
 abstract class ActivityRevisionView with _$ActivityRevisionView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ActivityRevisionView({
     required String id,
     required String activityId,
@@ -33,6 +36,8 @@ abstract class ActivityRevisionView with _$ActivityRevisionView {
 /// `GET /activities/{id}`.
 @freezed
 abstract class ActivityDetailView with _$ActivityDetailView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ActivityDetailView({
     required String id,
     required String projectId,

@@ -18,5 +18,5 @@ Map<String, dynamic> _$ActivityLocationDtoToJson(
 ) => <String, dynamic>{
   'lat': instance.lat,
   'lng': instance.lng,
-  'accuracyM': instance.accuracyM,
+  'accuracyM': ?instance.accuracyM,
 };

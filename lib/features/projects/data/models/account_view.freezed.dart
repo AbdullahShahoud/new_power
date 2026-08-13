@@ -233,8 +233,8 @@ return $default(_that.id,_that.name,_that.type,_that.registrationNumber,_that.ph
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _AccountView implements AccountView {
   const _AccountView({required this.id, required this.name, required this.type, this.registrationNumber, this.phone, this.email, this.city, this.addressLine, this.notes, required this.isVerified, this.verifiedAt, this.verifiedBy, this.verifiedByUser, this.contactCount, this.activeLinkCount, this.archivedAt});
   factory _AccountView.fromJson(Map<String, dynamic> json) => _$AccountViewFromJson(json);

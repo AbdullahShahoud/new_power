@@ -225,8 +225,8 @@ return $default(_that.id,_that.activityId,_that.before,_that.after,_that.fields,
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ActivityRevisionView implements ActivityRevisionView {
   const _ActivityRevisionView({required this.id, required this.activityId, required final  Map<String, dynamic> before, required final  Map<String, dynamic> after, required final  List<String> fields, required this.revisedAt, this.revisedBy, this.revisedByUser}): _before = before,_after = after,_fields = fields;
   factory _ActivityRevisionView.fromJson(Map<String, dynamic> json) => _$ActivityRevisionViewFromJson(json);
@@ -572,8 +572,8 @@ return $default(_that.id,_that.projectId,_that.projectName,_that.kind,_that.chan
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ActivityDetailView implements ActivityDetailView {
   const _ActivityDetailView({required this.id, required this.projectId, required this.projectName, required this.kind, this.channel, required this.purpose, required this.outcome, required this.occurredAt, required this.capturedAt, this.latitude, this.longitude, this.locationAccuracyM, this.locationVerified = false, this.constructionPhaseObserved, this.competitorAccountId, this.competitorName, required this.notes, final  List<PersonMetRefView> personsMet = const <PersonMetRefView>[], final  List<ActivityAttachmentView> attachments = const <ActivityAttachmentView>[], this.nextActionAt, this.nextActionDoneAt, this.backdated = false, this.backdateApprovedBy, this.editedAfterWindow = false, this.createdBy, this.createdByUser, required this.createdAt, required this.updatedAt, final  List<ActivityRevisionView> revisions = const <ActivityRevisionView>[]}): _personsMet = personsMet,_attachments = attachments,_revisions = revisions;
   factory _ActivityDetailView.fromJson(Map<String, dynamic> json) => _$ActivityDetailViewFromJson(json);

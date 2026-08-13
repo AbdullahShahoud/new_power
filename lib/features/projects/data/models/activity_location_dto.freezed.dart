@@ -208,8 +208,8 @@ return $default(_that.lat,_that.lng,_that.accuracyM);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _ActivityLocationDto implements ActivityLocationDto {
   const _ActivityLocationDto({required this.lat, required this.lng, this.accuracyM});
   factory _ActivityLocationDto.fromJson(Map<String, dynamic> json) => _$ActivityLocationDtoFromJson(json);

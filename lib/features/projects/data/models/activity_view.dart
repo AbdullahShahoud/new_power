@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 import 'enums.dart';
 
@@ -9,6 +10,8 @@ part 'activity_view.g.dart';
 /// `ActivityView.personsMet`.
 @freezed
 abstract class PersonMetRefView with _$PersonMetRefView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory PersonMetRefView({
     required String contactId,
     required String firstName,
@@ -28,6 +31,8 @@ abstract class PersonMetRefView with _$PersonMetRefView {
 /// rep actually opens it (Workflow 11), never eagerly for a whole list.
 @Freezed(toStringOverride: false)
 abstract class ActivityAttachmentView with _$ActivityAttachmentView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ActivityAttachmentView({
     required String id,
     required String key,
@@ -53,6 +58,8 @@ abstract class ActivityAttachmentView with _$ActivityAttachmentView {
 /// `ActivitiesBloc` land in Phase 2.
 @freezed
 abstract class ActivityView with _$ActivityView {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory ActivityView({
     required String id,
     required String projectId,

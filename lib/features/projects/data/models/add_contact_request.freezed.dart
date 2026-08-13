@@ -211,8 +211,8 @@ return $default(_that.firstName,_that.lastName,_that.position,_that.phone,_that.
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _AddContactRequest implements AddContactRequest {
   const _AddContactRequest({required this.firstName, required this.lastName, this.position, this.phone, this.email, this.isPrimary = false});
   factory _AddContactRequest.fromJson(Map<String, dynamic> json) => _$AddContactRequestFromJson(json);

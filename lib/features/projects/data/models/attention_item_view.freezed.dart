@@ -211,8 +211,8 @@ return $default(_that.projectId,_that.name,_that.reason,_that.message,_that.dueA
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [UtcDateTimeConverter()])
 class _AttentionItemView implements AttentionItemView {
   const _AttentionItemView({required this.projectId, required this.name, required this.reason, required this.message, this.dueAt, required this.daysWaiting});
   factory _AttentionItemView.fromJson(Map<String, dynamic> json) => _$AttentionItemViewFromJson(json);

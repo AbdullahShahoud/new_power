@@ -16,8 +16,8 @@ _ChangeStageRequest _$ChangeStageRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ChangeStageRequestToJson(_ChangeStageRequest instance) =>
     <String, dynamic>{
       'stage': _$ProjectStageEnumMap[instance.stage]!,
-      'note': instance.note,
-      'expectedVersion': instance.expectedVersion,
+      'note': ?instance.note,
+      'expectedVersion': ?instance.expectedVersion,
     };
 
 const _$ProjectStageEnumMap = {

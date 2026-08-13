@@ -210,8 +210,8 @@ return $default(_that.accountId,_that.role,_that.primaryContactId,_that.note,_th
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
 class _AddStakeholderLinkRequest implements AddStakeholderLinkRequest {
   const _AddStakeholderLinkRequest({required this.accountId, required this.role, this.primaryContactId, this.note, this.startedAt});
   factory _AddStakeholderLinkRequest.fromJson(Map<String, dynamic> json) => _$AddStakeholderLinkRequestFromJson(json);
