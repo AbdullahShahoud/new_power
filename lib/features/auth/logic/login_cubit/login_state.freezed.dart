@@ -55,7 +55,7 @@ extension LoginStatePatterns on LoginState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Success value)?  success,TResult Function( _OtpRequired value)?  otpRequired,TResult Function( _PendingApproval value)?  pendingApproval,TResult Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult Function( _TwoFactorRequired value)?  twoFactorRequired,TResult Function( _RateLimited value)?  rateLimited,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Success value)?  success,TResult Function( _OtpRequired value)?  otpRequired,TResult Function( _PendingApproval value)?  pendingApproval,TResult Function( _RoleNotAllowed value)?  roleNotAllowed,TResult Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult Function( _TwoFactorRequired value)?  twoFactorRequired,TResult Function( _RateLimited value)?  rateLimited,TResult Function( _Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -63,7 +63,8 @@ return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Success() when success != null:
 return success(_that);case _OtpRequired() when otpRequired != null:
 return otpRequired(_that);case _PendingApproval() when pendingApproval != null:
-return pendingApproval(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval(_that);case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired(_that);case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that);case _RateLimited() when rateLimited != null:
 return rateLimited(_that);case _Error() when error != null:
@@ -85,7 +86,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Success value)  success,required TResult Function( _OtpRequired value)  otpRequired,required TResult Function( _PendingApproval value)  pendingApproval,required TResult Function( _TwoFactorSetupRequired value)  twoFactorSetupRequired,required TResult Function( _TwoFactorRequired value)  twoFactorRequired,required TResult Function( _RateLimited value)  rateLimited,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Success value)  success,required TResult Function( _OtpRequired value)  otpRequired,required TResult Function( _PendingApproval value)  pendingApproval,required TResult Function( _RoleNotAllowed value)  roleNotAllowed,required TResult Function( _TwoFactorSetupRequired value)  twoFactorSetupRequired,required TResult Function( _TwoFactorRequired value)  twoFactorRequired,required TResult Function( _RateLimited value)  rateLimited,required TResult Function( _Error value)  error,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -93,7 +94,8 @@ return initial(_that);case _Loading():
 return loading(_that);case _Success():
 return success(_that);case _OtpRequired():
 return otpRequired(_that);case _PendingApproval():
-return pendingApproval(_that);case _TwoFactorSetupRequired():
+return pendingApproval(_that);case _RoleNotAllowed():
+return roleNotAllowed(_that);case _TwoFactorSetupRequired():
 return twoFactorSetupRequired(_that);case _TwoFactorRequired():
 return twoFactorRequired(_that);case _RateLimited():
 return rateLimited(_that);case _Error():
@@ -114,7 +116,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Success value)?  success,TResult? Function( _OtpRequired value)?  otpRequired,TResult? Function( _PendingApproval value)?  pendingApproval,TResult? Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult? Function( _TwoFactorRequired value)?  twoFactorRequired,TResult? Function( _RateLimited value)?  rateLimited,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Success value)?  success,TResult? Function( _OtpRequired value)?  otpRequired,TResult? Function( _PendingApproval value)?  pendingApproval,TResult? Function( _RoleNotAllowed value)?  roleNotAllowed,TResult? Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult? Function( _TwoFactorRequired value)?  twoFactorRequired,TResult? Function( _RateLimited value)?  rateLimited,TResult? Function( _Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -122,7 +124,8 @@ return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Success() when success != null:
 return success(_that);case _OtpRequired() when otpRequired != null:
 return otpRequired(_that);case _PendingApproval() when pendingApproval != null:
-return pendingApproval(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval(_that);case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired(_that);case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that);case _RateLimited() when rateLimited != null:
 return rateLimited(_that);case _Error() when error != null:
@@ -143,14 +146,15 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( String? role)?  success,TResult Function( String verificationId)?  otpRequired,TResult Function()?  pendingApproval,TResult Function()?  twoFactorSetupRequired,TResult Function( String verificationId)?  twoFactorRequired,TResult Function( int seconds)?  rateLimited,TResult Function( String error,  String? errorCode)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( String? role)?  success,TResult Function( String verificationId)?  otpRequired,TResult Function()?  pendingApproval,TResult Function()?  roleNotAllowed,TResult Function()?  twoFactorSetupRequired,TResult Function( String verificationId)?  twoFactorRequired,TResult Function( int seconds)?  rateLimited,TResult Function( String error,  String? errorCode)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
 return success(_that.role);case _OtpRequired() when otpRequired != null:
 return otpRequired(_that.verificationId);case _PendingApproval() when pendingApproval != null:
-return pendingApproval();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval();case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired();case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that.verificationId);case _RateLimited() when rateLimited != null:
 return rateLimited(_that.seconds);case _Error() when error != null:
@@ -172,14 +176,15 @@ return error(_that.error,_that.errorCode);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( String? role)  success,required TResult Function( String verificationId)  otpRequired,required TResult Function()  pendingApproval,required TResult Function()  twoFactorSetupRequired,required TResult Function( String verificationId)  twoFactorRequired,required TResult Function( int seconds)  rateLimited,required TResult Function( String error,  String? errorCode)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( String? role)  success,required TResult Function( String verificationId)  otpRequired,required TResult Function()  pendingApproval,required TResult Function()  roleNotAllowed,required TResult Function()  twoFactorSetupRequired,required TResult Function( String verificationId)  twoFactorRequired,required TResult Function( int seconds)  rateLimited,required TResult Function( String error,  String? errorCode)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Success():
 return success(_that.role);case _OtpRequired():
 return otpRequired(_that.verificationId);case _PendingApproval():
-return pendingApproval();case _TwoFactorSetupRequired():
+return pendingApproval();case _RoleNotAllowed():
+return roleNotAllowed();case _TwoFactorSetupRequired():
 return twoFactorSetupRequired();case _TwoFactorRequired():
 return twoFactorRequired(_that.verificationId);case _RateLimited():
 return rateLimited(_that.seconds);case _Error():
@@ -200,14 +205,15 @@ return error(_that.error,_that.errorCode);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( String? role)?  success,TResult? Function( String verificationId)?  otpRequired,TResult? Function()?  pendingApproval,TResult? Function()?  twoFactorSetupRequired,TResult? Function( String verificationId)?  twoFactorRequired,TResult? Function( int seconds)?  rateLimited,TResult? Function( String error,  String? errorCode)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( String? role)?  success,TResult? Function( String verificationId)?  otpRequired,TResult? Function()?  pendingApproval,TResult? Function()?  roleNotAllowed,TResult? Function()?  twoFactorSetupRequired,TResult? Function( String verificationId)?  twoFactorRequired,TResult? Function( int seconds)?  rateLimited,TResult? Function( String error,  String? errorCode)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
 return success(_that.role);case _OtpRequired() when otpRequired != null:
 return otpRequired(_that.verificationId);case _PendingApproval() when pendingApproval != null:
-return pendingApproval();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval();case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired();case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that.verificationId);case _RateLimited() when rateLimited != null:
 return rateLimited(_that.seconds);case _Error() when error != null:
@@ -439,6 +445,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'LoginState.pendingApproval()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _RoleNotAllowed implements LoginState {
+  const _RoleNotAllowed();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoleNotAllowed);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'LoginState.roleNotAllowed()';
 }
 
 

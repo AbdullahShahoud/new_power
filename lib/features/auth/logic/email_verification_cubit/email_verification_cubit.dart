@@ -86,6 +86,15 @@ class EmailVerificationCubit extends Cubit<EmailVerificationState> {
         await SecureStorageHelper.delete(
           key: SecureStorageHelper.verificationId,
         );
+        // Same rep-only gate as `LoginCubit` — this is the second door into
+        // an authenticated session (email/device OTP), so closing only the
+        // password path would leave it wide open.
+        if (data.role?.trim().toUpperCase() != 'REPRESENTATIVE') {
+          await SecureStorageHelper.deleteAll();
+          if (isClosed) return;
+          emit(const EmailVerificationState.roleNotAllowed());
+          break;
+        }
         emit(EmailVerificationState.verified(role: data.role));
         break;
       case VerificationTypes.pendingApproval:

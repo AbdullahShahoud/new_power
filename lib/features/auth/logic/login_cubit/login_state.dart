@@ -20,6 +20,12 @@ class LoginState with _$LoginState {
   /// PENDING_APPROVAL — terminal, nothing to submit until a manager approves.
   const factory LoginState.pendingApproval() = _PendingApproval;
 
+  /// Credentials were valid, but the account isn't a `REPRESENTATIVE` — this
+  /// client only serves reps. Terminal: tokens have been wiped, so there is
+  /// nothing to retry from here. Not a server outcome; decided client-side
+  /// in `LoginCubit._emitOutcome`.
+  const factory LoginState.roleNotAllowed() = _RoleNotAllowed;
+
   /// SETUP_2FA — General-Manager-only, limited-scope tokens issued. Not
   /// actionable from this rep-facing mobile app (see README1.md role table);
   /// shown as an informational message only.

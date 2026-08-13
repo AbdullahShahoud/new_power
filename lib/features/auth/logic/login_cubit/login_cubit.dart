@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/helpers/rate_limiter.dart';
+import '../../../../core/helpers/secure_storage_helper.dart';
 import '../../../../core/networking/api_result.dart';
 import '../../../../core/services/device_service.dart';
 import '../../data/models/login_request.dart';
@@ -83,11 +84,42 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 
+  /// Only `REPRESENTATIVE` may use this client. Compared case-insensitively
+  /// against the raw role string the API returns (`user_model.dart` keeps it
+  /// as a `String?` rather than an enum, since auth.md documents more roles
+  /// than this app models).
+  ///
+  /// A missing role is treated as **not** a representative: the safe
+  /// direction to be wrong in is refusing a login we can't verify, not
+  /// admitting one.
+  static bool _isRepresentative(String? role) =>
+      role?.trim().toUpperCase() == 'REPRESENTATIVE';
+
+  Future<void> _rejectNonRepresentative() async {
+    await SecureStorageHelper.deleteAll();
+    if (isClosed) return;
+    emit(const LoginState.roleNotAllowed());
+  }
+
   /// Branches on the six documented `verificationType` outcomes shared by
   /// `/auth/login` and `/auth/verify-otp`.
   void _emitOutcome(LoginData data) {
     switch (data.verificationType) {
       case VerificationTypes.loginSuccess:
+        // This app is the Sales-Representative client. Every screen in it
+        // is built around a rep's own scoped data, and a manager signing in
+        // would land in a UI that answers none of their questions (and
+        // silently hides most of what their role can actually reach).
+        // Refuse at the door rather than half-serve them.
+        //
+        // The repository has already persisted tokens by this point, so the
+        // refusal has to wipe them — otherwise the session survives and the
+        // startup router would let the blocked account straight back in on
+        // the next launch.
+        if (!_isRepresentative(data.role)) {
+          _rejectNonRepresentative();
+          return;
+        }
         emit(LoginState.success(role: data.role));
         break;
       case VerificationTypes.email:

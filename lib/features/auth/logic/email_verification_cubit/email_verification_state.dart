@@ -19,6 +19,10 @@ class EmailVerificationState with _$EmailVerificationState {
   /// sales manager's approval. Terminal for now.
   const factory EmailVerificationState.pendingApproval() = _PendingApproval;
 
+  /// Verified successfully, but the account isn't a `REPRESENTATIVE`. Same
+  /// client-side gate as `LoginState.roleNotAllowed`; tokens wiped.
+  const factory EmailVerificationState.roleNotAllowed() = _RoleNotAllowed;
+
   /// SETUP_2FA / 2FA — General-Manager-only continuation. See LoginState's
   /// note: informational only, no TOTP UI in this rep-facing app.
   const factory EmailVerificationState.twoFactorSetupRequired() =

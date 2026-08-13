@@ -55,14 +55,15 @@ extension EmailVerificationStatePatterns on EmailVerificationState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Verifying value)?  verifying,TResult Function( _Verified value)?  verified,TResult Function( _PendingApproval value)?  pendingApproval,TResult Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult Function( _TwoFactorRequired value)?  twoFactorRequired,TResult Function( _ResendingCode value)?  resendingCode,TResult Function( _CodeResent value)?  codeResent,TResult Function( _RateLimited value)?  rateLimited,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Verifying value)?  verifying,TResult Function( _Verified value)?  verified,TResult Function( _PendingApproval value)?  pendingApproval,TResult Function( _RoleNotAllowed value)?  roleNotAllowed,TResult Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult Function( _TwoFactorRequired value)?  twoFactorRequired,TResult Function( _ResendingCode value)?  resendingCode,TResult Function( _CodeResent value)?  codeResent,TResult Function( _RateLimited value)?  rateLimited,TResult Function( _Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Verifying() when verifying != null:
 return verifying(_that);case _Verified() when verified != null:
 return verified(_that);case _PendingApproval() when pendingApproval != null:
-return pendingApproval(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval(_that);case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired(_that);case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that);case _ResendingCode() when resendingCode != null:
 return resendingCode(_that);case _CodeResent() when codeResent != null:
@@ -86,14 +87,15 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Verifying value)  verifying,required TResult Function( _Verified value)  verified,required TResult Function( _PendingApproval value)  pendingApproval,required TResult Function( _TwoFactorSetupRequired value)  twoFactorSetupRequired,required TResult Function( _TwoFactorRequired value)  twoFactorRequired,required TResult Function( _ResendingCode value)  resendingCode,required TResult Function( _CodeResent value)  codeResent,required TResult Function( _RateLimited value)  rateLimited,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Verifying value)  verifying,required TResult Function( _Verified value)  verified,required TResult Function( _PendingApproval value)  pendingApproval,required TResult Function( _RoleNotAllowed value)  roleNotAllowed,required TResult Function( _TwoFactorSetupRequired value)  twoFactorSetupRequired,required TResult Function( _TwoFactorRequired value)  twoFactorRequired,required TResult Function( _ResendingCode value)  resendingCode,required TResult Function( _CodeResent value)  codeResent,required TResult Function( _RateLimited value)  rateLimited,required TResult Function( _Error value)  error,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Verifying():
 return verifying(_that);case _Verified():
 return verified(_that);case _PendingApproval():
-return pendingApproval(_that);case _TwoFactorSetupRequired():
+return pendingApproval(_that);case _RoleNotAllowed():
+return roleNotAllowed(_that);case _TwoFactorSetupRequired():
 return twoFactorSetupRequired(_that);case _TwoFactorRequired():
 return twoFactorRequired(_that);case _ResendingCode():
 return resendingCode(_that);case _CodeResent():
@@ -116,14 +118,15 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Verifying value)?  verifying,TResult? Function( _Verified value)?  verified,TResult? Function( _PendingApproval value)?  pendingApproval,TResult? Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult? Function( _TwoFactorRequired value)?  twoFactorRequired,TResult? Function( _ResendingCode value)?  resendingCode,TResult? Function( _CodeResent value)?  codeResent,TResult? Function( _RateLimited value)?  rateLimited,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Verifying value)?  verifying,TResult? Function( _Verified value)?  verified,TResult? Function( _PendingApproval value)?  pendingApproval,TResult? Function( _RoleNotAllowed value)?  roleNotAllowed,TResult? Function( _TwoFactorSetupRequired value)?  twoFactorSetupRequired,TResult? Function( _TwoFactorRequired value)?  twoFactorRequired,TResult? Function( _ResendingCode value)?  resendingCode,TResult? Function( _CodeResent value)?  codeResent,TResult? Function( _RateLimited value)?  rateLimited,TResult? Function( _Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Verifying() when verifying != null:
 return verifying(_that);case _Verified() when verified != null:
 return verified(_that);case _PendingApproval() when pendingApproval != null:
-return pendingApproval(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval(_that);case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed(_that);case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired(_that);case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that);case _ResendingCode() when resendingCode != null:
 return resendingCode(_that);case _CodeResent() when codeResent != null:
@@ -146,13 +149,14 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  verifying,TResult Function( String? role)?  verified,TResult Function()?  pendingApproval,TResult Function()?  twoFactorSetupRequired,TResult Function( String verificationId)?  twoFactorRequired,TResult Function()?  resendingCode,TResult Function( String message)?  codeResent,TResult Function( int seconds)?  rateLimited,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  verifying,TResult Function( String? role)?  verified,TResult Function()?  pendingApproval,TResult Function()?  roleNotAllowed,TResult Function()?  twoFactorSetupRequired,TResult Function( String verificationId)?  twoFactorRequired,TResult Function()?  resendingCode,TResult Function( String message)?  codeResent,TResult Function( int seconds)?  rateLimited,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Verifying() when verifying != null:
 return verifying();case _Verified() when verified != null:
 return verified(_that.role);case _PendingApproval() when pendingApproval != null:
-return pendingApproval();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval();case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired();case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that.verificationId);case _ResendingCode() when resendingCode != null:
 return resendingCode();case _CodeResent() when codeResent != null:
@@ -176,13 +180,14 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  verifying,required TResult Function( String? role)  verified,required TResult Function()  pendingApproval,required TResult Function()  twoFactorSetupRequired,required TResult Function( String verificationId)  twoFactorRequired,required TResult Function()  resendingCode,required TResult Function( String message)  codeResent,required TResult Function( int seconds)  rateLimited,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  verifying,required TResult Function( String? role)  verified,required TResult Function()  pendingApproval,required TResult Function()  roleNotAllowed,required TResult Function()  twoFactorSetupRequired,required TResult Function( String verificationId)  twoFactorRequired,required TResult Function()  resendingCode,required TResult Function( String message)  codeResent,required TResult Function( int seconds)  rateLimited,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Verifying():
 return verifying();case _Verified():
 return verified(_that.role);case _PendingApproval():
-return pendingApproval();case _TwoFactorSetupRequired():
+return pendingApproval();case _RoleNotAllowed():
+return roleNotAllowed();case _TwoFactorSetupRequired():
 return twoFactorSetupRequired();case _TwoFactorRequired():
 return twoFactorRequired(_that.verificationId);case _ResendingCode():
 return resendingCode();case _CodeResent():
@@ -205,13 +210,14 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  verifying,TResult? Function( String? role)?  verified,TResult? Function()?  pendingApproval,TResult? Function()?  twoFactorSetupRequired,TResult? Function( String verificationId)?  twoFactorRequired,TResult? Function()?  resendingCode,TResult? Function( String message)?  codeResent,TResult? Function( int seconds)?  rateLimited,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  verifying,TResult? Function( String? role)?  verified,TResult? Function()?  pendingApproval,TResult? Function()?  roleNotAllowed,TResult? Function()?  twoFactorSetupRequired,TResult? Function( String verificationId)?  twoFactorRequired,TResult? Function()?  resendingCode,TResult? Function( String message)?  codeResent,TResult? Function( int seconds)?  rateLimited,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Verifying() when verifying != null:
 return verifying();case _Verified() when verified != null:
 return verified(_that.role);case _PendingApproval() when pendingApproval != null:
-return pendingApproval();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
+return pendingApproval();case _RoleNotAllowed() when roleNotAllowed != null:
+return roleNotAllowed();case _TwoFactorSetupRequired() when twoFactorSetupRequired != null:
 return twoFactorSetupRequired();case _TwoFactorRequired() when twoFactorRequired != null:
 return twoFactorRequired(_that.verificationId);case _ResendingCode() when resendingCode != null:
 return resendingCode();case _CodeResent() when codeResent != null:
@@ -379,6 +385,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'EmailVerificationState.pendingApproval()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _RoleNotAllowed implements EmailVerificationState {
+  const _RoleNotAllowed();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoleNotAllowed);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'EmailVerificationState.roleNotAllowed()';
 }
 
 
