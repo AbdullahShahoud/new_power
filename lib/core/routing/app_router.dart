@@ -11,6 +11,11 @@ import '../../features/home/ui/screens/notifications_screen.dart';
 import '../../features/onboarding/ui/onboarding_screen.dart';
 import '../../features/projects/data/models/enums.dart';
 import '../../features/projects/data/models/project_detail_view.dart';
+import '../../features/catalog/data/models/localized.dart';
+import '../../features/catalog/ui/screens/catalog_search_screen.dart';
+import '../../features/catalog/ui/screens/category_screen.dart';
+import '../../features/catalog/ui/screens/product_detail_screen.dart';
+import '../../features/projects/ui/screens/account_contacts_screen.dart';
 import '../../features/projects/ui/screens/account_picker_screen.dart';
 import '../../features/projects/ui/screens/activity_detail_screen.dart';
 import '../../features/projects/ui/screens/add_contact_screen.dart';
@@ -129,15 +134,52 @@ class AppRouter {
       // ========================== Offline sync =============================
       case Routes.offlineQueueScreen:
         return _slideRoute(const OfflineQueueScreen(), settings);
+      // ========================== Catalogue =================================
+      case Routes.catalogCategoryScreen:
+        final args = settings.arguments as Map;
+        return _slideRoute(
+          CategoryScreen(
+            idOrSlug: args['idOrSlug'] as String,
+            name: args['name'] as Localized?,
+          ),
+          settings,
+        );
+      case Routes.catalogSearchScreen:
+        return _slideRoute(const CatalogSearchScreen(), settings);
+      case Routes.productDetailScreen:
+        final args = settings.arguments as Map;
+        return _slideRoute(
+          ProductDetailScreen(idOrSlug: args['idOrSlug'] as String),
+          settings,
+        );
       // ========================== Stakeholders ==============================
       case Routes.accountPickerScreen:
-        return _slideRoute(const AccountPickerScreen(), settings);
+        // Optional: absent for plain stakeholder linking, set by the Won /
+        // Lost pickers so the list opens filtered and browsable.
+        final args = settings.arguments as Map?;
+        return _slideRoute(
+          AccountPickerScreen(
+            classification:
+                args?['classification'] as AccountClassification?,
+          ),
+          settings,
+        );
       case Routes.registerAccountScreen:
         return _slideRoute(const RegisterAccountScreen(), settings);
       case Routes.contactPickerScreen:
         final args = settings.arguments as Map;
         return _slideRoute(
           ContactPickerScreen(accountId: args['accountId'] as String),
+          settings,
+        );
+      case Routes.accountContactsScreen:
+        final args = settings.arguments as Map;
+        return _slideRoute(
+          AccountContactsScreen(
+            projectId: args['projectId'] as String,
+            accountId: args['accountId'] as String,
+            accountName: args['accountName'] as String,
+          ),
           settings,
         );
       case Routes.addContactScreen:
@@ -155,7 +197,12 @@ class AppRouter {
       case Routes.addStakeholderLinkScreen:
         final args = settings.arguments as Map;
         return _slideRoute(
-          AddStakeholderLinkScreen(projectId: args['projectId'] as String),
+          AddStakeholderLinkScreen(
+            projectId: args['projectId'] as String,
+            existingLinks:
+                (args['existingLinks'] as List<ProjectCompanyOption>?) ??
+                const [],
+          ),
           settings,
         );
       case Routes.editStakeholderLinkScreen:

@@ -1,6 +1,11 @@
 import 'package:get_it/get_it.dart';
 
 import '../../features/auth/data/repo/auth_repository.dart';
+import '../../features/catalog/data/repo/catalog_repository.dart';
+import '../../features/catalog/logic/categories_bloc/categories_bloc.dart';
+import '../../features/catalog/logic/product_detail_bloc/product_detail_bloc.dart';
+import '../../features/catalog/logic/products_bloc/products_bloc.dart';
+import '../../features/catalog/logic/search_bloc/search_bloc.dart';
 import '../../features/auth/logic/email_verification_cubit/email_verification_cubit.dart';
 import '../../features/auth/logic/forgot_password_cubit/forgot_password_cubit.dart';
 import '../../features/auth/logic/login_cubit/login_cubit.dart';
@@ -134,6 +139,31 @@ Future<void> setupGetIt() async {
   );
   getIt.registerFactory<StakeholdersBloc>(
     () => StakeholdersBloc(getIt<StakeholdersRepository>()),
+  );
+
+  // ============================ Catalogue ================================
+  // catalog-mobile-integration.md. Read-only and shared master data — no
+  // per-user scoping, so a single repository over the default appDio
+  // instance is all the surface needs.
+  //
+  // Every Bloc is a factory, as elsewhere in the app. The session cache
+  // §19.4 asks for lives in the repository singleton instead — a Bloc handed
+  // to `BlocProvider(create:)` is closed when its screen pops, so a
+  // long-lived one would be unusable after the first category screen.
+  getIt.registerLazySingleton<CatalogRepository>(
+    () => CatalogRepository(getIt<ApiService>()),
+  );
+  getIt.registerFactory<CategoriesBloc>(
+    () => CategoriesBloc(getIt<CatalogRepository>()),
+  );
+  getIt.registerFactory<ProductsBloc>(
+    () => ProductsBloc(getIt<CatalogRepository>()),
+  );
+  getIt.registerFactory<ProductDetailBloc>(
+    () => ProductDetailBloc(getIt<CatalogRepository>()),
+  );
+  getIt.registerFactory<SearchBloc>(
+    () => SearchBloc(getIt<CatalogRepository>()),
   );
 
   // ========================== User self-service ==========================

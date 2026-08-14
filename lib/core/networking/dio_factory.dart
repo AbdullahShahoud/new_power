@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import '../config/feature_flags.dart';
 import '../routing/navigation_key.dart';
 import '../helpers/secure_storage_helper.dart';
 import '../routing/routes.dart';
@@ -485,7 +486,12 @@ class DioFactory {
       },
       onError: (DioException error, handler) async {
         // ── No internet: queue the request and retry on reconnect ──────────
-        if (error.type == DioExceptionType.connectionError) {
+        // Suspended — see `FeatureFlags.offlineSyncEnabled`. With the queue
+        // off, a connection error must propagate immediately: parking the
+        // handler here is what makes a request hang for up to three minutes
+        // waiting for a reconnect that nothing is now listening for.
+        if (error.type == DioExceptionType.connectionError &&
+            FeatureFlags.offlineSyncEnabled) {
           if (error.requestOptions.extra['isOfflineRetry'] == true) {
             return handler.next(error);
           }

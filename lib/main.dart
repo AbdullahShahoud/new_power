@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'core/config/feature_flags.dart';
 import 'core/di/dependency_injection.dart';
 import 'core/helpers/cache_helper.dart';
 import 'core/localization/app_localizations.dart';
@@ -21,7 +22,9 @@ Future<void> main() async {
   await CacheHelper.init();
   await Hive.initFlutter();
   await setupGetIt();
-  _wireOfflineSync();
+  // Suspended — see `FeatureFlags.offlineSyncEnabled`. Left wired so the
+  // feature comes back by flipping that one flag.
+  if (FeatureFlags.offlineSyncEnabled) _wireOfflineSync();
   final initialRoute = await AppStartupRouter.resolve();
   runApp(MyApp(initialRoute: initialRoute));
 }

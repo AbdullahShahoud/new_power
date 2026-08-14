@@ -24,6 +24,31 @@ import 'secure_storage_helper.dart';
 ///   - A single success resets the counter and any active lock.
 class RateLimiter {
   RateLimiter._();
+
+  /// **Client-side locking is off.**
+  ///
+  /// This limiter was only ever a local UX guard — our own invention, not
+  /// anything the API requires. It locked the user out for 30s→60s→120s…
+  /// after three consecutive failures, which is punishing during testing
+  /// and of marginal value in production (the backend enforces its own
+  /// per-endpoint throttles regardless, and those are the ones that
+  /// actually protect the service).
+  ///
+  /// Every public method below short-circuits on this flag, so the class
+  /// still satisfies its ~20 call sites without any of them changing.
+  ///
+  /// **The server's `429 RATE_LIMIT_EXCEEDED` handling is untouched and
+  /// still active** — that isn't this class. Each auth cubit reads
+  /// `error.code` and the server's own `retryAfter` directly, so a real
+  /// server throttle still surfaces as a clear countdown rather than a
+  /// generic failure. That path cannot be removed from the client anyway:
+  /// the limit lives on the server.
+  ///
+  /// Non-`const` on purpose — a `const false` would make the real
+  /// implementations provably unreachable and the analyzer would flag every
+  /// one of them as dead code.
+  static bool clientSideLockingEnabled = false;
+
   static final Lock _lock = Lock();
   // default max attempts before lockout; can be overridden per operation
   // Default: 3 attempts before first lockout (30s)
@@ -43,6 +68,7 @@ class RateLimiter {
   /// Returns the number of seconds remaining in the lockout,
   /// or `null` if the operation is not currently locked.
   static Future<int?> checkLock(String op) async {
+    if (!clientSideLockingEnabled) return null;
     final lockedUntilStr = await SecureStorageHelper.readSafe(
       key: _lockedUntilKey(op),
     );
@@ -63,6 +89,7 @@ class RateLimiter {
   /// Returns the lockout duration in seconds if this attempt triggered a
   /// lockout, or `null` if the user still has remaining attempts.
   static Future<int?> recordFailure(String op) async {
+    if (!clientSideLockingEnabled) return null;
     return await _lock.synchronized(() async {
       final prevStr = await SecureStorageHelper.readSafe(key: _attemptsKey(op));
       final prev = int.tryParse(prevStr ?? '') ?? 0;
@@ -110,6 +137,9 @@ class RateLimiter {
 
   /// Returns how many attempts remain before the next lockout.
   static Future<int> remainingAttempts(String op) async {
+    // A large sentinel rather than 0: callers read this as "attempts left",
+    // and 0 would render as "no attempts remaining" — the opposite of off.
+    if (!clientSideLockingEnabled) return 999;
     final attemptsStr = await SecureStorageHelper.readSafe(
       key: _attemptsKey(op),
     );
@@ -124,6 +154,7 @@ class RateLimiter {
   /// Resets the attempt counter and clears any active lock for [op].
   /// Also resets the lockout round on successful operation.
   static Future<void> reset(String op) async {
+    if (!clientSideLockingEnabled) return;
     await SecureStorageHelper.save(key: _attemptsKey(op), value: '0');
     await SecureStorageHelper.save(key: _lockedUntilKey(op), value: '0');
     await SecureStorageHelper.save(key: _lockoutRoundKey(op), value: '0');
@@ -136,6 +167,10 @@ class RateLimiter {
   /// throttles. Does not touch the attempt counter/round — a server-driven
   /// lock isn't part of the local escalating-backoff sequence.
   static Future<void> lockFor(String op, int seconds) async {
+    // Even a server-driven 429 no longer persists a local lock. The cubits
+    // still surface the server's own countdown to the user; this only stops
+    // that window from also blocking the *next* attempt client-side.
+    if (!clientSideLockingEnabled) return;
     if (seconds <= 0) return;
     final lockedUntilMs =
         DateTime.now().millisecondsSinceEpoch + seconds * 1000;

@@ -57,6 +57,14 @@ class Routes {
   // Argument: {'accountId': String}. Pops with a ContactView, or null.
   static const String contactPickerScreen = '/stakeholders/contacts/pick';
   // Argument: {'accountId': String}. Pops with a ContactView, or null.
+  // ========================= Catalogue =========================
+  /// The catalogue tab root lives inside `MainScreen`; these are the pushes
+  /// above it.
+  static const String catalogCategoryScreen = '/catalog/category';
+  static const String catalogSearchScreen = '/catalog/search';
+  static const String productDetailScreen = '/catalog/product';
+
+  static const String accountContactsScreen = '/stakeholders/contacts/roster';
   static const String addContactScreen = '/stakeholders/contacts/add';
   // Argument: {'projectId': String}
   static const String decisionMakerHistoryScreen =
