@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/helpers/extensions.dart';
 import '../../../../core/helpers/spacing.dart';
@@ -133,8 +134,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 verticalSpace(16.h),
                                 const _OutcomesLinkCard(),
                                 verticalSpace(16.h),
-                                const _OfflineQueueLinkCard(),
-                                verticalSpace(16.h),
+                                // Suspended — see
+                                // `FeatureFlags.offlineSyncEnabled`.
+                                if (FeatureFlags.offlineSyncEnabled) ...[
+                                  const _OfflineQueueLinkCard(),
+                                  verticalSpace(16.h),
+                                ],
                                 const _SettingsCard(),
                                 verticalSpace(24.h),
                                 AppButton(

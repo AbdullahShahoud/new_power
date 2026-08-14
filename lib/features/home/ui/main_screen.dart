@@ -9,7 +9,7 @@ import '../../../core/theming/styles.dart';
 import '../../../core/widget/animated_indexed_stack.dart';
 import '../../projects/ui/screens/projects_list_screen.dart';
 import 'screens/home_dashboard_screen.dart';
-import 'screens/products_screen.dart';
+import '../../catalog/ui/screens/catalog_home_screen.dart';
 import 'screens/profile_screen.dart';
 
 /// Post-login shell: four tabs (Home, Projects, Products, Profile) over
@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
   static const _tabs = [
     HomeDashboardScreen(),
     ProjectsListScreen(),
-    ProductsScreen(),
+    CatalogHomeScreen(),
     ProfileScreen(),
   ];
 

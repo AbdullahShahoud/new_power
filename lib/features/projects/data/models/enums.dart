@@ -372,6 +372,52 @@ extension AccountTypeWire on AccountType {
   };
 }
 
+/// directory-mobile-integration.md §6.3 — what an account currently *is*.
+///
+/// An account may carry several at once ("a shop that also does
+/// installation is one account that is both `DISTRIBUTOR` and
+/// `PROJECT_STAKEHOLDER`"), so these are never mutually exclusive.
+///
+/// This is the concept that was undocumented when Outcomes was built and
+/// that blocked the Won-distributor and competitor pickers. `GET /accounts`
+/// now filters on it, so those pickers are finally expressible.
+enum AccountClassification {
+  @JsonValue('PROJECT_STAKEHOLDER')
+  projectStakeholder,
+  @JsonValue('DISTRIBUTOR')
+  distributor,
+  @JsonValue('COMPETITOR')
+  competitor,
+}
+
+extension AccountClassificationWire on AccountClassification {
+  String get wireValue => switch (this) {
+    AccountClassification.projectStakeholder => 'PROJECT_STAKEHOLDER',
+    AccountClassification.distributor => 'DISTRIBUTOR',
+    AccountClassification.competitor => 'COMPETITOR',
+  };
+}
+
+/// §6.4 `in` — whether a search matches accounts, the people behind them,
+/// or both. Defaults to `both` server-side "because that is the question a
+/// rep actually has: they remember the man, not the company."
+enum AccountSearchIn {
+  @JsonValue('accounts')
+  accounts,
+  @JsonValue('contacts')
+  contacts,
+  @JsonValue('both')
+  both,
+}
+
+extension AccountSearchInWire on AccountSearchIn {
+  String get wireValue => switch (this) {
+    AccountSearchIn.accounts => 'accounts',
+    AccountSearchIn.contacts => 'contacts',
+    AccountSearchIn.both => 'both',
+  };
+}
+
 /// §5 `GET /projects/needs-attention` — returned in urgency order
 /// (first-match-wins ranking: `FOLLOW_UP_DUE` > `AWAITING_THEM` >
 /// `STAGE_WITHOUT_EVIDENCE` > `NO_ACTIVITY`).
