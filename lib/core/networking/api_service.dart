@@ -22,6 +22,7 @@ import '../../features/auth/data/models/reset_password_response.dart';
 import '../../features/auth/data/models/user_response.dart';
 import '../../features/auth/data/models/verify_otp_request.dart';
 import '../../features/auth/data/models/verify_otp_response.dart';
+import '../../features/catalog/data/models/catalog_responses.dart';
 import '../../features/projects/data/models/accounts_list_response.dart';
 import '../../features/projects/data/models/activities_list_response.dart';
 import '../../features/projects/data/models/activity_detail_response.dart';
@@ -52,6 +53,7 @@ import '../../features/projects/data/models/project_images_response.dart';
 import '../../features/projects/data/models/project_response.dart';
 import '../../features/projects/data/models/projects_list_response.dart';
 import '../../features/projects/data/models/reason_request.dart';
+import '../../features/projects/data/models/set_contact_account_request.dart';
 import '../../features/projects/data/models/register_account_request.dart';
 import '../../features/projects/data/models/register_account_response.dart';
 import '../../features/projects/data/models/register_project_request.dart';
@@ -319,9 +321,15 @@ abstract class ApiService {
     @Body() RegisterAccountRequest request,
   );
 
+  /// A rep must send `search` **or** `classification` — neither returns an
+  /// empty page (200, not 403). `limit` is capped to 25 server-side
+  /// whatever is asked for.
   @GET(ApiConstants.accounts)
   Future<AccountsListResponse> searchAccounts({
     @Query('search') String? search,
+    @Query('classification') String? classification,
+    @Query('in') String? searchIn,
+    @Query('authorizedOnly') bool? authorizedOnly,
     @Query('type') String? type,
     @Query('city') String? city,
     @Query('includeArchived') bool? includeArchived,
@@ -330,36 +338,56 @@ abstract class ApiService {
     @Query('limit') int? limit,
   });
 
-  @POST(ApiConstants.accountContacts)
-  Future<ContactResponse> addContact(
+  @POST(ApiConstants.accountClassifications)
+  Future<AccountClassificationResponse> classifyAccount(
     @Path('id') String accountId,
-    @Body() AddContactRequest request,
+    @Body() ClassifyAccountRequest request,
   );
 
+  /// The rep's own contacts under one account (A5). Bare list, no
+  /// pagination, ordered primary-first then alphabetical.
   @GET(ApiConstants.accountContacts)
-  Future<ContactsListResponse> getContacts(
+  Future<ContactsListResponse> getAccountContacts(
     @Path('id') String accountId, {
     @Query('includeArchived') bool? includeArchived,
   });
 
-  @GET(ApiConstants.accountContactById)
-  Future<ContactResponse> getContactById(
-    @Path('id') String accountId,
-    @Path('contactId') String contactId,
-  );
+  // ── Contacts as a top-level resource (§7) ───────────────────────────
 
-  @PATCH(ApiConstants.accountContactById)
+  @POST(ApiConstants.contacts)
+  Future<ContactResponse> addContact(@Body() AddContactRequest request);
+
+  /// `search` is required for a rep; own contacts only, page cap 25.
+  @GET(ApiConstants.contacts)
+  Future<ContactsListResponse> searchContacts({
+    @Query('search') String? search,
+    @Query('page') int? page,
+    @Query('limit') int? limit,
+  });
+
+  /// 404 (not 403) for someone else's contact — deliberately
+  /// indistinguishable from "no such contact".
+  @GET(ApiConstants.contactById)
+  Future<ContactResponse> getContactById(@Path('id') String contactId);
+
+  @PATCH(ApiConstants.contactById)
   Future<ContactResponse> patchContact(
-    @Path('id') String accountId,
-    @Path('contactId') String contactId,
+    @Path('id') String contactId,
     @Body() PatchContactRequest request,
   );
 
-  @DELETE(ApiConstants.accountContactById)
+  @DELETE(ApiConstants.contactById)
   Future<ContactResponse> archiveContact(
-    @Path('id') String accountId,
-    @Path('contactId') String contactId,
+    @Path('id') String contactId,
     @Body() ReasonRequest request,
+  );
+
+  /// File an unfiled person against an account, or move them to another
+  /// one (C6).
+  @PUT(ApiConstants.contactAccount)
+  Future<ContactResponse> setContactAccount(
+    @Path('id') String contactId,
+    @Body() SetContactAccountRequest request,
   );
 
   @POST(ApiConstants.projectStakeholders)
@@ -418,4 +446,49 @@ abstract class ApiService {
     @Query('page') int? page,
     @Query('limit') int? limit,
   });
+
+  // ========================= Catalogue =========================
+
+  @GET(ApiConstants.catalogAttributes)
+  Future<AttributeListResponse> getCatalogAttributes();
+
+  @GET(ApiConstants.catalogVersion)
+  Future<CatalogVersionResponse> getCatalogVersion();
+
+  @GET(ApiConstants.categories)
+  Future<CategoryListResponse> getCategories({
+    @Query('tree') bool? tree,
+
+    /// ⚠️ An **id only** — passed straight into a `parentId === x`
+    /// comparison with no slug resolution, so a slug silently returns `[]`
+    /// rather than a 404 (§7.4).
+    @Query('parentId') String? parentId,
+  });
+
+  @GET(ApiConstants.categoryById)
+  Future<CategoryDetailResponse> getCategory(
+    @Path('idOrSlug') String idOrSlug,
+  );
+
+  /// `@Queries` rather than named `@Query` parameters because the `attr`
+  /// map is flattened into `attr[CODE]` keys that cannot be declared
+  /// statically (§4.3).
+  @GET(ApiConstants.categoryFilters)
+  Future<CategoryFiltersResponse> getCategoryFilters(
+    @Queries() Map<String, dynamic> queries,
+  );
+
+  @GET(ApiConstants.products)
+  Future<ProductListResponse> getProducts(
+    @Queries() Map<String, dynamic> queries,
+  );
+
+  @GET(ApiConstants.productSuggest)
+  Future<SuggestionListResponse> suggestProducts({
+    @Query('q') String? q,
+    @Query('limit') int? limit,
+  });
+
+  @GET(ApiConstants.productById)
+  Future<ProductDetailResponse> getProduct(@Path('idOrSlug') String idOrSlug);
 }

@@ -138,6 +138,23 @@ final Map<String, String> enUS = {
       'Couldn\'t load this project. Check your connection.',
   'projects_detail_photos': 'Photos',
   'projects_detail_outside_territory': 'Outside territory',
+  // Activity attachments (§Workflow 1: photos, voice notes, PDF/Word)
+  'attachment_add': 'Add attachment',
+  'attachment_kind_image': 'Photo',
+  'attachment_kind_audio': 'Voice note',
+  'attachment_kind_document': 'Document',
+  'attachment_source_document': 'Document (PDF / Word)',
+  'attachment_source_voice': 'Record a voice note',
+  'attachment_audio_unavailable': 'This recording could not be played',
+  'attachment_open_failed': 'Nothing on this device can open that file',
+  'voice_note_title': 'Voice note',
+  'voice_note_discard': 'Discard',
+  'voice_note_attach': 'Attach',
+  'voice_note_permission_denied':
+      'Microphone access is needed to record a voice note',
+  'voice_note_too_short': 'That recording was too short',
+  'voice_note_error': 'Recording failed. Try again',
+
   'projects_detail_section_basic': 'Basic information',
   'edit_project_cta': 'Edit',
   'edit_project_title': 'Edit project',
@@ -487,6 +504,10 @@ final Map<String, String> enUS = {
   'account_picker_empty_subtitle':
       'Nobody in the directory matches that search — add them instead.',
   'account_picker_unverified': 'Unverified',
+  'account_picker_classify_as': 'Mark as {classification}',
+  'account_classification_project_stakeholder': 'Project stakeholder',
+  'account_classification_distributor': 'Distributor',
+  'account_classification_competitor': 'Competitor',
 
   'register_account_title': 'Add a company',
   'register_account_name': 'Name',
@@ -514,6 +535,12 @@ final Map<String, String> enUS = {
   'contact_picker_empty_subtitle':
       'Contacts you add for this company will appear here.',
   'contact_picker_primary': 'Primary',
+  'contact_edit_title': 'Edit contact',
+  'contact_action_edit': 'Edit details',
+  'contact_action_decision_maker': 'Make decision maker',
+  'contact_saved': 'Contact saved',
+  'stakeholder_action_contacts': 'View contacts',
+  'decision_maker_set_done': 'Decision maker updated',
 
   'add_contact_title': 'Add a contact',
   'add_contact_first_name': 'First name',
@@ -534,6 +561,7 @@ final Map<String, String> enUS = {
   'add_stakeholder_title': 'Add a stakeholder',
   'add_stakeholder_person_name': 'Name',
   'add_stakeholder_company_name': 'Company / customer',
+  'add_stakeholder_company_new': 'New company',
   'add_stakeholder_company_name_hint': 'Who do they work for?',
   'add_stakeholder_account': 'Company',
   'add_stakeholder_account_hint': 'Search for a company',
@@ -887,4 +915,58 @@ final Map<String, String> enUS = {
   'map_picker_hint':
       'Long-press anywhere on the map to place a pin, or use the button to locate yourself.',
   'map_picker_confirm': 'Confirm location',
+
+  // ============================ Catalogue ============================
+  'catalog_title': 'Catalogue',
+  'catalog_search_hint': 'Search by name or code',
+  'catalog_categories_section': 'Categories',
+  'catalog_subcategories_section': 'Subcategories',
+  'catalog_specs_section': 'Specifications',
+  'catalog_category_product_count': '{count} products',
+  'catalog_result_count': '{count} results',
+  'catalog_available': 'Available',
+  'catalog_unavailable': 'Unavailable',
+  'catalog_datasheet': 'Datasheet',
+  'catalog_datasheet_failed': 'Could not open the datasheet',
+  'catalog_discontinued_notice':
+      'This product has been discontinued and is shown for reference.',
+  'catalog_browse_categories': 'Browse categories',
+  'retry': 'Retry',
+
+  // Filters
+  'catalog_filters_title': 'Filters',
+  'catalog_filters_reset': 'Reset',
+  'catalog_filters_apply': 'Show results',
+  'catalog_filters_clear_all': 'Clear all',
+  'catalog_filters_search_values': 'Search values…',
+  'catalog_filters_truncated':
+      'Showing the {shown} most common values of {total}',
+  'catalog_filter_dropped':
+      'A filter is no longer available and was removed.',
+
+  // Sort
+  'catalog_sort_relevance': 'Relevance',
+  'catalog_sort_name': 'Name',
+  'catalog_sort_newest': 'Newest',
+  'catalog_sort_category': 'Category',
+
+  // Empty & error states
+  'catalog_empty_title': 'No categories yet',
+  'catalog_empty_subtitle': 'The catalogue has not been set up yet.',
+  'catalog_no_results_title': 'No products found',
+  'catalog_no_results_subtitle': 'There is nothing in this category yet.',
+  'catalog_no_results_filters':
+      'No product matches the selected filters. Try removing one.',
+  'catalog_unavailable_title': 'Catalogue not available yet',
+  'catalog_unavailable_subtitle':
+      'No catalogue version has been published yet. Please try again later.',
+  'catalog_product_not_found_title': 'Product not available',
+  'catalog_product_not_found_subtitle':
+      'This product is not part of the published catalogue.',
+  'catalog_search_intro_title': 'Search the catalogue',
+  'catalog_search_intro_subtitle':
+      'Search covers product names, codes and categories. To search by specification, use the filters.',
+  'catalog_search_no_results_title': 'No results for “{term}”',
+  'catalog_search_no_results_subtitle':
+      'Search covers names, codes and categories only — not the specification sheet. Use the filters to search by specification.',
 };

@@ -76,9 +76,20 @@ class ApiConstants {
   // reach are wired — everything else on `/accounts` is `SALES_MANAGER`+/
   // `SALES_ADMIN`+ and this app has no role above REPRESENTATIVE to serve.
   static const String accounts = "/accounts";
+  static const String accountClassifications =
+      "/accounts/{id}/classifications";
+
+  /// The rep's own roster under one account (A5) — narrowed server-side to
+  /// contacts this rep added, so it legitimately disagrees with the account
+  /// row's `contactCount` (which counts everyone).
   static const String accountContacts = "/accounts/{id}/contacts";
-  static const String accountContactById =
-      "/accounts/{id}/contacts/{contactId}";
+
+  /// Contacts are a **top-level resource** now, not nested under an
+  /// account — `accountId` is optional so an unfiled person is expressible
+  /// (directory-mobile-integration.md §7.1).
+  static const String contacts = "/contacts";
+  static const String contactById = "/contacts/{id}";
+  static const String contactAccount = "/contacts/{id}/account";
   static const String projectStakeholders =
       "/projects/{projectId}/stakeholders";
   static const String projectStakeholderById =
@@ -89,4 +100,36 @@ class ApiConstants {
       "/projects/{projectId}/decision-maker";
   static const String projectDecisionMakerHistory =
       "/projects/{projectId}/decision-maker/history";
+
+  // ========================= Catalogue =========================
+  // catalog-mobile-integration.md §7. Nine GET endpoints, all
+  // `REPRESENTATIVE`+ — there is no role branch on this surface, and no
+  // write surface at all. `/catalog/sync` is deliberately absent: offline
+  // is out of scope for this build.
+
+  /// §7.1 — the attribute dictionary. No query parameters; binds no DTO, so
+  /// extras are ignored rather than rejected.
+  static const String catalogAttributes = "/catalog/attributes";
+
+  /// §7.2 — the cheap staleness probe.
+  static const String catalogVersion = "/catalog/version";
+
+  /// §7.4 — the taxonomy.
+  static const String categories = "/categories";
+
+  /// §7.5 — the filter rail. ⚠️ Declared **before** `:idOrSlug`
+  /// server-side and the category travels as a **query parameter**;
+  /// `/categories/{id}/filters` does not exist and would parse as a slug.
+  static const String categoryFilters = "/categories/filters";
+
+  static const String categoryById = "/categories/{idOrSlug}";
+
+  /// §7.7 — list/filter/search. ⚠️ Its envelope nests the payload one level
+  /// deeper than every other endpoint in this app (§5.2).
+  static const String products = "/products";
+
+  /// §7.8 — typeahead. Declared before `:idOrSlug`; do not reorder.
+  static const String productSuggest = "/products/suggest";
+
+  static const String productById = "/products/{idOrSlug}";
 }

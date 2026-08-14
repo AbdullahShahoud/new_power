@@ -129,6 +129,23 @@ final Map<String, String> arSY = {
   'projects_detail_error': 'تعذر تحميل هذا المشروع. تحقق من الاتصال.',
   'projects_detail_photos': 'الصور',
   'projects_detail_outside_territory': 'خارج المنطقة',
+  // مرفقات النشاط
+  'attachment_add': 'إضافة مرفق',
+  'attachment_kind_image': 'صورة',
+  'attachment_kind_audio': 'ملاحظة صوتية',
+  'attachment_kind_document': 'مستند',
+  'attachment_source_document': 'مستند (PDF / Word)',
+  'attachment_source_voice': 'تسجيل ملاحظة صوتية',
+  'attachment_audio_unavailable': 'تعذّر تشغيل هذا التسجيل',
+  'attachment_open_failed': 'لا يوجد تطبيق على جهازك يفتح هذا الملف',
+  'voice_note_title': 'ملاحظة صوتية',
+  'voice_note_discard': 'حذف',
+  'voice_note_attach': 'إرفاق',
+  'voice_note_permission_denied':
+      'نحتاج إذن الميكروفون لتسجيل ملاحظة صوتية',
+  'voice_note_too_short': 'التسجيل قصير جدًا',
+  'voice_note_error': 'فشل التسجيل. حاول مرة أخرى',
+
   'projects_detail_section_basic': 'معلومات أساسية',
   'edit_project_cta': 'تعديل',
   'edit_project_title': 'تعديل المشروع',
@@ -468,6 +485,10 @@ final Map<String, String> arSY = {
   'account_picker_empty_subtitle':
       'لا يوجد في الدليل ما يطابق هذا البحث — أضفها بدلاً من ذلك.',
   'account_picker_unverified': 'غير موثّق',
+  'account_picker_classify_as': 'تصنيف كـ {classification}',
+  'account_classification_project_stakeholder': 'صاحب مصلحة في المشروع',
+  'account_classification_distributor': 'موزّع',
+  'account_classification_competitor': 'منافس',
 
   'register_account_title': 'إضافة شركة',
   'register_account_name': 'الاسم',
@@ -495,6 +516,12 @@ final Map<String, String> arSY = {
   'contact_picker_empty_subtitle':
       'جهات الاتصال التي تضيفها لهذه الشركة ستظهر هنا.',
   'contact_picker_primary': 'أساسي',
+  'contact_edit_title': 'تعديل جهة الاتصال',
+  'contact_action_edit': 'تعديل البيانات',
+  'contact_action_decision_maker': 'تعيين كصاحب قرار',
+  'contact_saved': 'تم حفظ جهة الاتصال',
+  'stakeholder_action_contacts': 'عرض جهات الاتصال',
+  'decision_maker_set_done': 'تم تحديث صاحب القرار',
 
   'add_contact_title': 'إضافة جهة اتصال',
   'add_contact_first_name': 'الاسم الأول',
@@ -515,6 +542,7 @@ final Map<String, String> arSY = {
   'add_stakeholder_title': 'إضافة صاحب مصلحة',
   'add_stakeholder_person_name': 'الاسم',
   'add_stakeholder_company_name': 'الشركة / الزبون',
+  'add_stakeholder_company_new': 'شركة جديدة',
   'add_stakeholder_company_name_hint': 'لدى من يعمل؟',
   'add_stakeholder_account': 'الشركة',
   'add_stakeholder_account_hint': 'ابحث عن شركة',
@@ -889,4 +917,55 @@ final Map<String, String> arSY = {
   'map_picker_hint':
       'اضغط مطولًا في أي مكان على الخريطة لوضع دبوس، أو استخدم الزر لتحديد موقعك.',
   'map_picker_confirm': 'تأكيد الموقع',
+
+  // ============================ Catalogue ============================
+  'catalog_title': 'الكتالوج',
+  'catalog_search_hint': 'ابحث بالاسم أو الكود',
+  'catalog_categories_section': 'الفئات',
+  'catalog_subcategories_section': 'الفئات الفرعية',
+  'catalog_specs_section': 'المواصفات',
+  'catalog_category_product_count': '{count} منتج',
+  'catalog_result_count': '{count} نتيجة',
+  'catalog_available': 'متوفر',
+  'catalog_unavailable': 'غير متوفر',
+  'catalog_datasheet': 'ورقة البيانات',
+  'catalog_datasheet_failed': 'تعذّر فتح ورقة البيانات',
+  'catalog_discontinued_notice': 'هذا المنتج موقوف ويُعرض للاطلاع فقط.',
+  'catalog_browse_categories': 'تصفّح الفئات',
+  'retry': 'إعادة المحاولة',
+
+  // Filters
+  'catalog_filters_title': 'الفلاتر',
+  'catalog_filters_reset': 'إعادة الضبط',
+  'catalog_filters_apply': 'عرض النتائج',
+  'catalog_filters_clear_all': 'مسح الكل',
+  'catalog_filters_search_values': 'ابحث في القيم…',
+  'catalog_filters_truncated': 'تُعرض أكثر {shown} قيمة شيوعًا من أصل {total}',
+  'catalog_filter_dropped': 'أحد الفلاتر لم يعد متاحًا وتمت إزالته.',
+
+  // Sort
+  'catalog_sort_relevance': 'الأكثر صلة',
+  'catalog_sort_name': 'الاسم',
+  'catalog_sort_newest': 'الأحدث',
+  'catalog_sort_category': 'الفئة',
+
+  // Empty & error states
+  'catalog_empty_title': 'لا توجد فئات بعد',
+  'catalog_empty_subtitle': 'لم يتم إعداد الكتالوج بعد.',
+  'catalog_no_results_title': 'لا توجد منتجات',
+  'catalog_no_results_subtitle': 'لا يوجد شيء في هذه الفئة بعد.',
+  'catalog_no_results_filters':
+      'لا يوجد منتج يطابق الفلاتر المحددة. جرّب إزالة أحدها.',
+  'catalog_unavailable_title': 'الكتالوج غير متاح بعد',
+  'catalog_unavailable_subtitle':
+      'لم يتم نشر أي نسخة من الكتالوج بعد. يرجى المحاولة لاحقًا.',
+  'catalog_product_not_found_title': 'المنتج غير متاح',
+  'catalog_product_not_found_subtitle':
+      'هذا المنتج ليس ضمن الكتالوج المنشور.',
+  'catalog_search_intro_title': 'ابحث في الكتالوج',
+  'catalog_search_intro_subtitle':
+      'يشمل البحث أسماء المنتجات والأكواد والفئات. وللبحث حسب المواصفات استخدم الفلاتر.',
+  'catalog_search_no_results_title': 'لا نتائج لـ «{term}»',
+  'catalog_search_no_results_subtitle':
+      'يشمل البحث الأسماء والأكواد والفئات فقط — لا جدول المواصفات. استخدم الفلاتر للبحث حسب المواصفات.',
 };
