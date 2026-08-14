@@ -4,12 +4,10 @@ import '../../../../core/helpers/validators.dart';
 part 'reason_request.freezed.dart';
 part 'reason_request.g.dart';
 
-/// The bare `{ reason }` body shape shared by every stakeholders.md
-/// mutation whose only field is the mandatory explanation: `DELETE
-/// /accounts/{id}/contacts/{contactId}`, `DELETE .../decision-maker`. One
-/// type instead of four near-identical ones — same reasoning as
-/// `RejectOutcomeRequest`'s shape being reused nowhere else, except here
-/// the shape genuinely repeats verbatim across endpoints.
+/// The bare `{ reason }` body shape shared by every directory mutation
+/// whose only field is the mandatory explanation: `DELETE /contacts/{id}`
+/// and `DELETE /projects/{id}/decision-maker`. One type instead of two
+/// near-identical ones — the shape repeats verbatim across them.
 @freezed
 abstract class ReasonRequest with _$ReasonRequest {
   const factory ReasonRequest({required String reason}) = _ReasonRequest;

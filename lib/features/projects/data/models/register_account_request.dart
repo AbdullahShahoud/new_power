@@ -5,17 +5,45 @@ import 'enums.dart';
 part 'register_account_request.freezed.dart';
 part 'register_account_request.g.dart';
 
-/// stakeholders.md `POST /accounts` — "record a company they just met"
-/// (SH6). Only `name` is required; everything else is what a rep happens to
-/// have on hand. Arrives `isVerified: false` for a `REPRESENTATIVE` — this
-/// client never sends `isVerified` itself, the server decides it from the
-/// caller's role.
+/// One person on a `POST /accounts` body — directory-mobile-integration.md
+/// §6.1's nested `AddContactDto`.
+///
+/// No `accountId` and no `company` here: the account being created *is* the
+/// one they belong to.
+@freezed
+abstract class NewAccountContact with _$NewAccountContact {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
+  const factory NewAccountContact({
+    required String firstName,
+    required String lastName,
+    String? position,
+    String? phone,
+    String? email,
+    String? notes,
+    @Default(false) bool isPrimary,
+  }) = _NewAccountContact;
+
+  factory NewAccountContact.fromJson(Map<String, dynamic> json) =>
+      _$NewAccountContactFromJson(json);
+}
+
+/// directory-mobile-integration.md §6.1 `POST /accounts` — create.
+///
+/// **One visit, one request.** The body may inline a `classification` and
+/// up to 20 `contacts`, so the common field flow (met a company, met a
+/// person there) is a single call rather than three.
+///
+/// Validation is all-or-nothing server-side: "a bad phone on the third
+/// person creates *nothing*", and an unknown classification is refused
+/// before the account is written. So a rejected submission can always be
+/// corrected and resubmitted safely — there is never a half-created
+/// account to clean up.
+///
+/// Never blocked for resembling an existing account: refusing here "would
+/// only teach reps to type *Al Amal 2*".
 @freezed
 abstract class RegisterAccountRequest with _$RegisterAccountRequest {
-  /// Optional-and-absent must actually be absent on the wire:
-  /// json_serializable emits every key by default, and this API rejects
-  /// present-but-null on validated optional fields (see
-  /// `SubmitWonRequest` for the case that surfaced it).
   // ignore: invalid_annotation_target
   @JsonSerializable(includeIfNull: false)
   const factory RegisterAccountRequest({
@@ -27,6 +55,8 @@ abstract class RegisterAccountRequest with _$RegisterAccountRequest {
     String? city,
     String? addressLine,
     String? notes,
+    AccountClassification? classification,
+    @Default(<NewAccountContact>[]) List<NewAccountContact> contacts,
   }) = _RegisterAccountRequest;
 
   factory RegisterAccountRequest.fromJson(Map<String, dynamic> json) =>
@@ -45,6 +75,27 @@ extension RegisterAccountRequestValidation on RegisterAccountRequest {
     if (email != null && email!.trim().isNotEmpty) {
       if (!AppValidators.emailRegex.hasMatch(email!.trim())) {
         throw ArgumentError('email must be a valid address');
+      }
+    }
+    if (contacts.length > 20) {
+      throw ArgumentError('contacts cannot exceed 20 entries');
+    }
+    for (final contact in contacts) {
+      AppValidators.validateContactName(
+        contact.firstName,
+        fieldName: 'firstName',
+      );
+      AppValidators.validateContactName(
+        contact.lastName,
+        fieldName: 'lastName',
+      );
+      if (contact.phone != null && contact.phone!.trim().isNotEmpty) {
+        AppValidators.validateWesternPhone(contact.phone!);
+      }
+      if (contact.email != null && contact.email!.trim().isNotEmpty) {
+        if (!AppValidators.emailRegex.hasMatch(contact.email!.trim())) {
+          throw ArgumentError('contact email must be a valid address');
+        }
       }
     }
   }
