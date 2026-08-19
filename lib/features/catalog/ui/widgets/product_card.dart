@@ -11,6 +11,34 @@ import '../../../../core/widget/pressable_scale.dart';
 import '../../data/models/localized.dart';
 import '../../data/models/product_view.dart';
 
+/// The grid geometry every product grid must use — the category screen and
+/// the search results share it so they cannot drift apart.
+///
+/// Sized with `mainAxisExtent` (an absolute height) rather than
+/// `childAspectRatio` (a ratio), which is what made the grid look different
+/// on every handset: the image is square, so it grows with the column width,
+/// but the text under it needs a roughly *fixed* number of pixels. Tying the
+/// whole cell to a ratio meant a narrow phone starved the text — clipping
+/// the chips — while a wide one left a dead band under them.
+///
+/// Here the height is "square image + a fixed text block", so the text gets
+/// the same room on every screen and the only thing that varies is the
+/// picture, which is exactly the part that *should* scale.
+SliverGridDelegateWithFixedCrossAxisCount productGridDelegate(
+  double availableWidth,
+) {
+  const columns = 2;
+  final spacing = 12.w;
+  final columnWidth = (availableWidth - spacing * (columns - 1)) / columns;
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: columns,
+    crossAxisSpacing: spacing,
+    mainAxisSpacing: 12.h,
+    // Room for three lines of name, the code line, and one row of chips.
+    mainAxisExtent: columnWidth + 132.h,
+  );
+}
+
 /// One product in the grid.
 ///
 /// There is **no price and no stock figure anywhere in this API** — that
@@ -56,47 +84,70 @@ class ProductCard extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(10.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name.resolve(context),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.xsBold.copyWith(height: 1.35),
-                  ),
-                  if (product.sku != null) ...[
-                    verticalSpace(4.h),
-                    // Latin codes inside an Arabic layout must be
-                    // direction-isolated or the punctuation flips to the
-                    // wrong end of the string.
-                    Directionality(
-                      textDirection: TextDirection.ltr,
+            // Takes exactly the height the grid left over, so the card can
+            // never demand more than its cell — the source of the clipped
+            // content on smaller screens.
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 10.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Three lines rather than two: product names here carry
+                    // the wattage, colour and finish, and cutting at two
+                    // routinely hid the part that distinguishes one fitting
+                    // from the next. `Flexible` lets it give way first if a
+                    // large system font leaves nothing to spare.
+                    Flexible(
                       child: Text(
-                        product.sku!,
-                        maxLines: 1,
+                        product.name.resolve(context),
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.xsMedium.copyWith(
-                          color: colors.ink400,
-                          letterSpacing: 0.2,
+                        style: context.textStyles.xsBold.copyWith(
+                          height: 1.35,
                         ),
                       ),
                     ),
+                    if (product.sku != null) ...[
+                      verticalSpace(4.h),
+                      // Latin codes inside an Arabic layout must be
+                      // direction-isolated or the punctuation flips to the
+                      // wrong end of the string.
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          product.sku!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.xsMedium.copyWith(
+                            color: colors.ink400,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                    // Absorbs whatever slack is left so the chips always sit
+                    // on the card's bottom edge. Without it a short name
+                    // floated its chips halfway up and the row of cards read
+                    // as ragged.
+                    const Spacer(),
+                    if (product.highlights.isNotEmpty)
+                      SizedBox(
+                        height: 18.h,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            for (final highlight
+                                in product.highlights.take(3)) ...[
+                              HighlightChip(highlight: highlight),
+                              horizontalSpace(4),
+                            ],
+                          ],
+                        ),
+                      ),
                   ],
-                  if (product.highlights.isNotEmpty) ...[
-                    verticalSpace(8.h),
-                    Wrap(
-                      spacing: 4.w,
-                      runSpacing: 4.h,
-                      children: [
-                        for (final highlight in product.highlights.take(3))
-                          HighlightChip(highlight: highlight),
-                      ],
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ],
@@ -180,7 +231,10 @@ class _ProductThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final url = product.primaryImage?.thumbnailUrl ?? product.primaryImage?.url;
+    // Always the full `url`, never `thumbnailUrl`. The thumbnails this
+    // catalogue serves are too small for a half-width card and render
+    // visibly soft; the bandwidth saved is not worth a blurry grid.
+    final url = product.primaryImage?.url;
 
     if (url == null) return _Placeholder(product: product);
 

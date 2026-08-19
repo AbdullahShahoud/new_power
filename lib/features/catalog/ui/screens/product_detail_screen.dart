@@ -252,11 +252,17 @@ class _Content extends StatelessWidget {
         ),
 
         // Floats over the gallery, matching the design's transparent bar.
-        SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
+        //
+        // Explicitly positioned rather than wrapped in an `Align`: a
+        // non-positioned `Stack` child gets loose constraints, so an `Align`
+        // with no size factors expands to the **whole stack** — which put
+        // this button halfway down the screen instead of in the corner.
+        PositionedDirectional(
+          top: 0,
+          start: 0,
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(12.w),
               child: _CircleButton(
                 icon: Icons.arrow_back_rounded,
                 onTap: () => context.pop(),
@@ -458,9 +464,21 @@ class _Codes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // `sku` and `itemNumber` are separate columns but hold the same string
+    // for much of this catalogue. Printing "NP-TL-30B · NP-TL-30B" looks
+    // like a rendering fault, so identical values collapse to one.
+    // Compared case-insensitively and trimmed: they come from different
+    // source columns and drift in casing alone is not a real difference.
+    final sku = product.sku?.trim();
+    final itemNumber = product.itemNumber?.trim();
+    final sameCode =
+        sku != null &&
+        itemNumber != null &&
+        sku.toLowerCase() == itemNumber.toLowerCase();
     final parts = [
-      if (product.sku != null) product.sku!,
-      if (product.itemNumber != null) product.itemNumber!,
+      if (sku != null && sku.isNotEmpty) sku,
+      if (!sameCode && itemNumber != null && itemNumber.isNotEmpty)
+        itemNumber,
     ];
     if (parts.isEmpty) return const SizedBox.shrink();
     return Directionality(

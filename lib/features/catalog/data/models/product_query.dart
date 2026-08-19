@@ -24,6 +24,7 @@ class ProductQuery {
   final Map<String, List<String>> attributes;
 
   final ProductSort? sort;
+
   final bool? hasDatasheet;
   final bool? available;
   final int page;
@@ -49,10 +50,17 @@ class ProductQuery {
     return trimmed.length >= 2 ? trimmed : null;
   }
 
-  bool get hasFilters => attributes.isNotEmpty;
+  /// True when anything narrows the result set beyond the category and the
+  /// search term — the dynamic `attr` rail **or** any of the fixed filters.
+  bool get hasFilters =>
+      attributes.isNotEmpty ||
+      hasDatasheet == true ||
+      available != null;
 
   int get appliedFilterCount =>
-      attributes.values.fold(0, (sum, values) => sum + values.length);
+      attributes.values.fold(0, (sum, values) => sum + values.length) +
+      (hasDatasheet == true ? 1 : 0) +
+      (available != null ? 1 : 0);
 
   /// §7.7 — the default is `relevance` with a usable `q`, `name` otherwise.
   /// `relevance` without a term is silently downgraded server-side, so
@@ -99,9 +107,19 @@ class ProductQuery {
     if (category != null) params['category'] = category;
     final search = effectiveQuery;
     if (search != null) params['q'] = search;
+    // ⚠️ `hasDatasheet` / `available` are deliberately NOT sent here.
+    // `CategoryFiltersQueryDto` binds only `category`, `includeSubtree`,
+    // `attr` and `q`, and the pipe runs with `forbidNonWhitelisted: true` —
+    // so any extra key is a 400 `VALIDATION_ERROR`, not a silent strip
+    // §2.2).
+    //
+    // The cost is that facet counts are computed *without* them, so they can
+    // overstate what the list returns once they are applied. The server
+    // offers no way to narrow them, so the rail's counts are treated as the
+    // approximations they are rather than as promises.
     attributes.forEach((code, values) {
       if (values.isEmpty) return;
-      params['attr[$code]'] = values.join(',');
+      params["attr[$code]"] = values.join(",");
     });
     return params;
   }
@@ -174,7 +192,15 @@ class ProductQuery {
     return copyWith(attributes: next, page: 1);
   }
 
-  ProductQuery cleared() => copyWith(attributes: const {}, page: 1);
+  /// "Clear all" means every filter, the fixed ones included — leaving an
+  /// availability or datasheet filter silently applied behind a cleared rail
+  /// is exactly the confusion the button exists to prevent.
+  ProductQuery cleared() => copyWith(
+    attributes: const {},
+    hasDatasheet: null,
+    available: null,
+    page: 1,
+  );
 
   static const _sentinel = Object();
 
