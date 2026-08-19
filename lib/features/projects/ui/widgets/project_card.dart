@@ -125,10 +125,10 @@ class ProjectCard extends StatelessWidget {
   }
 }
 
-/// The project's first photo when the list response happens to carry one
-/// (see `ProjectSummaryView.images`), otherwise a brand-tinted building
-/// glyph — never a broken-image box or an empty gap, since the documented
-/// list contract doesn't promise photos at all.
+/// The project's cover photo, otherwise a brand-tinted building glyph —
+/// never a broken-image box or an empty gap, since the documented list
+/// contract doesn't promise photos at all (the server sends `coverImage`
+/// regardless, which is what this now reads).
 class _ProjectThumbnail extends StatelessWidget {
   final ProjectSummaryView project;
 
@@ -138,12 +138,9 @@ class _ProjectThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     // §9: a photo whose URL couldn't be signed arrives with `url: null` —
-    // it still counts toward `imageCount`, so pick the first *displayable*
-    // one rather than blindly taking `images.first`.
-    final url = project.images
-        .map((image) => image.url)
-        .where((u) => u != null && u.isNotEmpty)
-        .firstOrNull;
+    // it still counts toward `imageCount`, so the helper picks the first
+    // *displayable* one rather than blindly taking `images.first`.
+    final url = project.thumbnailUrl;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.field),

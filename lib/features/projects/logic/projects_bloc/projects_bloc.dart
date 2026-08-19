@@ -289,14 +289,17 @@ class ProjectsBloc extends Bloc<ProjectsEvent, ProjectsState> {
   }) async {
     final result = await _projectsRepository.history(id, page: page);
     switch (result) {
-      case Success(data: final entries):
-        final items = append ? [...state.history, ...entries] : entries;
+      case Success(data: final response):
+        final items = append
+            ? [...state.history, ...response.data]
+            : response.data;
         emit(
           state.copyWith(
             historyStatus: items.isEmpty
                 ? PagedFeedStatus.empty
                 : PagedFeedStatus.loaded,
             history: items,
+            historyPagination: response.pagination,
           ),
         );
       case Failure(error: final error):

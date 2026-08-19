@@ -10,7 +10,7 @@ import '../models/enums.dart';
 import '../models/nearby_project_card_view.dart';
 import '../models/patch_project_request.dart';
 import '../models/project_detail_view.dart';
-import '../models/project_history_entry_view.dart';
+import '../models/project_history_response.dart';
 import '../models/project_image_view.dart';
 import '../models/project_view.dart';
 import '../models/projects_list_response.dart' show ProjectsListResponse;
@@ -192,7 +192,11 @@ class ProjectsRepository {
 
   /// `GET /projects/{id}/history` — stage and status changes merged into
   /// one chronological feed, newest first.
-  Future<ApiResult<List<ProjectHistoryEntryView>>> history(
+  /// Returns the **whole response**, not just `data` — matching `list()`.
+  /// `pagination` is a sibling of `data` here, and dropping it left the
+  /// caller unable to tell whether more pages existed, so "load more" could
+  /// never appear no matter how long the history was.
+  Future<ApiResult<ProjectHistoryResponse>> history(
     String id, {
     int? page,
     int? limit,
@@ -203,7 +207,7 @@ class ProjectsRepository {
         page: page,
         limit: limit,
       );
-      return ApiResult.success(response.data);
+      return ApiResult.success(response);
     } catch (error) {
       return ApiResult.failure(ApiErrorHandler.handle(error));
     }
