@@ -15,9 +15,9 @@ import '../../data/models/filter_view.dart';
 import '../../data/models/localized.dart';
 import '../../data/models/product_query.dart';
 
-/// How many filter options are revealed at a time. The server caps a
-/// DISCRETE rail at 24 distinct values, so this is purely about how much of
-/// that lands on screen at once — never about fetching more.
+/// How many filter options are revealed per step — the initial batch and
+/// every "show more" after it. Nothing here assumes a total: the reveal
+/// simply stops when the list runs out, whatever length the server sent.
 const int kOptionPageSize = 15;
 
 /// The filter rail, as a scrollable bottom sheet.
@@ -359,12 +359,7 @@ class _DiscreteGroup extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    context
-                        .tr('catalog_filters_show_more')
-                        .replaceAll(
-                          '{count}',
-                          '${visible.length - visibleCount}',
-                        ),
+                    context.tr('catalog_filters_show_more'),
                     style: context.textStyles.xsBold.copyWith(
                       color: colors.brand600,
                     ),

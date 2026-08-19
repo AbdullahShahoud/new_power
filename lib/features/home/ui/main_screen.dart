@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/di/dependency_injection.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theming/app_colors.dart';
 import '../../../core/theming/app_radius.dart';
@@ -11,6 +12,7 @@ import '../../projects/ui/screens/projects_list_screen.dart';
 import 'screens/home_dashboard_screen.dart';
 import '../../catalog/ui/screens/catalog_home_screen.dart';
 import 'screens/profile_screen.dart';
+import '../../notifications/logic/badge_cubit/unread_badge_cubit.dart';
 
 /// Post-login shell: four tabs (Home, Projects, Products, Profile) over
 /// an on-brand floating bottom bar. Notifications moved off the tab bar —
@@ -26,9 +28,35 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
   DateTime? _lastBackPressTime;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // App start — one of the events the badge refreshes on, in place of a
+    // timer. The 30-request-per-minute budget is shared with the catalogue
+    // and directory, and the count is write-through cached server-side, so
+    // polling would cost more and be no fresher.
+    getIt<UnreadBadgeCubit>().refresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    // Debounced ≥ 30s: a rep flicking between apps would otherwise spend
+    // the budget re-asking a question whose answer has not changed.
+    getIt<UnreadBadgeCubit>().refresh(debounced: true);
+  }
 
   static const _tabs = [
     HomeDashboardScreen(),
