@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/helpers/extensions.dart';
@@ -19,10 +20,16 @@ import '../../data/models/contact_view.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/submit_lost_request.dart';
 import '../../data/models/submit_won_request.dart';
+import '../../data/models/uploaded_file_dto.dart';
+import '../../logic/file_upload_bloc/file_upload_bloc.dart';
+import '../../logic/file_upload_bloc/file_upload_event.dart';
+import '../../logic/file_upload_bloc/file_upload_state.dart';
 import '../../logic/outcomes_bloc/outcomes_bloc.dart';
 import '../../logic/outcomes_bloc/outcomes_event.dart';
 import '../../logic/outcomes_bloc/outcomes_state.dart';
+import '../widgets/attachment_picker.dart';
 import '../widgets/option_picker_field.dart';
+import '../widgets/pending_attachment.dart';
 import '../widgets/project_enum_labels.dart';
 
 const _defaultCurrency = 'SAR';
@@ -48,8 +55,15 @@ class SubmitOutcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<OutcomesBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<OutcomesBloc>()),
+        // Won submissions carry proof — an award letter (تعميد), a signed
+        // PO, a delivery note. Same upload route as everywhere else:
+        // `POST /files` per file, then the returned keys are quoted in the
+        // request body (Workflow 1 — one file per call, never batched).
+        BlocProvider(create: (_) => getIt<FileUploadBloc>()),
+      ],
       child: _SubmitOutcomeView(projectId: projectId, initialType: initialType),
     );
   }
@@ -85,6 +99,68 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
   final _unitsSuppliedController = TextEditingController();
   final _unitsTotalController = TextEditingController();
   DateTime? _soldAt;
+
+  /// Supporting documents for a won deal. Capped at 10 to match
+  /// `SubmitWonRequest.validate()`, which rejects more server-side anyway.
+  static const _maxFiles = 10;
+  final _uuid = const Uuid();
+  final List<PendingAttachment> _attachments = [];
+
+  /// Mirrors `log_activity_screen`: the picker only produces the file, this
+  /// assigns the tracking id and starts the upload so every attachment takes
+  /// the same route through [FileUploadBloc].
+  void _onAttachmentsAdded(List<PendingAttachment> added) {
+    final fileUploadBloc = context.read<FileUploadBloc>();
+    setState(() {
+      for (final attachment in added) {
+        if (_attachments.length >= _maxFiles) break;
+        final localId = _uuid.v4();
+        _attachments.add(
+          PendingAttachment(
+            localId: localId,
+            file: attachment.file,
+            kind: attachment.kind,
+            duration: attachment.duration,
+          ),
+        );
+        fileUploadBloc.add(
+          FileUploadEvent.uploadRequested(
+            localId: localId,
+            file: attachment.file,
+          ),
+        );
+      }
+    });
+  }
+
+  void _removeAttachment(String localId) {
+    context.read<FileUploadBloc>().add(
+      FileUploadEvent.uploadCancelled(localId: localId),
+    );
+    setState(() => _attachments.removeWhere((a) => a.localId == localId));
+  }
+
+  /// Collects the finished uploads as `{key, name}` pairs.
+  ///
+  /// Returns `null` — rather than an empty list — while any upload is still
+  /// in flight, so the caller aborts instead of silently submitting a won
+  /// outcome without the proof the rep just attached.
+  List<UploadedFileDto>? _collectUploadedFiles() {
+    final uploads = context.read<FileUploadBloc>().state.uploads;
+    final files = <UploadedFileDto>[];
+    for (final attachment in _attachments) {
+      final item = uploads[attachment.localId];
+      if (item == null) continue;
+      if (item.status == FileUploadItemStatus.uploading) {
+        _showSnack(context.tr('projects_register_photos_still_uploading'));
+        return null;
+      }
+      if (item.status == FileUploadItemStatus.uploaded && item.file != null) {
+        files.add(UploadedFileDto(key: item.file!.key, name: item.file!.name));
+      }
+    }
+    return files;
+  }
   final Set<ProductCategory> _categories = {};
 
   // ── Shared ───────────────────────────────────────────────────────────
@@ -181,12 +257,19 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
       _showSnack(context.tr('submit_won_distributor_required'));
       return;
     }
+    // Aborts while an upload is still running rather than submitting the
+    // outcome without the proof the rep attached — a won outcome can only
+    // be submitted once, so a silently file-less one is not recoverable.
+    final files = _collectUploadedFiles();
+    if (files == null) return;
+
     final valueText = _valueController.text.trim();
     final value = valueText.isEmpty ? null : double.tryParse(valueText);
     final unitsSupplied = int.tryParse(_unitsSuppliedController.text.trim());
     final unitsTotal = int.tryParse(_unitsTotalController.text.trim());
 
     final request = SubmitWonRequest(
+      files: files,
       distributorAccountId: distributor.id,
       value: value,
       currency: value != null ? _defaultCurrency : null,
@@ -332,6 +415,23 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
                             maxLines: 3,
                             validator: _validateOptionalLongText,
                           ),
+                          // Won only: `SubmitLostRequest` has no `files`
+                          // field, so offering the picker on a loss would
+                          // collect documents the request then silently
+                          // drops.
+                          if (_type == OutcomeType.won) ...[
+                            verticalSpace(16.h),
+                            _Label(
+                              context.tr('submit_won_files'),
+                              optional: true,
+                            ),
+                            AttachmentPicker(
+                              attachments: _attachments,
+                              maxAttachments: _maxFiles,
+                              onAdded: _onAttachmentsAdded,
+                              onRemove: _removeAttachment,
+                            ),
+                          ],
                           verticalSpace(24.h),
                           BlocBuilder<OutcomesBloc, OutcomesState>(
                             builder: (context, state) {

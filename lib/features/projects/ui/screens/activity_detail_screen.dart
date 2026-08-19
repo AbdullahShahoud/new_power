@@ -33,7 +33,17 @@ import '../widgets/project_enum_labels.dart';
 /// role-gated Project controls in Phase 1.
 class ActivityDetailScreen extends StatelessWidget {
   final String activityId;
-  const ActivityDetailScreen({super.key, required this.activityId});
+
+  /// Set when the project this activity belongs to has a confirmed
+  /// WON/LOST outcome. The entry stays fully readable — it is part of the
+  /// record the outcome was judged on — but it can no longer be edited.
+  final bool projectClosed;
+
+  const ActivityDetailScreen({
+    super.key,
+    required this.activityId,
+    this.projectClosed = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +51,21 @@ class ActivityDetailScreen extends StatelessWidget {
       create: (_) =>
           getIt<ActivitiesBloc>()
             ..add(ActivitiesEvent.detailRequested(activityId)),
-      child: _ActivityDetailView(activityId: activityId),
+      child: _ActivityDetailView(
+        activityId: activityId,
+        projectClosed: projectClosed,
+      ),
     );
   }
 }
 
 class _ActivityDetailView extends StatelessWidget {
   final String activityId;
-  const _ActivityDetailView({required this.activityId});
+  final bool projectClosed;
+  const _ActivityDetailView({
+    required this.activityId,
+    required this.projectClosed,
+  });
 
   Future<void> _promptEdit(
     BuildContext context,
@@ -297,6 +314,7 @@ class _ActivityDetailView extends StatelessWidget {
                       ),
                       ActivityDetailStatus.loaded => _ActivityDetailBody(
                         activity: state.selectedActivity!,
+                        projectClosed: projectClosed,
                         onEdit: () =>
                             _promptEdit(context, state.selectedActivity!),
                       ),
@@ -319,7 +337,12 @@ extension _Let<T> on T {
 class _ActivityDetailBody extends StatelessWidget {
   final ActivityDetailView activity;
   final VoidCallback onEdit;
-  const _ActivityDetailBody({required this.activity, required this.onEdit});
+  final bool projectClosed;
+  const _ActivityDetailBody({
+    required this.activity,
+    required this.onEdit,
+    required this.projectClosed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -503,20 +526,25 @@ class _ActivityDetailBody extends StatelessWidget {
             ),
         ],
         verticalSpace(24.h),
-        BlocBuilder<ActivitiesBloc, ActivitiesState>(
-          buildWhen: (previous, current) =>
-              previous.mutationStatus != current.mutationStatus,
-          builder: (context, state) {
-            final submitting =
-                state.mutationStatus == ActivityMutationStatus.inProgress;
-            return AppButton(
-              text: context.tr('activity_detail_edit_cta'),
-              variant: AppButtonVariant.secondary,
-              isLoading: submitting,
-              onPressed: submitting ? null : onEdit,
-            );
-          },
-        ),
+        // Editing is normally always offered — author-only is enforced
+        // server-side and a rep has no local field to check it against. A
+        // closed project is the one case the client *can* decide, so the
+        // button goes away entirely rather than failing on submit.
+        if (!projectClosed)
+          BlocBuilder<ActivitiesBloc, ActivitiesState>(
+            buildWhen: (previous, current) =>
+                previous.mutationStatus != current.mutationStatus,
+            builder: (context, state) {
+              final submitting =
+                  state.mutationStatus == ActivityMutationStatus.inProgress;
+              return AppButton(
+                text: context.tr('activity_detail_edit_cta'),
+                variant: AppButtonVariant.secondary,
+                isLoading: submitting,
+                onPressed: submitting ? null : onEdit,
+              );
+            },
+          ),
       ],
     );
   }

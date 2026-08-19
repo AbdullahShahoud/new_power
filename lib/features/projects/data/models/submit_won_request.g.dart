@@ -24,6 +24,11 @@ _SubmitWonRequest _$SubmitWonRequestFromJson(Map<String, dynamic> json) =>
       unitsTotal: (json['unitsTotal'] as num?)?.toInt(),
       buyerContactId: json['buyerContactId'] as String?,
       notes: json['notes'] as String?,
+      files:
+          (json['files'] as List<dynamic>?)
+              ?.map((e) => UploadedFileDto.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <UploadedFileDto>[],
     );
 
 Map<String, dynamic> _$SubmitWonRequestToJson(_SubmitWonRequest instance) =>
@@ -42,6 +47,7 @@ Map<String, dynamic> _$SubmitWonRequestToJson(_SubmitWonRequest instance) =>
       'unitsTotal': ?instance.unitsTotal,
       'buyerContactId': ?instance.buyerContactId,
       'notes': ?instance.notes,
+      'files': instance.files,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

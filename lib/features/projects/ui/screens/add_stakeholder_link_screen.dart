@@ -13,13 +13,13 @@ import '../../../../core/widget/app_button.dart';
 import '../../../../core/widget/app_header.dart';
 import '../../../../core/widget/app_text_field.dart';
 import '../../../../core/widget/pressable_scale.dart';
-import '../../data/models/add_contact_request.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/register_account_request.dart';
 import '../../logic/stakeholder_mutation_status.dart';
 import '../../logic/stakeholders_bloc/stakeholders_bloc.dart';
 import '../../logic/stakeholders_bloc/stakeholders_event.dart';
 import '../../logic/stakeholders_bloc/stakeholders_state.dart';
+import '../../../auth/ui/widgets/phone_text_field.dart';
 import '../widgets/option_picker_field.dart';
 import '../widgets/project_enum_labels.dart';
 
@@ -35,9 +35,9 @@ typedef ProjectCompanyOption = ({String accountId, String name});
 /// separately, so the repository orchestrates the writes behind one form
 /// submission and this screen never mentions "account" at all.
 ///
-/// Two branches: a **new company** (created with its first contact inlined
-/// in one `POST /accounts`), or a **company already on this project**
-/// (the new person is filed under that existing account). Pops `true` on
+/// Always creates a **new** company with its first contact inlined in one
+/// `POST /accounts`. Picking a company already on the project was offered
+/// here once and removed on request ("إنشاء سجل جديد دائمًا"). Pops `true` on
 /// success so the caller refreshes the project detail.
 class AddStakeholderLinkScreen extends StatelessWidget {
   final String projectId;
@@ -89,26 +89,12 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
   final _lastNameController = TextEditingController();
   final _positionController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _phoneFieldKey = GlobalKey<PhoneTextFieldState>();
   final _emailController = TextEditingController();
   final _noteController = TextEditingController();
 
   AccountType _accountType = AccountType.company;
   StakeholderRole? _role;
-
-  /// The company picked from those already on this project, or `null` when
-  /// the rep is entering a brand-new one. Drives which branch `_submit`
-  /// takes and whether the company-name field is shown at all.
-  ProjectCompanyOption? _existingCompany;
-
-  /// One entry per distinct account on the project — the same company can
-  /// hold two roles, and offering it twice would be noise.
-  List<ProjectCompanyOption> get _distinctCompanies {
-    final seen = <String>{};
-    return [
-      for (final company in widget.existingLinks)
-        if (seen.add(company.accountId)) company,
-    ];
-  }
 
   @override
   void dispose() {
@@ -133,6 +119,18 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
     return trimmed.isEmpty ? null : trimmed;
   }
 
+  /// The number with its dial code, or `null` when the rep left it blank.
+  ///
+  /// The empty check reads the **controller**, not `fullPhoneNumber`: that
+  /// getter concatenates the picker's dial code with the field, so an
+  /// untouched field yields a bare `"+966"` — which would be stored as a
+  /// phone number that cannot be called.
+  String? get _phoneOrNull {
+    if (_phoneController.text.trim().isEmpty) return null;
+    return _phoneFieldKey.currentState?.fullPhoneNumber ??
+        _phoneController.text.trim();
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     if (_role == null) {
@@ -141,39 +139,16 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
     }
 
     final bloc = context.read<StakeholdersBloc>();
-    final existing = _existingCompany;
 
-    // Branch on whether the rep picked a company already on this project.
-    // The second person a rep meets usually works for one of them, and
-    // creating a near-duplicate account for them is exactly the mess the
-    // directory's merge queue exists to clean up.
-    if (existing != null) {
-      bloc.add(
-        StakeholdersEvent.stakeholderPersonAddedToCompany(
-          projectId: widget.projectId,
-          accountId: existing.accountId,
-          contact: AddContactRequest(
-            firstName: _firstNameController.text.trim(),
-            lastName: _lastNameController.text.trim(),
-            accountId: existing.accountId,
-            position: _textOrNull(_positionController),
-            phone: _textOrNull(_phoneController),
-            email: _textOrNull(_emailController),
-          ),
-          role: _role!,
-          note: _textOrNull(_noteController),
-        ),
-      );
-      return;
-    }
-
+    // Always a new record. Reusing a company already on the project was
+    // offered here once and removed on request (see the form above).
     bloc.add(
       StakeholdersEvent.stakeholderPersonAdded(
         projectId: widget.projectId,
         account: RegisterAccountRequest(
           name: _companyNameController.text.trim(),
           type: _accountType,
-          phone: _textOrNull(_phoneController),
+          phone: _phoneOrNull,
           // Marks the new company as a project stakeholder so it surfaces
           // in a later classification-filtered search, not only by name.
           classification: AccountClassification.projectStakeholder,
@@ -184,7 +159,7 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
               firstName: _firstNameController.text.trim(),
               lastName: _lastNameController.text.trim(),
               position: _textOrNull(_positionController),
-              phone: _textOrNull(_phoneController),
+              phone: _phoneOrNull,
               email: _textOrNull(_emailController),
               // The only person on a freshly created company is, by
               // definition, who to ask for there.
@@ -268,69 +243,34 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
 
                           // ── Where they work ───────────────────────────
                           _Label(context.tr('add_stakeholder_company_name')),
-                          // Companies already on this project come first:
-                          // the second person a rep meets usually works for
-                          // one of them, and picking here avoids creating a
-                          // near-duplicate account.
-                          if (_distinctCompanies.isNotEmpty) ...[
-                            Wrap(
-                              spacing: 8.w,
-                              runSpacing: 8.h,
-                              children: [
-                                for (final company in _distinctCompanies)
-                                  _CompanyChip(
-                                    label: company.name,
-                                    selected:
-                                        _existingCompany?.accountId ==
-                                        company.accountId,
-                                    onTap: () => setState(
-                                      () => _existingCompany =
-                                          _existingCompany?.accountId ==
-                                              company.accountId
-                                          ? null
-                                          : company,
-                                    ),
-                                  ),
-                                _CompanyChip(
-                                  label: context.tr(
-                                    'add_stakeholder_company_new',
-                                  ),
-                                  selected: _existingCompany == null,
-                                  onTap: () =>
-                                      setState(() => _existingCompany = null),
-                                ),
-                              ],
+                          // The row of companies already linked to this
+                          // project used to sit here as reusable chips. It
+                          // was removed on request: the confirmed model is
+                          // "always create a new record", so offering an
+                          // existing one to reuse contradicted it and made
+                          // the form read as two competing ways to answer
+                          // the same question.
+                          _AccountTypeToggle(
+                            type: _accountType,
+                            onChanged: (v) =>
+                                setState(() => _accountType = v),
+                          ),
+                          verticalSpace(8.h),
+                          AppTextField(
+                            hintText: context.tr(
+                              'add_stakeholder_company_name_hint',
                             ),
-                            verticalSpace(10.h),
-                          ],
-                          // Only asked for when the company is actually new.
-                          if (_existingCompany == null) ...[
-                            _AccountTypeToggle(
-                              type: _accountType,
-                              onChanged: (v) =>
-                                  setState(() => _accountType = v),
-                            ),
-                            verticalSpace(8.h),
-                            AppTextField(
-                              hintText: context.tr(
-                                'add_stakeholder_company_name_hint',
-                              ),
-                              controller: _companyNameController,
-                              validator: (value) {
-                                // Skipped entirely when an existing company
-                                // is selected — the field isn't on screen.
-                                if (_existingCompany != null) return null;
-                                final trimmed = value?.trim() ?? '';
-                                if (trimmed.length < 2 ||
-                                    trimmed.length > 200) {
-                                  return context.tr(
-                                    'register_account_name_error',
-                                  );
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
+                            controller: _companyNameController,
+                            validator: (value) {
+                              final trimmed = value?.trim() ?? '';
+                              if (trimmed.length < 2 || trimmed.length > 200) {
+                                return context.tr(
+                                  'register_account_name_error',
+                                );
+                              }
+                              return null;
+                            },
+                          ),
                           verticalSpace(16.h),
 
                           // ── Their part on this project ────────────────
@@ -358,10 +298,14 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
                             context.tr('add_contact_phone'),
                             optional: true,
                           ),
-                          AppTextField(
-                            hintText: context.tr('add_contact_phone_hint'),
+                          // Same control as the sign-up screen: country
+                          // picker with a dial code, so the number reaches
+                          // the API in full international form instead of
+                          // whatever local shorthand the rep typed.
+                          PhoneTextField(
+                            key: _phoneFieldKey,
                             controller: _phoneController,
-                            keyboardType: TextInputType.phone,
+                            hintText: context.tr('add_contact_phone_hint'),
                           ),
                           verticalSpace(16.h),
                           _Label(
@@ -414,42 +358,6 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
 /// A selectable company already on this project (or the "new company"
 /// escape hatch). Same visual language as the product-category chips on the
 /// Won form.
-class _CompanyChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _CompanyChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return PressableScale(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        decoration: BoxDecoration(
-          color: selected ? colors.brand500 : colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.full),
-          border: Border.all(
-            color: selected ? colors.brand500 : colors.ink200,
-          ),
-        ),
-        child: Text(
-          label,
-          style: context.textStyles.xsSemibold.copyWith(
-            color: selected ? colors.white : colors.textColor,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _AccountTypeToggle extends StatelessWidget {
   final AccountType type;

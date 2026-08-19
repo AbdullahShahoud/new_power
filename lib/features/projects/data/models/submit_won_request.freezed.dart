@@ -15,7 +15,16 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SubmitWonRequest {
 
- String get distributorAccountId; double? get value; String? get currency; DateTime? get soldAt; List<ProductCategory> get categories; int? get unitsSupplied; int? get unitsTotal; String? get buyerContactId; String? get notes;
+ String get distributorAccountId; double? get value; String? get currency; DateTime? get soldAt; List<ProductCategory> get categories; int? get unitsSupplied; int? get unitsTotal; String? get buyerContactId; String? get notes;/// Supporting documents for the claim — a signed contract, a delivery
+/// note, the approval scan. Same `{key, name}` shape as an activity's
+/// attachments: upload through `POST /files` first, then quote the keys
+/// it returns.
+///
+/// Capped at 10 to match every other `files` array in this API. Empty by
+/// default and, with `includeIfNull: false`, an empty list still
+/// serialises as `"files": []` — harmless, since the server treats the
+/// array as optional.
+ List<UploadedFileDto> get files;
 /// Create a copy of SubmitWonRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +37,16 @@ $SubmitWonRequestCopyWith<SubmitWonRequest> get copyWith => _$SubmitWonRequestCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubmitWonRequest&&(identical(other.distributorAccountId, distributorAccountId) || other.distributorAccountId == distributorAccountId)&&(identical(other.value, value) || other.value == value)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.soldAt, soldAt) || other.soldAt == soldAt)&&const DeepCollectionEquality().equals(other.categories, categories)&&(identical(other.unitsSupplied, unitsSupplied) || other.unitsSupplied == unitsSupplied)&&(identical(other.unitsTotal, unitsTotal) || other.unitsTotal == unitsTotal)&&(identical(other.buyerContactId, buyerContactId) || other.buyerContactId == buyerContactId)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubmitWonRequest&&(identical(other.distributorAccountId, distributorAccountId) || other.distributorAccountId == distributorAccountId)&&(identical(other.value, value) || other.value == value)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.soldAt, soldAt) || other.soldAt == soldAt)&&const DeepCollectionEquality().equals(other.categories, categories)&&(identical(other.unitsSupplied, unitsSupplied) || other.unitsSupplied == unitsSupplied)&&(identical(other.unitsTotal, unitsTotal) || other.unitsTotal == unitsTotal)&&(identical(other.buyerContactId, buyerContactId) || other.buyerContactId == buyerContactId)&&(identical(other.notes, notes) || other.notes == notes)&&const DeepCollectionEquality().equals(other.files, files));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,distributorAccountId,value,currency,soldAt,const DeepCollectionEquality().hash(categories),unitsSupplied,unitsTotal,buyerContactId,notes);
+int get hashCode => Object.hash(runtimeType,distributorAccountId,value,currency,soldAt,const DeepCollectionEquality().hash(categories),unitsSupplied,unitsTotal,buyerContactId,notes,const DeepCollectionEquality().hash(files));
 
 @override
 String toString() {
-  return 'SubmitWonRequest(distributorAccountId: $distributorAccountId, value: $value, currency: $currency, soldAt: $soldAt, categories: $categories, unitsSupplied: $unitsSupplied, unitsTotal: $unitsTotal, buyerContactId: $buyerContactId, notes: $notes)';
+  return 'SubmitWonRequest(distributorAccountId: $distributorAccountId, value: $value, currency: $currency, soldAt: $soldAt, categories: $categories, unitsSupplied: $unitsSupplied, unitsTotal: $unitsTotal, buyerContactId: $buyerContactId, notes: $notes, files: $files)';
 }
 
 
@@ -48,7 +57,7 @@ abstract mixin class $SubmitWonRequestCopyWith<$Res>  {
   factory $SubmitWonRequestCopyWith(SubmitWonRequest value, $Res Function(SubmitWonRequest) _then) = _$SubmitWonRequestCopyWithImpl;
 @useResult
 $Res call({
- String distributorAccountId, double? value, String? currency, DateTime? soldAt, List<ProductCategory> categories, int? unitsSupplied, int? unitsTotal, String? buyerContactId, String? notes
+ String distributorAccountId, double? value, String? currency, DateTime? soldAt, List<ProductCategory> categories, int? unitsSupplied, int? unitsTotal, String? buyerContactId, String? notes, List<UploadedFileDto> files
 });
 
 
@@ -65,7 +74,7 @@ class _$SubmitWonRequestCopyWithImpl<$Res>
 
 /// Create a copy of SubmitWonRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? distributorAccountId = null,Object? value = freezed,Object? currency = freezed,Object? soldAt = freezed,Object? categories = null,Object? unitsSupplied = freezed,Object? unitsTotal = freezed,Object? buyerContactId = freezed,Object? notes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? distributorAccountId = null,Object? value = freezed,Object? currency = freezed,Object? soldAt = freezed,Object? categories = null,Object? unitsSupplied = freezed,Object? unitsTotal = freezed,Object? buyerContactId = freezed,Object? notes = freezed,Object? files = null,}) {
   return _then(_self.copyWith(
 distributorAccountId: null == distributorAccountId ? _self.distributorAccountId : distributorAccountId // ignore: cast_nullable_to_non_nullable
 as String,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
@@ -76,7 +85,8 @@ as List<ProductCategory>,unitsSupplied: freezed == unitsSupplied ? _self.unitsSu
 as int?,unitsTotal: freezed == unitsTotal ? _self.unitsTotal : unitsTotal // ignore: cast_nullable_to_non_nullable
 as int?,buyerContactId: freezed == buyerContactId ? _self.buyerContactId : buyerContactId // ignore: cast_nullable_to_non_nullable
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,files: null == files ? _self.files : files // ignore: cast_nullable_to_non_nullable
+as List<UploadedFileDto>,
   ));
 }
 
@@ -161,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String distributorAccountId,  double? value,  String? currency,  DateTime? soldAt,  List<ProductCategory> categories,  int? unitsSupplied,  int? unitsTotal,  String? buyerContactId,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String distributorAccountId,  double? value,  String? currency,  DateTime? soldAt,  List<ProductCategory> categories,  int? unitsSupplied,  int? unitsTotal,  String? buyerContactId,  String? notes,  List<UploadedFileDto> files)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SubmitWonRequest() when $default != null:
-return $default(_that.distributorAccountId,_that.value,_that.currency,_that.soldAt,_that.categories,_that.unitsSupplied,_that.unitsTotal,_that.buyerContactId,_that.notes);case _:
+return $default(_that.distributorAccountId,_that.value,_that.currency,_that.soldAt,_that.categories,_that.unitsSupplied,_that.unitsTotal,_that.buyerContactId,_that.notes,_that.files);case _:
   return orElse();
 
 }
@@ -182,10 +192,10 @@ return $default(_that.distributorAccountId,_that.value,_that.currency,_that.sold
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String distributorAccountId,  double? value,  String? currency,  DateTime? soldAt,  List<ProductCategory> categories,  int? unitsSupplied,  int? unitsTotal,  String? buyerContactId,  String? notes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String distributorAccountId,  double? value,  String? currency,  DateTime? soldAt,  List<ProductCategory> categories,  int? unitsSupplied,  int? unitsTotal,  String? buyerContactId,  String? notes,  List<UploadedFileDto> files)  $default,) {final _that = this;
 switch (_that) {
 case _SubmitWonRequest():
-return $default(_that.distributorAccountId,_that.value,_that.currency,_that.soldAt,_that.categories,_that.unitsSupplied,_that.unitsTotal,_that.buyerContactId,_that.notes);case _:
+return $default(_that.distributorAccountId,_that.value,_that.currency,_that.soldAt,_that.categories,_that.unitsSupplied,_that.unitsTotal,_that.buyerContactId,_that.notes,_that.files);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +212,10 @@ return $default(_that.distributorAccountId,_that.value,_that.currency,_that.sold
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String distributorAccountId,  double? value,  String? currency,  DateTime? soldAt,  List<ProductCategory> categories,  int? unitsSupplied,  int? unitsTotal,  String? buyerContactId,  String? notes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String distributorAccountId,  double? value,  String? currency,  DateTime? soldAt,  List<ProductCategory> categories,  int? unitsSupplied,  int? unitsTotal,  String? buyerContactId,  String? notes,  List<UploadedFileDto> files)?  $default,) {final _that = this;
 switch (_that) {
 case _SubmitWonRequest() when $default != null:
-return $default(_that.distributorAccountId,_that.value,_that.currency,_that.soldAt,_that.categories,_that.unitsSupplied,_that.unitsTotal,_that.buyerContactId,_that.notes);case _:
+return $default(_that.distributorAccountId,_that.value,_that.currency,_that.soldAt,_that.categories,_that.unitsSupplied,_that.unitsTotal,_that.buyerContactId,_that.notes,_that.files);case _:
   return null;
 
 }
@@ -217,7 +227,7 @@ return $default(_that.distributorAccountId,_that.value,_that.currency,_that.sold
 
 @JsonSerializable(includeIfNull: false, converters: [UtcDateTimeConverter()])
 class _SubmitWonRequest implements SubmitWonRequest {
-  const _SubmitWonRequest({required this.distributorAccountId, this.value, this.currency, this.soldAt, final  List<ProductCategory> categories = const <ProductCategory>[], this.unitsSupplied, this.unitsTotal, this.buyerContactId, this.notes}): _categories = categories;
+  const _SubmitWonRequest({required this.distributorAccountId, this.value, this.currency, this.soldAt, final  List<ProductCategory> categories = const <ProductCategory>[], this.unitsSupplied, this.unitsTotal, this.buyerContactId, this.notes, final  List<UploadedFileDto> files = const <UploadedFileDto>[]}): _categories = categories,_files = files;
   factory _SubmitWonRequest.fromJson(Map<String, dynamic> json) => _$SubmitWonRequestFromJson(json);
 
 @override final  String distributorAccountId;
@@ -235,6 +245,31 @@ class _SubmitWonRequest implements SubmitWonRequest {
 @override final  int? unitsTotal;
 @override final  String? buyerContactId;
 @override final  String? notes;
+/// Supporting documents for the claim — a signed contract, a delivery
+/// note, the approval scan. Same `{key, name}` shape as an activity's
+/// attachments: upload through `POST /files` first, then quote the keys
+/// it returns.
+///
+/// Capped at 10 to match every other `files` array in this API. Empty by
+/// default and, with `includeIfNull: false`, an empty list still
+/// serialises as `"files": []` — harmless, since the server treats the
+/// array as optional.
+ final  List<UploadedFileDto> _files;
+/// Supporting documents for the claim — a signed contract, a delivery
+/// note, the approval scan. Same `{key, name}` shape as an activity's
+/// attachments: upload through `POST /files` first, then quote the keys
+/// it returns.
+///
+/// Capped at 10 to match every other `files` array in this API. Empty by
+/// default and, with `includeIfNull: false`, an empty list still
+/// serialises as `"files": []` — harmless, since the server treats the
+/// array as optional.
+@override@JsonKey() List<UploadedFileDto> get files {
+  if (_files is EqualUnmodifiableListView) return _files;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_files);
+}
+
 
 /// Create a copy of SubmitWonRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -249,16 +284,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubmitWonRequest&&(identical(other.distributorAccountId, distributorAccountId) || other.distributorAccountId == distributorAccountId)&&(identical(other.value, value) || other.value == value)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.soldAt, soldAt) || other.soldAt == soldAt)&&const DeepCollectionEquality().equals(other._categories, _categories)&&(identical(other.unitsSupplied, unitsSupplied) || other.unitsSupplied == unitsSupplied)&&(identical(other.unitsTotal, unitsTotal) || other.unitsTotal == unitsTotal)&&(identical(other.buyerContactId, buyerContactId) || other.buyerContactId == buyerContactId)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubmitWonRequest&&(identical(other.distributorAccountId, distributorAccountId) || other.distributorAccountId == distributorAccountId)&&(identical(other.value, value) || other.value == value)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.soldAt, soldAt) || other.soldAt == soldAt)&&const DeepCollectionEquality().equals(other._categories, _categories)&&(identical(other.unitsSupplied, unitsSupplied) || other.unitsSupplied == unitsSupplied)&&(identical(other.unitsTotal, unitsTotal) || other.unitsTotal == unitsTotal)&&(identical(other.buyerContactId, buyerContactId) || other.buyerContactId == buyerContactId)&&(identical(other.notes, notes) || other.notes == notes)&&const DeepCollectionEquality().equals(other._files, _files));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,distributorAccountId,value,currency,soldAt,const DeepCollectionEquality().hash(_categories),unitsSupplied,unitsTotal,buyerContactId,notes);
+int get hashCode => Object.hash(runtimeType,distributorAccountId,value,currency,soldAt,const DeepCollectionEquality().hash(_categories),unitsSupplied,unitsTotal,buyerContactId,notes,const DeepCollectionEquality().hash(_files));
 
 @override
 String toString() {
-  return 'SubmitWonRequest(distributorAccountId: $distributorAccountId, value: $value, currency: $currency, soldAt: $soldAt, categories: $categories, unitsSupplied: $unitsSupplied, unitsTotal: $unitsTotal, buyerContactId: $buyerContactId, notes: $notes)';
+  return 'SubmitWonRequest(distributorAccountId: $distributorAccountId, value: $value, currency: $currency, soldAt: $soldAt, categories: $categories, unitsSupplied: $unitsSupplied, unitsTotal: $unitsTotal, buyerContactId: $buyerContactId, notes: $notes, files: $files)';
 }
 
 
@@ -269,7 +304,7 @@ abstract mixin class _$SubmitWonRequestCopyWith<$Res> implements $SubmitWonReque
   factory _$SubmitWonRequestCopyWith(_SubmitWonRequest value, $Res Function(_SubmitWonRequest) _then) = __$SubmitWonRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String distributorAccountId, double? value, String? currency, DateTime? soldAt, List<ProductCategory> categories, int? unitsSupplied, int? unitsTotal, String? buyerContactId, String? notes
+ String distributorAccountId, double? value, String? currency, DateTime? soldAt, List<ProductCategory> categories, int? unitsSupplied, int? unitsTotal, String? buyerContactId, String? notes, List<UploadedFileDto> files
 });
 
 
@@ -286,7 +321,7 @@ class __$SubmitWonRequestCopyWithImpl<$Res>
 
 /// Create a copy of SubmitWonRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? distributorAccountId = null,Object? value = freezed,Object? currency = freezed,Object? soldAt = freezed,Object? categories = null,Object? unitsSupplied = freezed,Object? unitsTotal = freezed,Object? buyerContactId = freezed,Object? notes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? distributorAccountId = null,Object? value = freezed,Object? currency = freezed,Object? soldAt = freezed,Object? categories = null,Object? unitsSupplied = freezed,Object? unitsTotal = freezed,Object? buyerContactId = freezed,Object? notes = freezed,Object? files = null,}) {
   return _then(_SubmitWonRequest(
 distributorAccountId: null == distributorAccountId ? _self.distributorAccountId : distributorAccountId // ignore: cast_nullable_to_non_nullable
 as String,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
@@ -297,7 +332,8 @@ as List<ProductCategory>,unitsSupplied: freezed == unitsSupplied ? _self.unitsSu
 as int?,unitsTotal: freezed == unitsTotal ? _self.unitsTotal : unitsTotal // ignore: cast_nullable_to_non_nullable
 as int?,buyerContactId: freezed == buyerContactId ? _self.buyerContactId : buyerContactId // ignore: cast_nullable_to_non_nullable
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
+as List<UploadedFileDto>,
   ));
 }
 

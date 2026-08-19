@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/networking/utc_date_time_converter.dart';
 import '../../../../core/helpers/validators.dart';
 import 'enums.dart';
+import 'uploaded_file_dto.dart';
 
 part 'submit_won_request.freezed.dart';
 part 'submit_won_request.g.dart';
@@ -36,6 +37,17 @@ abstract class SubmitWonRequest with _$SubmitWonRequest {
     int? unitsTotal,
     String? buyerContactId,
     String? notes,
+
+    /// Supporting documents for the claim — a signed contract, a delivery
+    /// note, the approval scan. Same `{key, name}` shape as an activity's
+    /// attachments: upload through `POST /files` first, then quote the keys
+    /// it returns.
+    ///
+    /// Capped at 10 to match every other `files` array in this API. Empty by
+    /// default and, with `includeIfNull: false`, an empty list still
+    /// serialises as `"files": []` — harmless, since the server treats the
+    /// array as optional.
+    @Default(<UploadedFileDto>[]) List<UploadedFileDto> files,
   }) = _SubmitWonRequest;
 
   factory SubmitWonRequest.fromJson(Map<String, dynamic> json) =>
@@ -73,6 +85,12 @@ extension SubmitWonRequestValidation on SubmitWonRequest {
     final trimmedNotes = notes?.trim();
     if (trimmedNotes != null && trimmedNotes.length > 2000) {
       throw ArgumentError('notes cannot exceed 2000 characters');
+    }
+    if (files.length > 10) {
+      throw ArgumentError('files cannot exceed 10 items');
+    }
+    for (final file in files) {
+      file.validate();
     }
   }
 }

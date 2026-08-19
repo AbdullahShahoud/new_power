@@ -65,9 +65,7 @@ class _EditProjectView extends StatefulWidget {
 class _EditProjectViewState extends State<_EditProjectView> {
   final _formKey = GlobalKey<FormState>();
 
-  late final _nameController = TextEditingController(
-    text: widget.project.name,
-  );
+  late final _nameController = TextEditingController(text: widget.project.name);
   late final _descriptionController = TextEditingController(
     text: widget.project.description,
   );
@@ -243,14 +241,18 @@ class _EditProjectViewState extends State<_EditProjectView> {
                           ),
                           verticalSpace(16.h),
                           _Label(context.tr('projects_register_building_type')),
-                          OptionPickerField<BuildingType>(
-                            hintText: context.tr(
-                              'projects_register_building_type_hint',
+                          Padding(
+                            padding: const EdgeInsets.only(right: 9.0),
+                            child: OptionPickerField<BuildingType>(
+                              hintText: context.tr(
+                                'projects_register_building_type_hint',
+                              ),
+                              value: _buildingType,
+                              options: BuildingType.values,
+                              labelOf: (v) => context.tr(v.labelKey),
+                              onChanged: (v) =>
+                                  setState(() => _buildingType = v),
                             ),
-                            value: _buildingType,
-                            options: BuildingType.values,
-                            labelOf: (v) => context.tr(v.labelKey),
-                            onChanged: (v) => setState(() => _buildingType = v),
                           ),
                           verticalSpace(16.h),
                           _Label(context.tr('projects_register_description')),
@@ -303,10 +305,9 @@ class _EditProjectViewState extends State<_EditProjectView> {
                               'projects_register_estimated_value_hint',
                             ),
                             controller: _estimatedValueController,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                           ),
                           verticalSpace(16.h),
                           _Label(
