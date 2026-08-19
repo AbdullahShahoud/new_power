@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/networking/api_result.dart';
 import '../../data/models/category_view.dart';
 import '../../data/repo/catalog_repository.dart';
@@ -11,7 +12,8 @@ import 'categories_state.dart';
 class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
   final CatalogRepository _repository;
 
-  CategoriesBloc(this._repository) : super(const CategoriesState()) {
+  CategoriesBloc(this._repository)
+    : super(CategoriesState(viewMode: readStoredViewMode())) {
     on<CategoriesTreeRequested>(_onTreeRequested);
     on<CategoriesCategoryRequested>(_onCategoryRequested);
     on<CategoriesViewModeToggled>(_onViewModeToggled);
@@ -89,16 +91,34 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     );
   }
 
+  /// Toggles and **persists**. The Bloc is a factory — a fresh one per
+  /// screen — so without writing this out the choice would be forgotten the
+  /// moment the rep left the tab, which reads as the button not working.
   void _onViewModeToggled(
     CategoriesViewModeToggled event,
     Emitter<CategoriesState> emit,
   ) {
-    emit(
-      state.copyWith(
-        viewMode: state.viewMode == CategoryViewMode.grid
-            ? CategoryViewMode.list
-            : CategoryViewMode.grid,
-      ),
+    final next = state.viewMode == CategoryViewMode.grid
+        ? CategoryViewMode.list
+        : CategoryViewMode.grid;
+    // Fire-and-forget: a failed write costs the preference next launch, and
+    // is never worth blocking the animation for.
+    CacheHelper.saveData(
+      key: CacheHelper.catalogCategoryViewMode,
+      value: next.name,
     );
+    emit(state.copyWith(viewMode: next));
+  }
+
+  /// Reads the stored preference. Called when the tree is first requested so
+  /// the very first frame already shows the mode the rep chose last time,
+  /// rather than flashing the default and correcting itself.
+  static CategoryViewMode readStoredViewMode() {
+    final stored =
+        CacheHelper.getData(key: CacheHelper.catalogCategoryViewMode)
+            as String?;
+    return stored == CategoryViewMode.list.name
+        ? CategoryViewMode.list
+        : CategoryViewMode.grid;
   }
 }

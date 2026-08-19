@@ -12,20 +12,20 @@ import '../../../../core/theming/app_radius.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/empty_state.dart';
 import '../../../../core/widget/pressable_scale.dart';
-import '../../data/models/catalog_enums.dart';
 import '../../data/models/category_view.dart';
 import '../../data/models/localized.dart';
 import '../../data/models/product_query.dart';
 import '../../logic/categories_bloc/categories_bloc.dart';
 import '../../logic/categories_bloc/categories_event.dart';
+import '../../logic/categories_bloc/categories_state.dart';
 import '../../logic/products_bloc/products_bloc.dart';
 import '../../logic/products_bloc/products_event.dart';
 import '../../logic/products_bloc/products_state.dart';
 import '../widgets/catalog_skeletons.dart';
 import '../widgets/category_tile.dart';
 import '../widgets/collapsing_header.dart';
-import '../widgets/filters_sheet.dart';
 import '../widgets/product_card.dart';
+import '../widgets/product_filter_bar.dart';
 
 /// One category: its trail, its direct children, and its products.
 ///
@@ -44,8 +44,9 @@ class CategoryScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => getIt<CategoriesBloc>()
-            ..add(CategoriesEvent.categoryRequested(idOrSlug)),
+          create: (_) =>
+              getIt<CategoriesBloc>()
+                ..add(CategoriesEvent.categoryRequested(idOrSlug)),
         ),
         BlocProvider(
           create: (_) => getIt<ProductsBloc>()
@@ -92,52 +93,8 @@ class _CategoryViewState extends State<_CategoryView> {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
     if (position.pixels >= position.maxScrollExtent - 400) {
-      context.read<ProductsBloc>().add(
-        const ProductsEvent.nextPageRequested(),
-      );
+      context.read<ProductsBloc>().add(const ProductsEvent.nextPageRequested());
     }
-  }
-
-  Future<void> _openFilters(ProductsState state) async {
-    final bloc = context.read<ProductsBloc>();
-    final next = await showFiltersSheet(
-      context: context,
-      filters: state.filters,
-      query: state.query,
-      resultCount: state.total,
-    );
-    if (next != null) bloc.add(ProductsEvent.queryChanged(next));
-  }
-
-  Future<void> _openSort(ProductsState state) async {
-    final bloc = context.read<ProductsBloc>();
-    final picked = await showModalBottomSheet<ProductSort>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final option in ProductSort.values)
-              // `relevance` is only offered with a usable term: the server
-              // silently downgrades it to `name` without one, and an option
-              // that lies about what it did is worse than an absent option.
-              if (option != ProductSort.relevance ||
-                  state.query.effectiveQuery != null)
-                ListTile(
-                  title: Text(sheetContext.tr(option.labelKey)),
-                  trailing: state.query.effectiveSort == option
-                      ? Icon(
-                          Icons.check,
-                          color: sheetContext.colors.brand500,
-                        )
-                      : null,
-                  onTap: () => sheetContext.pop(option),
-                ),
-          ],
-        ),
-      ),
-    );
-    if (picked != null) bloc.add(ProductsEvent.sortChanged(picked));
   }
 
   @override
@@ -170,10 +127,9 @@ class _CategoryViewState extends State<_CategoryView> {
             ),
             child: RefreshIndicator(
               color: colors.brand500,
-              onRefresh: () async =>
-                  context.read<ProductsBloc>().add(
-                    const ProductsEvent.refreshed(),
-                  ),
+              onRefresh: () async => context.read<ProductsBloc>().add(
+                const ProductsEvent.refreshed(),
+              ),
               child: _buildScrollView(context, productsState, headerHeight),
             ),
           );
@@ -188,7 +144,8 @@ class _CategoryViewState extends State<_CategoryView> {
     double headerHeight,
   ) {
     final categoriesState = context.watch<CategoriesBloc>().state;
-    final children = categoriesState.selected?.children ?? const <CategoryView>[];
+    final children =
+        categoriesState.selected?.children ?? const <CategoryView>[];
 
     return CustomScrollView(
       controller: _scrollController,
@@ -198,11 +155,16 @@ class _CategoryViewState extends State<_CategoryView> {
         // nothing below it moves when the bar hides.
         SliverToBoxAdapter(child: SizedBox(height: headerHeight)),
 
-        if (categoriesState.selected != null)
-          SliverToBoxAdapter(
-            child: _Breadcrumb(result: categoriesState.selected!),
-          ),
+        // The header comes from its own request, so it gets its own loading
+        // state instead of leaving the top of the screen blank.
+        if (categoriesState.selected == null &&
+            categoriesState.detailStatus != CategoriesStatus.networkError)
+          const SliverToBoxAdapter(child: CategoryHeaderSkeleton()),
 
+        // if (categoriesState.selected != null)
+        //   SliverToBoxAdapter(
+        //     child: _Breadcrumb(result: categoriesState.selected!),
+        //   ),
         if (children.isNotEmpty) ...[
           SliverPadding(
             padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
@@ -229,10 +191,7 @@ class _CategoryViewState extends State<_CategoryView> {
                       category: child,
                       onTap: () => context.pushNamed(
                         Routes.catalogCategoryScreen,
-                        arguments: {
-                          'idOrSlug': child.slug,
-                          'name': child.name,
-                        },
+                        arguments: {'idOrSlug': child.slug, 'name': child.name},
                       ),
                     ),
                   );
@@ -245,10 +204,10 @@ class _CategoryViewState extends State<_CategoryView> {
         SliverPadding(
           padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 8.h),
           sliver: SliverToBoxAdapter(
-            child: _FilterBar(
+            child: ProductFilterBar(
               state: productsState,
-              onFilters: () => _openFilters(productsState),
-              onSort: () => _openSort(productsState),
+              onFilters: () => openProductFilters(context, productsState),
+              onSort: () => openProductSort(context, productsState),
             ),
           ),
         ),
@@ -257,7 +216,7 @@ class _CategoryViewState extends State<_CategoryView> {
           SliverPadding(
             padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
             sliver: SliverToBoxAdapter(
-              child: _AppliedPills(state: productsState),
+              child: AppliedFilterPills(state: productsState),
             ),
           ),
 
@@ -265,7 +224,11 @@ class _CategoryViewState extends State<_CategoryView> {
 
         SliverToBoxAdapter(
           child: SizedBox(
-            height: productsState.isLoadingMore ? 60.h : 24.h,
+            // A pushed route, so it covers the tab bar and only owes the
+            // device's own bottom inset — plus room for the paging spinner.
+            height:
+                (productsState.isLoadingMore ? 60.h : 24.h) +
+                MediaQuery.paddingOf(context).bottom,
             child: productsState.isLoadingMore
                 ? Center(
                     child: SizedBox(
@@ -363,11 +326,8 @@ class _CategoryViewState extends State<_CategoryView> {
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 12.h,
-                childAspectRatio: 0.68,
+              gridDelegate: productGridDelegate(
+                MediaQuery.sizeOf(context).width - 40.w,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final product = state.products[index];
@@ -492,201 +452,6 @@ class _Breadcrumb extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class _FilterBar extends StatelessWidget {
-  final ProductsState state;
-  final VoidCallback onFilters;
-  final VoidCallback onSort;
-
-  const _FilterBar({
-    required this.state,
-    required this.onFilters,
-    required this.onSort,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final hasRail = state.filters.isNotEmpty;
-    return Row(
-      children: [
-        // Hidden rather than disabled when the rail is empty: the server
-        // omits attributes with no values in the result set, and an empty
-        // rail is a normal, common outcome — not a fault worth a dead button.
-        if (hasRail)
-          _BarButton(
-            label: context.tr('catalog_filters_title'),
-            icon: Icons.tune_rounded,
-            active: state.query.hasFilters,
-            badge: state.query.appliedFilterCount,
-            onTap: onFilters,
-          ),
-        if (hasRail) horizontalSpace(8),
-        _BarButton(
-          label: context.tr(state.query.effectiveSort.labelKey),
-          icon: Icons.keyboard_arrow_down_rounded,
-          active: false,
-          onTap: onSort,
-        ),
-        const Spacer(),
-        // ⚠️ This is the *result* total from `/products`, never a category
-        // count — the two legitimately disagree because category counts
-        // ignore published-version membership (BR-8).
-        Text(
-          context
-              .tr('catalog_result_count')
-              .replaceAll('{count}', '${state.total}'),
-          style: context.textStyles.xsMedium.copyWith(color: colors.ink400),
-        ),
-      ],
-    );
-  }
-}
-
-class _BarButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool active;
-  final int badge;
-  final VoidCallback onTap;
-
-  const _BarButton({
-    required this.label,
-    required this.icon,
-    required this.active,
-    this.badge = 0,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return PressableScale(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        decoration: BoxDecoration(
-          color: active ? colors.brand50 : colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.full),
-          border: Border.all(
-            color: active ? colors.brand300 : colors.Color13,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14.sp,
-              color: active ? colors.brand600 : colors.textColor70,
-            ),
-            horizontalSpace(5),
-            Text(
-              label,
-              style: context.textStyles.xsSemibold.copyWith(
-                color: active ? colors.brand600 : colors.textColor,
-              ),
-            ),
-            if (active && badge > 0) ...[
-              horizontalSpace(5),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 5.w),
-                decoration: BoxDecoration(
-                  color: colors.brand500,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Text(
-                  '$badge',
-                  style: context.textStyles.xsBold.copyWith(
-                    color: colors.white,
-                    fontSize: 9.sp,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The applied filters, each removable in one tap. Labels come from the
-/// rail's own options so a chip reads "Black", not `BLACK`.
-class _AppliedPills extends StatelessWidget {
-  final ProductsState state;
-
-  const _AppliedPills({required this.state});
-
-  String _labelFor(BuildContext context, String code, String optionCode) {
-    for (final filter in state.filters) {
-      if (filter.code != code) continue;
-      for (final option in filter.options ?? const []) {
-        if (option.code == optionCode) return option.label.resolve(context);
-      }
-    }
-    // A RANGE token (`10..20`) has no option to name it, and a stale code
-    // may no longer be in the rail — showing the raw token still tells the
-    // rep what is filtering their list.
-    return optionCode.replaceAll('..', ' – ');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Wrap(
-      spacing: 6.w,
-      runSpacing: 6.h,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        for (final entry in state.query.attributes.entries)
-          for (final value in entry.value)
-            PressableScale(
-              onTap: () => context.read<ProductsBloc>().add(
-                ProductsEvent.attributeToggled(
-                  code: entry.key,
-                  optionCode: value,
-                ),
-              ),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10.w,
-                  vertical: 4.h,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.brand50,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _labelFor(context, entry.key, value),
-                      style: context.textStyles.xsSemibold.copyWith(
-                        color: colors.brand700,
-                      ),
-                    ),
-                    horizontalSpace(5),
-                    Icon(Icons.close_rounded, size: 12.sp,
-                        color: colors.brand600),
-                  ],
-                ),
-              ),
-            ),
-        PressableScale(
-          onTap: () => context.read<ProductsBloc>().add(
-            const ProductsEvent.filtersCleared(),
-          ),
-          child: Text(
-            context.tr('catalog_filters_clear_all'),
-            style: context.textStyles.xsBold.copyWith(color: colors.ink500),
-          ),
-        ),
-      ],
     );
   }
 }

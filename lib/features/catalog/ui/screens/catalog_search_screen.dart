@@ -23,6 +23,7 @@ import '../../logic/products_bloc/products_state.dart';
 import '../../logic/search_bloc/search_bloc.dart';
 import '../widgets/catalog_skeletons.dart';
 import '../widgets/product_card.dart';
+import '../widgets/product_filter_bar.dart';
 
 /// Catalogue search: typeahead while typing, a real result list on submit.
 ///
@@ -239,25 +240,32 @@ class _SearchViewState extends State<_SearchView> {
             return CustomScrollView(
               controller: _scrollController,
               slivers: [
+                // The same controls the category screen offers. §11.7 ANDs
+                // `q` with every filter, and `/categories/filters` accepts
+                // `q` too — so a search has a real rail of its own, computed
+                // over the matched set rather than a category's.
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 8.h),
                   sliver: SliverToBoxAdapter(
-                    child: Text(
-                      context
-                          .tr('catalog_result_count')
-                          .replaceAll('{count}', '${state.total}'),
-                      style: context.textStyles.xsMedium,
+                    child: ProductFilterBar(
+                      state: state,
+                      onFilters: () => openProductFilters(context, state),
+                      onSort: () => openProductSort(context, state),
                     ),
                   ),
                 ),
+                if (state.query.hasFilters)
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
+                    sliver: SliverToBoxAdapter(
+                      child: AppliedFilterPills(state: state),
+                    ),
+                  ),
                 SliverPadding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12.w,
-                      mainAxisSpacing: 12.h,
-                      childAspectRatio: 0.68,
+                    gridDelegate: productGridDelegate(
+                      MediaQuery.sizeOf(context).width - 40.w,
                     ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final product = state.products[index];

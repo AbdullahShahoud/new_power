@@ -113,7 +113,11 @@ class _CatalogHomeViewState extends State<_CatalogHomeView> {
     CategoriesState state,
     EdgeInsets topInset,
   ) {
-    final gridPadding = topInset + EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h);
+    // `MainScreen` sets `extendBody: true`, so a tab's content runs *under*
+    // the floating bottom bar (64.h + its own bottom inset). Without this
+    // clearance the last row of categories sits behind it and reads as a
+    // screen that ends early. 100.h matches what the other tabs reserve.
+    final gridPadding = topInset + EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h);
 
     switch (state.status) {
       case CategoriesStatus.initial:
@@ -195,7 +199,8 @@ class _CatalogHomeViewState extends State<_CatalogHomeView> {
               ),
             ),
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
+              // Clears the floating bottom bar — see [gridPadding] above.
+              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 100.h),
               sliver: state.viewMode == CategoryViewMode.grid
                   ? SliverGrid(
                       gridDelegate:

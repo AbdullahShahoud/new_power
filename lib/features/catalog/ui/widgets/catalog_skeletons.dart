@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/helpers/spacing.dart';
 import '../../../../core/theming/app_radius.dart';
 import '../../../../core/widget/shimmer_skeleton.dart';
+import 'product_card.dart';
 
 /// Loading state for any catalogue grid. Mirrors the real card's proportions
 /// — square image, two text lines, a chip row — so the swap to content
@@ -23,12 +24,18 @@ class CatalogGridSkeleton extends StatelessWidget {
     return AppShimmer(
       child: GridView.builder(
         padding: padding,
+        // Both are required together: this is placed inside a
+        // `SliverToBoxAdapter`, which offers **unbounded** height. Without
+        // `shrinkWrap` the grid tries to fill infinity, the shimmer's filter
+        // never gets a size, and layout dies with "RenderBox was not laid
+        // out" — taking the whole sliver's geometry with it.
+        shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12.w,
-          mainAxisSpacing: 12.h,
-          childAspectRatio: 0.68,
+        // The real grid's geometry, not an approximation of it — a skeleton
+        // at a different cell height makes the whole page jump the moment
+        // content lands.
+        gridDelegate: productGridDelegate(
+          MediaQuery.sizeOf(context).width - 40.w,
         ),
         itemCount: itemCount,
         itemBuilder: (_, _) => Container(
@@ -58,6 +65,8 @@ class CatalogListSkeleton extends StatelessWidget {
     return AppShimmer(
       child: ListView.builder(
         padding: padding,
+        // Same unbounded-height reason as [CatalogGridSkeleton].
+        shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
         itemBuilder: (_, _) => Container(
@@ -68,6 +77,56 @@ class CatalogListSkeleton extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.card),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Loading state for a category screen's header — the breadcrumb trail and
+/// the horizontal subcategory strip.
+///
+/// Needed because those two come from `/categories/{idOrSlug}`, a *separate*
+/// request from `/products`: without it the top of the screen stays blank
+/// while the grid below already shimmers, and the header then pops in and
+/// shoves the grid down.
+class CategoryHeaderSkeleton extends StatelessWidget {
+  final bool showSubcategories;
+
+  const CategoryHeaderSkeleton({super.key, this.showSubcategories = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppShimmer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: SkeletonBox(width: 180.w, height: 12.h),
+          ),
+          if (showSubcategories) ...[
+            verticalSpace(16.h),
+            SizedBox(
+              height: 118.h,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 4,
+                separatorBuilder: (_, _) => horizontalSpace(10),
+                itemBuilder: (_, _) => SizedBox(
+                  width: 108.w,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
