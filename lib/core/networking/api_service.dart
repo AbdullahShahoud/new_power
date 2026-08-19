@@ -23,6 +23,7 @@ import '../../features/auth/data/models/user_response.dart';
 import '../../features/auth/data/models/verify_otp_request.dart';
 import '../../features/auth/data/models/verify_otp_response.dart';
 import '../../features/catalog/data/models/catalog_responses.dart';
+import '../../features/notifications/data/models/notification_responses.dart';
 import '../../features/projects/data/models/accounts_list_response.dart';
 import '../../features/projects/data/models/activities_list_response.dart';
 import '../../features/projects/data/models/activity_detail_response.dart';
@@ -491,4 +492,46 @@ abstract class ApiService {
 
   @GET(ApiConstants.productById)
   Future<ProductDetailResponse> getProduct(@Path('idOrSlug') String idOrSlug);
+
+  // ======================== Notifications ========================
+
+  @GET(ApiConstants.notifications)
+  Future<NotificationsListResponse> getNotifications({
+    @Query('page') int? page,
+    @Query('limit') int? limit,
+    @Query('type') String? type,
+    @Query('status') String? status,
+  });
+
+  @GET(ApiConstants.notificationUnreadCount)
+  Future<NotificationCountResponse> getUnreadCount();
+
+  @GET(ApiConstants.notificationPreferences)
+  Future<NotificationPreferencesResponse> getNotificationPreferences();
+
+  /// No body. `id` is a **cuid** taken as a raw string — no `ParseUUIDPipe`
+  /// exists on this route, so it must not be validated as a uuid.
+  @PATCH(ApiConstants.notificationRead)
+  Future<NotificationDetailResponse> markNotificationRead(
+    @Path('id') String id,
+  );
+
+  @PATCH(ApiConstants.notificationReadAll)
+  Future<NotificationCountResponse> markAllNotificationsRead();
+
+  /// Soft-delete. ⚠️ The response carries **no `data` key at all**, which is
+  /// why it maps to [NotificationActionResponse] rather than a data-bearing
+  /// envelope.
+  @DELETE(ApiConstants.notificationById)
+  Future<NotificationActionResponse> archiveNotification(
+    @Path('id') String id,
+  );
+
+  @PUT(ApiConstants.deviceFcmToken)
+  Future<FcmTokenResponse> registerFcmToken(
+    @Body() RegisterFcmTokenRequest request,
+  );
+
+  @DELETE(ApiConstants.deviceFcmToken)
+  Future<FcmTokenResponse> deleteFcmToken();
 }

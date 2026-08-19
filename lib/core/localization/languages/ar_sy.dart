@@ -610,10 +610,6 @@ final Map<String, String> arSY = {
   'decision_maker_history_empty_subtitle':
       'سيظهر هنا كل صانع قرار مرّ به هذا المشروع.',
 
-  'notifications_title': 'الإشعارات',
-  'notifications_empty_title': 'لا توجد إشعارات بعد',
-  'notifications_empty_subtitle':
-      'ستصلك هنا إشعارات حول التحديثات على مشاريعك وزياراتك.',
   'products_title': 'المنتجات',
   'products_empty_title': 'لا توجد منتجات بعد',
   'products_empty_subtitle':
@@ -955,7 +951,7 @@ final Map<String, String> arSY = {
   'catalog_filters_unavailable_only': 'غير المتوفر فقط',
   'catalog_filters_truncated':
       'تُعرض القيم الأكثر شيوعًا فقط. ابحث في الأعلى للوصول إلى غيرها.',
-  'catalog_filters_show_more': 'عرض {count} أخرى',
+  'catalog_filters_show_more': 'عرض المزيد',
   'catalog_filter_dropped': 'أحد الفلاتر لم يعد متاحًا وتمت إزالته.',
 
   // Sort
@@ -982,4 +978,78 @@ final Map<String, String> arSY = {
   'catalog_search_no_results_title': 'لا نتائج لـ «{term}»',
   'catalog_search_no_results_subtitle':
       'يشمل البحث الأسماء والأكواد والفئات فقط — لا جدول المواصفات. استخدم الفلاتر للبحث حسب المواصفات.',
+  // ========================== Notifications ==========================
+  'notifications_title': 'الإشعارات',
+  'notifications_filter_all': 'الكل',
+  'notifications_type_security': 'الأمان',
+  'notifications_type_system': 'النظام',
+  'notifications_type_other': 'أخرى',
+  'notifications_mark_all_read': 'تعليم الكل',
+  // بلا رقم عمدًا: العدد الذي يرجعه read-all يشمل الإشعارات المؤرشفة أيضًا،
+  // فقد يتجاوز ما رآه المستخدم فعلًا.
+  'notifications_all_read': 'تم تعليم الكل كمقروء',
+  'notifications_archived': 'تم حذف الإشعار',
+  'notifications_undo': 'تراجع',
+  'notifications_show_all': 'عرض الكل',
+  'notifications_empty_title': 'لا توجد إشعارات',
+  'notifications_empty_subtitle':
+      'ستصلك هنا تنبيهات الأمان وتحديثات حسابك.',
+  'notifications_empty_filtered_title': 'لا توجد إشعارات في هذا التصنيف',
+  'notifications_group_today': 'اليوم',
+  'notifications_group_yesterday': 'أمس',
+  'notifications_group_this_week': 'هذا الأسبوع',
+  'notifications_group_older': 'أقدم',
+  'notifications_semantics_unread': 'غير مقروء',
+  'notifications_semantics_badge': '{count} إشعارات غير مقروءة',
+
+  // نصوص الإشعارات. مفتاحها النوع الفرعي المشتقّ لا عنوان الخادم: العنوان
+  // قالب إنجليزي ثابت يتغيّر كلما عدّل الباك إند نصًا، والمطابقة عليه تنكسر
+  // بصمت. ولا توجد خانات أسماء — الـ API يرسل معرّفات uuid لا أسماء.
+  'notification_account_approved_title': 'تمت الموافقة على حسابك',
+  'notification_account_approved_body':
+      'أهلاً بك! وافق مديرك على حسابك، يمكنك تسجيل الدخول الآن.',
+  'notification_password_changed_title': 'تم تغيير كلمة المرور',
+  'notification_password_changed_body':
+      'تم تغيير كلمة مرور حسابك. إن لم تكن أنت، تواصل مع الدعم فوراً.',
+  'notification_password_reset_title': 'تم تغيير كلمة المرور',
+  'notification_password_reset_body':
+      'تمت إعادة تعيين كلمة مرورك بنجاح.',
+  'notification_admin_password_reset_title': 'تمت إعادة تعيين كلمة المرور',
+  'notification_admin_password_reset_body':
+      'أُعيد تعيين كلمة مرورك. راجع بريدك للحصول على كلمة مرور مؤقتة ثم غيّرها.',
+  'notification_two_factor_enabled_title': 'تم تفعيل التحقق بخطوتين',
+  'notification_two_factor_enabled_body':
+      'أصبح حسابك محمياً بالتحقق بخطوتين.',
+  'notification_account_suspended_title': 'تم تعليق الحساب',
+  'notification_account_suspended_body':
+      'تم تعليق حسابك. افتح التطبيق للتفاصيل أو تواصل مع مديرك.',
+  'notification_account_banned_title': 'تم تقييد الحساب نهائياً',
+  'notification_account_banned_body':
+      'تم تقييد حسابك بشكل دائم. تواصل مع الدعم.',
+  'notification_account_reactivated_title': 'تمت إعادة تفعيل الحساب',
+  'notification_account_reactivated_body': 'حسابك نشط مجدداً. أهلاً بعودتك!',
+  'notification_rep_pending_approval_title': 'مندوب جديد بانتظار الموافقة',
+  'notification_rep_pending_approval_body':
+      'سجّل مندوب باستخدام رمزك وينتظر موافقتك.',
+  // لا يُعرض أبدًا — البث الإداري يظهر بنص الخادم كما هو.
+  'notification_broadcast_title': '',
+  'notification_broadcast_body': '',
+  'notification_meta_logged_out_others':
+      'تم تسجيل الخروج من أجهزتك الأخرى',
+
+  // الوقت النسبي. العربية تحتاج أربع صيغ نحوية لكل وحدة: مفرد ومثنى وجمع
+  // قلة (٣-١٠) وجمع كثرة (١١+). صيغة واحدة تكون خاطئة في أغلب الأعداد.
+  'time_just_now': 'الآن',
+  'time_minute_one': 'منذ دقيقة',
+  'time_minute_two': 'منذ دقيقتين',
+  'time_minute_few': 'منذ {count} دقائق',
+  'time_minute_many': 'منذ {count} دقيقة',
+  'time_hour_one': 'منذ ساعة',
+  'time_hour_two': 'منذ ساعتين',
+  'time_hour_few': 'منذ {count} ساعات',
+  'time_hour_many': 'منذ {count} ساعة',
+  'time_day_one': 'أمس',
+  'time_day_two': 'منذ يومين',
+  'time_day_few': 'منذ {count} أيام',
+  'time_day_many': 'منذ {count} يوماً',
 };

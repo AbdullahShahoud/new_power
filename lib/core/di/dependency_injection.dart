@@ -6,6 +6,8 @@ import '../../features/catalog/logic/categories_bloc/categories_bloc.dart';
 import '../../features/catalog/logic/product_detail_bloc/product_detail_bloc.dart';
 import '../../features/catalog/logic/products_bloc/products_bloc.dart';
 import '../../features/catalog/logic/search_bloc/search_bloc.dart';
+import '../../features/notifications/data/repo/notifications_repository.dart';
+import '../../features/notifications/logic/badge_cubit/unread_badge_cubit.dart';
 import '../../features/auth/logic/email_verification_cubit/email_verification_cubit.dart';
 import '../../features/auth/logic/forgot_password_cubit/forgot_password_cubit.dart';
 import '../../features/auth/logic/login_cubit/login_cubit.dart';
@@ -164,6 +166,21 @@ Future<void> setupGetIt() async {
   );
   getIt.registerFactory<SearchBloc>(
     () => SearchBloc(getIt<CatalogRepository>()),
+  );
+
+  // ========================== Notifications ==============================
+  // notifications-mobile-integration.md. `UnreadBadgeCubit` is a **lazy
+  // singleton** on purpose: the badge appears in more than one place and
+  // both must read one state object, or the bell and the inbox drift apart
+  // and each spends a request answering the same question.
+  //
+  // `InboxBloc` stays per-screen (constructed at the BlocProvider) so its
+  // pending-archive timers die with the screen.
+  getIt.registerLazySingleton<NotificationsRepository>(
+    () => NotificationsRepository(getIt<ApiService>()),
+  );
+  getIt.registerLazySingleton<UnreadBadgeCubit>(
+    () => UnreadBadgeCubit(getIt<NotificationsRepository>()),
   );
 
   // ========================== User self-service ==========================

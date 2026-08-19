@@ -632,10 +632,6 @@ final Map<String, String> enUS = {
   'decision_maker_history_empty_subtitle':
       'Every decision maker this project has had will show up here.',
 
-  'notifications_title': 'Notifications',
-  'notifications_empty_title': 'No notifications yet',
-  'notifications_empty_subtitle':
-      'You\'ll be notified here about updates on your projects and visits.',
   'products_title': 'Products',
   'products_empty_title': 'No products yet',
   'products_empty_subtitle':
@@ -957,7 +953,7 @@ final Map<String, String> enUS = {
   'catalog_filters_unavailable_only': 'Unavailable only',
   'catalog_filters_truncated':
       'Only the most common values are listed. Search above to find others.',
-  'catalog_filters_show_more': 'Show {count} more',
+  'catalog_filters_show_more': 'Show more',
   'catalog_filter_dropped':
       'A filter is no longer available and was removed.',
 
@@ -986,4 +982,82 @@ final Map<String, String> enUS = {
   'catalog_search_no_results_title': 'No results for “{term}”',
   'catalog_search_no_results_subtitle':
       'Search covers names, codes and categories only — not the specification sheet. Use the filters to search by specification.',
+  // ========================== Notifications ==========================
+  'notifications_title': 'Notifications',
+  'notifications_filter_all': 'All',
+  'notifications_type_security': 'Security',
+  'notifications_type_system': 'System',
+  'notifications_type_other': 'Other',
+  'notifications_mark_all_read': 'Mark all read',
+  // Deliberately carries no number: `read-all` returns a count that also
+  // includes archived rows, so it can exceed what the user ever saw.
+  'notifications_all_read': 'All marked as read',
+  'notifications_archived': 'Notification deleted',
+  'notifications_undo': 'Undo',
+  'notifications_show_all': 'Show all',
+  'notifications_empty_title': 'No notifications',
+  'notifications_empty_subtitle':
+      'Security alerts and account updates will arrive here.',
+  'notifications_empty_filtered_title': 'Nothing in this category',
+  'notifications_group_today': 'Today',
+  'notifications_group_yesterday': 'Yesterday',
+  'notifications_group_this_week': 'This week',
+  'notifications_group_older': 'Earlier',
+  'notifications_semantics_unread': 'Unread',
+  'notifications_semantics_badge': '{count} unread notifications',
+
+  // Notification bodies. Keyed on the derived sub-type rather than the
+  // server's title: the title is a hard-coded English template that changes
+  // whenever the backend edits a string, and matching on it breaks silently.
+  // No name slots — the API sends raw uuids, never names.
+  'notification_account_approved_title': 'Your account has been approved',
+  'notification_account_approved_body':
+      'Welcome aboard! Your manager approved your account — you can sign in now.',
+  'notification_password_changed_title': 'Password changed',
+  'notification_password_changed_body':
+      'Your account password was changed. If this wasn\'t you, contact support immediately.',
+  'notification_password_reset_title': 'Password changed',
+  'notification_password_reset_body':
+      'Your password was reset successfully.',
+  'notification_admin_password_reset_title': 'Password reset',
+  'notification_admin_password_reset_body':
+      'Your password was reset. Check your email for a temporary password, then change it.',
+  'notification_two_factor_enabled_title':
+      'Two-factor authentication enabled',
+  'notification_two_factor_enabled_body':
+      'Your account is now protected by two-factor authentication.',
+  'notification_account_suspended_title': 'Account suspended',
+  'notification_account_suspended_body':
+      'Your account has been suspended. Open the app for details or contact your manager.',
+  'notification_account_banned_title': 'Account permanently restricted',
+  'notification_account_banned_body':
+      'Your account has been permanently restricted. Contact support.',
+  'notification_account_reactivated_title': 'Account reactivated',
+  'notification_account_reactivated_body':
+      'Your account is active again. Welcome back!',
+  'notification_rep_pending_approval_title':
+      'New representative awaiting approval',
+  'notification_rep_pending_approval_body':
+      'A representative registered with your code and is waiting for your approval.',
+  // Never rendered — a broadcast shows the server's own text verbatim.
+  'notification_broadcast_title': '',
+  'notification_broadcast_body': '',
+  'notification_meta_logged_out_others':
+      'You were signed out of your other devices',
+
+  // Relative time. Arabic needs four grammatical buckets per unit; English
+  // maps two of them onto the same string.
+  'time_just_now': 'Just now',
+  'time_minute_one': 'A minute ago',
+  'time_minute_two': '{count} minutes ago',
+  'time_minute_few': '{count} minutes ago',
+  'time_minute_many': '{count} minutes ago',
+  'time_hour_one': 'An hour ago',
+  'time_hour_two': '{count} hours ago',
+  'time_hour_few': '{count} hours ago',
+  'time_hour_many': '{count} hours ago',
+  'time_day_one': 'Yesterday',
+  'time_day_two': '{count} days ago',
+  'time_day_few': '{count} days ago',
+  'time_day_many': '{count} days ago',
 };

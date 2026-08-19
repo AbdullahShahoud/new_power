@@ -7,7 +7,7 @@ import '../../features/auth/ui/screens/login_screen.dart';
 import '../../features/auth/ui/screens/register_screen.dart';
 import '../../features/auth/ui/screens/reset_password_screen.dart';
 import '../../features/home/ui/main_screen.dart';
-import '../../features/home/ui/screens/notifications_screen.dart';
+import '../../features/notifications/ui/screens/notifications_screen.dart';
 import '../../features/onboarding/ui/onboarding_screen.dart';
 import '../../features/projects/data/models/enums.dart';
 import '../../features/projects/data/models/project_detail_view.dart';

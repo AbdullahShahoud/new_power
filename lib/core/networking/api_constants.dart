@@ -132,4 +132,21 @@ class ApiConstants {
   static const String productSuggest = "/products/suggest";
 
   static const String productById = "/products/{idOrSlug}";
+
+  // ======================== Notifications ========================
+  // notifications-mobile-integration.md §2.1. The controller carries no
+  // @MinRole and no @Roles, and RolesGuard lets every authenticated role
+  // through when there is no role metadata — so all of these are open to
+  // a representative.
+  static const String notifications = "/notifications";
+  static const String notificationUnreadCount =
+      "/notifications/unread-count";
+  static const String notificationPreferences = "/notifications/preferences";
+  static const String notificationRead = "/notifications/{id}/read";
+  static const String notificationReadAll = "/notifications/read-all";
+  static const String notificationById = "/notifications/{id}";
+
+  /// ⚠️ **Singular** — the controller is @Controller('device'), not
+  /// 'devices'.
+  static const String deviceFcmToken = "/device/fcm-token";
 }
