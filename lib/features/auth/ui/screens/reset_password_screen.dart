@@ -270,9 +270,6 @@ class _ResetPasswordBodyState extends State<_ResetPasswordBody> {
         newPassword: _passwordController.text,
         email: widget.email,
       );
-      _otpController.clear();
-      _passwordController.clear();
-      _confirmPasswordController.clear();
     }
   }
 }

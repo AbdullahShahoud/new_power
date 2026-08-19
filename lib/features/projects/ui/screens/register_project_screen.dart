@@ -24,6 +24,9 @@ import '../../data/models/enums.dart';
 import '../../data/models/location_dto.dart';
 import '../../data/models/nearby_project_card_view.dart';
 import '../../data/models/register_project_request.dart';
+import '../../data/models/register_project_result.dart';
+import '../../data/repo/projects_repository.dart';
+import '../../../../core/networking/api_result.dart';
 import '../../data/models/stored_file.dart';
 import '../../logic/file_upload_bloc/file_upload_bloc.dart';
 import '../../logic/file_upload_bloc/file_upload_event.dart';
@@ -103,10 +106,7 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
   Future<void> _pickLocation() async {
     final result = await context.pushNamed(
       Routes.mapPickerScreen,
-      arguments: {
-        'initialLatitude': _latitude,
-        'initialLongitude': _longitude,
-      },
+      arguments: {'initialLatitude': _latitude, 'initialLongitude': _longitude},
     );
     if (result == null || !mounted) return;
     final picked = result as ({double lat, double lng});
@@ -248,6 +248,33 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  /// `GET /projects/nearby` around the building just registered.
+  ///
+  /// 300 m: far enough to catch the rest of a street, inside the endpoint's
+  /// 1–1200 m bound, and tight enough that a dense city block doesn't return
+  /// a list nobody reads.
+  ///
+  /// The new project is filtered out — it is trivially "near itself", and
+  /// showing it back as a possible duplicate of itself would be nonsense.
+  /// A failure here is swallowed: this is an extra courtesy after a
+  /// registration that already succeeded, and an error toast would read as
+  /// though the registration went wrong.
+  Future<List<NearbyProjectCardView>> _fetchNearby(
+    RegisteredProjectView project,
+  ) async {
+    final result = await getIt<ProjectsRepository>().nearby(
+      lat: project.latitude,
+      lng: project.longitude,
+      radiusM: 300,
+    );
+    if (result is! Success<List<NearbyProjectCardView>>) {
+      return const <NearbyProjectCardView>[];
+    }
+    return result.data
+        .where((candidate) => candidate.projectId != project.id)
+        .toList();
+  }
+
   Future<void> _showDuplicateCandidates(
     List<NearbyProjectCardView> candidates,
   ) async {
@@ -333,8 +360,17 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
           case ProjectMutationStatus.success:
             final result = state.lastRegistrationResult;
             if (result == null) return;
-            if (result.nearbyProjects.isNotEmpty) {
-              await _showDuplicateCandidates(result.nearbyProjects);
+            // `POST /projects` only returns `nearbyProjects` when the server
+            // itself judged something a possible duplicate, which is a
+            // narrow radius and often empty. When it is, ask
+            // `GET /projects/nearby` what is actually around the pin — the
+            // rep still wants to know whose buildings they are standing
+            // next to, and that endpoint crosses ownership on purpose (§5).
+            final candidates = result.nearbyProjects.isNotEmpty
+                ? result.nearbyProjects
+                : await _fetchNearby(result.project);
+            if (candidates.isNotEmpty) {
+              await _showDuplicateCandidates(candidates);
             }
             if (!context.mounted) return;
             context.pushReplacementNamed(
@@ -345,9 +381,10 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
             AppDialog.show<void>(
               context: context,
               title: context.tr('projects_register_territory_rejected_title'),
-              message:
-                  state.mutationErrorMessage ??
-                  context.tr('projects_register_territory_rejected_message'),
+              message: _territoryRejectedMessage(
+                context,
+                state.mutationErrorMessage,
+              ),
               actions: [
                 AppDialogButton.primary(
                   label: context.tr('confirm'),
@@ -466,29 +503,6 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
                           ),
                           verticalSpace(16.h),
                           _SectionLabel(
-                            context.tr('projects_register_address'),
-                            optional: true,
-                          ),
-                          AppTextField(
-                            hintText: context.tr(
-                              'projects_register_address_hint',
-                            ),
-                            controller: _addressController,
-                          ),
-                          verticalSpace(16.h),
-                          _SectionLabel(
-                            context.tr('projects_register_unit_count'),
-                            optional: true,
-                          ),
-                          AppTextField(
-                            hintText: context.tr(
-                              'projects_register_unit_count_hint',
-                            ),
-                            controller: _unitCountController,
-                            keyboardType: TextInputType.number,
-                          ),
-                          verticalSpace(16.h),
-                          _SectionLabel(
                             context.tr('projects_register_estimated_value'),
                           ),
                           AppTextField(
@@ -520,6 +534,32 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
                               return null;
                             },
                           ),
+
+                          verticalSpace(16.h),
+                          _SectionLabel(
+                            context.tr('projects_register_address'),
+                            optional: true,
+                          ),
+                          AppTextField(
+                            hintText: context.tr(
+                              'projects_register_address_hint',
+                            ),
+                            controller: _addressController,
+                          ),
+
+                          verticalSpace(16.h),
+                          _SectionLabel(
+                            context.tr('projects_register_unit_count'),
+                            optional: true,
+                          ),
+                          AppTextField(
+                            hintText: context.tr(
+                              'projects_register_unit_count_hint',
+                            ),
+                            controller: _unitCountController,
+                            keyboardType: TextInputType.number,
+                          ),
+
                           verticalSpace(16.h),
                           _SectionLabel(
                             context.tr('projects_register_notes'),
@@ -556,6 +596,40 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
       ),
     );
   }
+}
+
+/// Turns `PROJECT_OUTSIDE_OWN_TERRITORY`'s server message into something a
+/// rep can actually read.
+///
+/// The server sends an **English template with the territory name spliced
+/// in** — "This location is in دمشق, which is not one of your territories".
+/// Shown verbatim to an Arabic user that is a half-English sentence which
+/// states the refusal but not what to do about it.
+///
+/// The territory name is the one genuinely useful part, and the message is
+/// the only place it appears — no field on the error carries it — so it is
+/// lifted out and dropped into a localized sentence that also names the way
+/// forward. Everything else about the server string is discarded.
+///
+/// Parsing a server message is normally a mistake, so this is deliberately
+/// fail-soft: any drift in the backend wording falls through to the generic
+/// copy rather than showing a mangled sentence or an empty dialog.
+String _territoryRejectedMessage(BuildContext context, String? serverMessage) {
+  final fallback = context.tr('projects_register_territory_rejected_message');
+  if (serverMessage == null) return fallback;
+
+  final match = RegExp(
+    r'this location is in\s+(.+?)\s*,\s*which is not one of your territories',
+    caseSensitive: false,
+    dotAll: true,
+  ).firstMatch(serverMessage);
+
+  final territory = match?.group(1)?.trim();
+  if (territory == null || territory.isEmpty) return fallback;
+
+  return context
+      .tr('projects_register_territory_rejected_named')
+      .replaceAll('{territory}', territory);
 }
 
 class _SectionLabel extends StatelessWidget {
