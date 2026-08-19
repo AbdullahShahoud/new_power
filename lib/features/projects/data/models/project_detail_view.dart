@@ -124,3 +124,24 @@ abstract class ProjectDetailView with _$ProjectDetailView {
   factory ProjectDetailView.fromJson(Map<String, dynamic> json) =>
       _$ProjectDetailViewFromJson(json);
 }
+
+extension ProjectDetailViewX on ProjectDetailView {
+  /// The project is settled and must be **read-only**.
+  ///
+  /// `stage` is the field that carries this, not `status` — §1431/§1558:
+  /// `POST /outcomes/{id}/confirm` marks the outcome `CONFIRMED` **and**
+  /// moves the project to `WON` / `LOST` in the same transaction, stamping
+  /// `source: "OUTCOME_CONFIRMED"` on the stage-history entry. So a WON/LOST
+  /// stage can only have been reached by a manager approving an outcome —
+  /// there is no other path to it, and the stage picker deliberately
+  /// excludes both values.
+  ///
+  /// `LOST` is treated the same as `WON`: it is reached by the identical
+  /// confirmation route and is equally final, so letting a rep keep editing
+  /// a lost project would just be the same hole on the other side.
+  ///
+  /// (`closedAt` is set alongside it and would work as a signal too, but the
+  /// stage is what every other branch on this screen already reads.)
+  bool get isClosed =>
+      stage == ProjectStage.won || stage == ProjectStage.lost;
+}

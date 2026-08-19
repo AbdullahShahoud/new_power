@@ -46,6 +46,23 @@ class _ProjectsListView extends StatefulWidget {
 }
 
 class _ProjectsListViewState extends State<_ProjectsListView> {
+  /// Fires the refresh and waits for it to settle so the spinner retracts at
+  /// the right moment.
+  ///
+  /// The timeout is the load-bearing part. `firstWhere` waits for a *new*
+  /// state, and Bloc silently drops an `emit` whose state equals the current
+  /// one — so a refresh that returns byte-identical data (the common case
+  /// when a rep pulls twice in a row) emits nothing, and the await never
+  /// completes. The spinner then hangs on screen forever, which reads as
+  /// "refresh is broken" even though the request succeeded.
+  Future<void> _refreshList(BuildContext context) async {
+    final bloc = context.read<ProjectsBloc>();
+    bloc.add(const ProjectsEvent.listRefreshed());
+    await bloc.stream
+        .firstWhere((s) => s.listStatus != PagedFeedStatus.refreshing)
+        .timeout(const Duration(seconds: 15), onTimeout: () => bloc.state);
+  }
+
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
 
@@ -87,19 +104,29 @@ class _ProjectsListViewState extends State<_ProjectsListView> {
       // RTL — Flutter mirrors it from the ambient Directionality, so the
       // button lands on the natural "primary action" side in both locales
       // without a manual locale check.
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: 76.h),
+        padding: EdgeInsets.only(bottom: 80.h),
         child: FloatingActionButton.extended(
-          onPressed: () => context.pushNamed(Routes.registerProjectScreen),
+          // Awaited, then refreshed: registration pushes straight on to the
+          // new project's detail screen, so this future only completes once
+          // the rep pops all the way back here — at which point the list is
+          // stale and missing the building they just registered.
+          onPressed: () async {
+            await context.pushNamed(Routes.registerProjectScreen);
+            if (!context.mounted) return;
+            context.read<ProjectsBloc>().add(
+              const ProjectsEvent.listRefreshed(),
+            );
+          },
           backgroundColor: colors.brand500,
           foregroundColor: colors.white,
           shape: const StadiumBorder(),
           // Trimmed down from the default extended-FAB metrics: the stock
           // 48dp height and 20px padding read oversized next to this app's
           // `sm` button scale (h-8/h-10).
-          extendedPadding: EdgeInsets.symmetric(horizontal: 14.w),
-          extendedIconLabelSpacing: 6.w,
+          extendedPadding: EdgeInsets.symmetric(horizontal: 10.w),
+          extendedIconLabelSpacing: 4.w,
           elevation: 2,
           icon: Icon(Icons.add, size: 18.sp),
           label: Text(
@@ -141,25 +168,26 @@ class _ProjectsListViewState extends State<_ProjectsListView> {
                   return switch (state.listStatus) {
                     PagedFeedStatus.initial ||
                     PagedFeedStatus.loading => const _ProjectsListSkeleton(),
-                    PagedFeedStatus.networkError => _ListError(
-                      message: state.listErrorMessage,
+                    // Both of these used to render a bare, unscrollable
+                    // widget — so on exactly the two screens where a rep
+                    // most wants to pull down (nothing here yet, or the
+                    // load failed) there was nothing to pull.
+                    PagedFeedStatus.networkError => _PullToRefresh(
+                      onRefresh: () => _refreshList(context),
+                      child: _ListError(message: state.listErrorMessage),
                     ),
-                    PagedFeedStatus.empty => EmptyState(
-                      icon: Icons.apartment_rounded,
-                      title: context.tr('projects_empty_title'),
-                      subtitle: context.tr('projects_empty_subtitle'),
+                    PagedFeedStatus.empty => _PullToRefresh(
+                      onRefresh: () => _refreshList(context),
+                      child: EmptyState(
+                        icon: Icons.apartment_rounded,
+                        title: context.tr('projects_empty_title'),
+                        subtitle: context.tr('projects_empty_subtitle'),
+                      ),
                     ),
                     PagedFeedStatus.loaded ||
                     PagedFeedStatus.paginationLoading ||
                     PagedFeedStatus.refreshing => RefreshIndicator(
-                      onRefresh: () async {
-                        context.read<ProjectsBloc>().add(
-                          const ProjectsEvent.listRefreshed(),
-                        );
-                        await context.read<ProjectsBloc>().stream.firstWhere(
-                          (s) => s.listStatus != PagedFeedStatus.refreshing,
-                        );
-                      },
+                      onRefresh: () => _refreshList(context),
                       child: ListView.builder(
                         controller: _scrollController,
                         // `RefreshIndicator` needs a scrollable that can
@@ -380,6 +408,35 @@ class _ProjectsListSkeleton extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Makes a non-scrolling widget (an empty state, an error panel) pullable.
+///
+/// A `RefreshIndicator` only responds to overscroll from a real scrollable,
+/// so a centred `EmptyState` on its own cannot be pulled at all. Wrapping it
+/// in a viewport-filling scroll view with `AlwaysScrollableScrollPhysics`
+/// gives it something to overscroll while keeping it vertically centred.
+class _PullToRefresh extends StatelessWidget {
+  final Future<void> Function() onRefresh;
+  final Widget child;
+
+  const _PullToRefresh({required this.onRefresh, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(child: child),
+          ),
+        ),
       ),
     );
   }

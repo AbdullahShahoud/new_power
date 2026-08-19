@@ -3,6 +3,7 @@ import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
 import 'enums.dart';
 import 'project_image_view.dart';
+import 'stored_file.dart';
 
 part 'project_view.freezed.dart';
 part 'project_view.g.dart';
@@ -89,16 +90,41 @@ abstract class ProjectSummaryView with _$ProjectSummaryView {
     required int stakeholderCount,
     double? distanceM,
 
-    /// §5 `GET /projects` documents list rows as carrying `imageCount` but
-    /// **no `images` array** ("fetch one project to get photos"). Modeled
-    /// as optional-with-empty-default anyway: if the backend does include
-    /// it, the list card shows a real thumbnail for free; if it doesn't,
-    /// this stays empty and the card falls back to a placeholder. The
-    /// alternative — one `GET /projects/{id}` per visible row just for a
-    /// thumbnail — is an N+1 the doc is explicitly steering away from.
+    /// The list row's thumbnail. Added server-side after the reference doc
+    /// was written — §5 still describes list rows as carrying `imageCount`
+    /// but no photo, which is why the client used to fall back to a
+    /// placeholder here.
+    ///
+    /// `url` is a **signed, expiring** Cloudinary link (`urlExpiresAt`), not
+    /// a stable one — so it is fine to render immediately but must never be
+    /// cached past that timestamp or persisted as if permanent.
+    StoredFileView? coverImage,
+
+    /// Kept as a fallback for the same reason it was added: the list
+    /// endpoint is not documented to return photos at all, so neither shape
+    /// is guaranteed. [ProjectSummaryViewX.thumbnailUrl] prefers
+    /// [coverImage] and falls back to this.
     @Default(<ProjectImageView>[]) List<ProjectImageView> images,
   }) = _ProjectSummaryView;
 
   factory ProjectSummaryView.fromJson(Map<String, dynamic> json) =>
       _$ProjectSummaryViewFromJson(json);
+}
+
+extension ProjectSummaryViewX on ProjectSummaryView {
+  /// The best photo URL this row can offer, or `null` for the placeholder.
+  ///
+  /// Prefers `coverImage` (what the server actually sends today) and falls
+  /// back to the first entry of `images`. An unsigned photo is skipped
+  /// rather than rendered: it stays in the array with `url: null` while it
+  /// is still being processed.
+  String? get thumbnailUrl {
+    final cover = coverImage?.url;
+    if (cover != null && cover.isNotEmpty) return cover;
+    for (final image in images) {
+      final url = image.url;
+      if (url != null && url.isNotEmpty) return url;
+    }
+    return null;
+  }
 }

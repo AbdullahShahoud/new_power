@@ -208,6 +208,9 @@ _ProjectSummaryView _$ProjectSummaryViewFromJson(
   activityCount: (json['activityCount'] as num).toInt(),
   stakeholderCount: (json['stakeholderCount'] as num).toInt(),
   distanceM: (json['distanceM'] as num?)?.toDouble(),
+  coverImage: json['coverImage'] == null
+      ? null
+      : StoredFileView.fromJson(json['coverImage'] as Map<String, dynamic>),
   images:
       (json['images'] as List<dynamic>?)
           ?.map((e) => ProjectImageView.fromJson(e as Map<String, dynamic>))
@@ -259,5 +262,6 @@ Map<String, dynamic> _$ProjectSummaryViewToJson(
   'activityCount': instance.activityCount,
   'stakeholderCount': instance.stakeholderCount,
   'distanceM': instance.distanceM,
+  'coverImage': instance.coverImage,
   'images': instance.images,
 };

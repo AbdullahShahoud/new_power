@@ -301,6 +301,13 @@ class _ProjectDetailBody extends StatelessWidget {
                 ProjectSummaryCard(project: project),
                 verticalSpace(12.h),
 
+                // Says once, at the top, what every hidden control below
+                // would otherwise have to explain on tap.
+                if (project.isClosed) ...[
+                  _ClosedBanner(stage: project.stage),
+                  verticalSpace(12.h),
+                ],
+
                 ExpandableSection(
                   icon: Icons.info_outline_rounded,
                   title: context.tr('projects_detail_section_basic'),
@@ -319,6 +326,7 @@ class _ProjectDetailBody extends StatelessWidget {
                     projectId: project.id,
                     stakeholders: project.stakeholders,
                     decisionMaker: project.decisionMaker,
+                    isClosed: project.isClosed,
                   ),
                 ),
                 verticalSpace(12.h),
@@ -331,6 +339,7 @@ class _ProjectDetailBody extends StatelessWidget {
                     projectId: project.id,
                     activities: project.activities,
                     stakeholders: project.stakeholders,
+                    isClosed: project.isClosed,
                   ),
                 ),
                 verticalSpace(12.h),
@@ -361,6 +370,7 @@ class _ProjectDetailBody extends StatelessWidget {
                     projectId: project.id,
                     images: project.images,
                     imageCount: project.imageCount,
+                    isClosed: project.isClosed,
                   ),
                 ),
                 verticalSpace(12.h),
@@ -409,10 +419,15 @@ class _GallerySection extends StatelessWidget {
   final List<dynamic> images; // ProjectImageView
   final int imageCount;
 
+  /// Settled project: photos stay viewable but can no longer be added or
+  /// removed — they are part of the record the outcome was approved on.
+  final bool isClosed;
+
   const _GallerySection({
     required this.projectId,
     required this.images,
     required this.imageCount,
+    required this.isClosed,
   });
 
   Future<void> _addPhotos(BuildContext context) async {
@@ -489,7 +504,7 @@ class _GallerySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final canDelete = imageCount > 1;
+    final canDelete = imageCount > 1 && !isClosed;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -551,7 +566,7 @@ class _GallerySection extends StatelessWidget {
                     ],
                   ),
                 ),
-              if (imageCount < 10)
+              if (imageCount < 10 && !isClosed)
                 PressableScale(
                   onTap: () => _addPhotos(context),
                   child: Container(
@@ -603,45 +618,49 @@ class _CardSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Spacer(),
-            PressableScale(
-              onTap: () => _openEdit(context),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10.w,
-                  vertical: 5.h,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.brand50,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.edit_outlined,
-                      size: 14.sp,
-                      color: colors.brand600,
-                    ),
-                    horizontalSpace(4),
-                    Text(
-                      context.tr('edit_project_cta'),
-                      style: context.textStyles.xsSemibold.copyWith(
-                        color: colors.brand600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        verticalSpace(10.h),
+        // The edit button rides on the first field's row rather than sitting
+        // alone above it — on its own line it had nothing opposite it and
+        // read as a stray control.
+        //
+        // Hidden outright once the project is closed: a confirmed outcome
+        // moves the stage to WON/LOST in the same transaction as the
+        // manager's approval, and the record is then history. See
+        // [ProjectDetailViewX.isClosed].
         _InfoRow(
           label: context.tr('projects_register_building_type'),
           value: context.tr(project.buildingType.labelKey),
+          trailing: project.isClosed
+              ? null
+              : PressableScale(
+                  onTap: () => _openEdit(context),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 5.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.brand50,
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.edit_outlined,
+                          size: 14.sp,
+                          color: colors.brand600,
+                        ),
+                        horizontalSpace(4),
+                        Text(
+                          context.tr('edit_project_cta'),
+                          style: context.textStyles.xsSemibold.copyWith(
+                            color: colors.brand600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         ),
         _InfoRow(
           label: context.tr('projects_register_construction_phase'),
@@ -684,19 +703,35 @@ class _CardSection extends StatelessWidget {
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
-  const _InfoRow({required this.label, required this.value});
+
+  /// Optional action pinned to the row's trailing edge, so a control can sit
+  /// opposite a field instead of alone on a line of its own.
+  final Widget? trailing;
+
+  const _InfoRow({required this.label, required this.value, this.trailing});
 
   @override
   Widget build(BuildContext context) {
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: context.textStyles.xsMedium),
+        Text(value, style: context.textStyles.smMedium),
+      ],
+    );
+
     return Padding(
       padding: EdgeInsets.only(bottom: 10.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: context.textStyles.xsMedium),
-          Text(value, style: context.textStyles.smMedium),
-        ],
-      ),
+      child: trailing == null
+          ? content
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: content),
+                horizontalSpace(10),
+                trailing!,
+              ],
+            ),
     );
   }
 }
@@ -707,8 +742,7 @@ class _StageControl extends StatelessWidget {
   final ProjectDetailView project;
   const _StageControl({required this.project});
 
-  bool get _isTerminal =>
-      project.stage == ProjectStage.won || project.stage == ProjectStage.lost;
+  bool get _isTerminal => project.isClosed;
 
   @override
   Widget build(BuildContext context) {
@@ -753,37 +787,24 @@ class _OutcomeSection extends StatelessWidget {
   final String projectId;
   const _OutcomeSection({required this.projectId});
 
-  void _open(BuildContext context, OutcomeType type) {
+  /// No `initialType`: the submit screen defaults to `lost` and lets the rep
+  /// choose, rather than this button deciding for them.
+  void _open(BuildContext context) {
     context.pushNamed(
       Routes.submitOutcomeScreen,
-      arguments: {'projectId': projectId, 'initialType': type},
+      arguments: {'projectId': projectId},
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: AppButton(
-                text: context.tr('projects_detail_mark_as_won'),
-                onPressed: () => _open(context, OutcomeType.won),
-              ),
-            ),
-            horizontalSpace(10),
-            Expanded(
-              child: AppButton(
-                text: context.tr('projects_detail_mark_as_lost'),
-                variant: AppButtonVariant.secondary,
-                onPressed: () => _open(context, OutcomeType.lost),
-              ),
-            ),
-          ],
-        ),
-      ],
+    // One button, not two. The submit screen already carries its own
+    // won/lost selector, so a pair here only asked the same question twice —
+    // and pre-answering it makes the rep more likely to submit the outcome
+    // they clicked rather than the one that happened.
+    return AppButton(
+      text: context.tr('projects_detail_submit_outcome'),
+      onPressed: () => _open(context),
     );
   }
 }
@@ -855,7 +876,15 @@ class _StatusControl extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionTitle(context.tr('projects_detail_status')),
-        switch (project.status) {
+        // Same lock as the stage picker above: once an outcome is confirmed
+        // the record is history, so the status buttons become a plain label.
+        if (project.isClosed)
+          Text(
+            context.tr(project.status.labelKey),
+            style: context.textStyles.smMedium,
+          )
+        else
+          switch (project.status) {
           ProjectStatus.active => Row(
             children: [
               Expanded(
@@ -918,10 +947,16 @@ class _ActivitiesSection extends StatelessWidget {
   final List<ActivityView> activities;
   final List<StakeholderRefView> stakeholders;
 
+  /// A confirmed WON/LOST outcome makes the project a closed record: the
+  /// feed stays readable — those visits genuinely happened and are what the
+  /// outcome was judged on — but nothing new can be logged against it.
+  final bool isClosed;
+
   const _ActivitiesSection({
     required this.projectId,
     required this.activities,
     required this.stakeholders,
+    required this.isClosed,
   });
 
   Future<void> _openLogActivity(BuildContext context) async {
@@ -976,35 +1011,44 @@ class _ActivitiesSection extends StatelessWidget {
       children: [
         // The section's own title now lives on the ExpandableSection header,
         // so this row keeps only its action, right-aligned.
-        Row(
-          children: [
-            const Spacer(),
-            PressableScale(
-              onTap: () => _openLogActivity(context),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  color: colors.brand50,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add, size: 14.sp, color: colors.brand600),
-                    horizontalSpace(4),
-                    Text(
-                      context.tr('projects_detail_log_activity'),
-                      style: context.textStyles.xsSemibold.copyWith(
-                        color: colors.brand600,
+        //
+        // Hidden rather than disabled on a closed project: a greyed button
+        // invites a tap and then explains itself, while the banner at the
+        // top of the screen has already said why nothing here is editable.
+        if (!isClosed) ...[
+          Row(
+            children: [
+              const Spacer(),
+              PressableScale(
+                onTap: () => _openLogActivity(context),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 5.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.brand50,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add, size: 14.sp, color: colors.brand600),
+                      horizontalSpace(4),
+                      Text(
+                        context.tr('projects_detail_log_activity'),
+                        style: context.textStyles.xsSemibold.copyWith(
+                          color: colors.brand600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        verticalSpace(4.h),
+            ],
+          ),
+          verticalSpace(4.h),
+        ],
         if (activities.isEmpty)
           _InlineEmptyHint(
             icon: Icons.event_note_outlined,
@@ -1015,6 +1059,7 @@ class _ActivitiesSection extends StatelessWidget {
             _ActivityTimelineTile(
               activity: activities[i],
               isLast: i == activities.length - 1,
+              isClosed: isClosed,
             ),
       ],
     );
@@ -1032,7 +1077,16 @@ class _ActivityTimelineTile extends StatelessWidget {
   final ActivityView activity;
   final bool isLast;
 
-  const _ActivityTimelineTile({required this.activity, required this.isLast});
+  /// Carried through to the detail screen, which hides its edit button on a
+  /// closed project. The row itself stays tappable — reading an entry is
+  /// exactly what a closed project is still for.
+  final bool isClosed;
+
+  const _ActivityTimelineTile({
+    required this.activity,
+    required this.isLast,
+    required this.isClosed,
+  });
 
   String _formatOccurredAt(DateTime value) {
     final local = value.toLocal();
@@ -1052,7 +1106,7 @@ class _ActivityTimelineTile extends StatelessWidget {
     return PressableScale(
       onTap: () => context.pushNamed(
         Routes.activityDetailScreen,
-        arguments: {'activityId': activity.id},
+        arguments: {'activityId': activity.id, 'projectClosed': isClosed},
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -1174,10 +1228,17 @@ class _StakeholdersSection extends StatefulWidget {
   final List<StakeholderRefView> stakeholders;
   final DecisionMakerRefView? decisionMaker;
 
+  /// A confirmed WON/LOST outcome freezes the roster. Who was involved and
+  /// who decided is part of the record the outcome was judged on, so it
+  /// stays fully readable — but nobody can be added, replaced, unlinked, or
+  /// promoted to decision maker after the fact.
+  final bool isClosed;
+
   const _StakeholdersSection({
     required this.projectId,
     required this.stakeholders,
     required this.decisionMaker,
+    required this.isClosed,
   });
 
   @override
@@ -1529,6 +1590,7 @@ class _StakeholdersSectionState extends State<_StakeholdersSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Title lives on the ExpandableSection header now.
+            if (!widget.isClosed)
             Row(
               children: [
                 const Spacer(),
@@ -1573,7 +1635,12 @@ class _StakeholdersSectionState extends State<_StakeholdersSection> {
             else
               for (final stakeholder in widget.stakeholders)
                 PressableScale(
-                  onTap: () => _openLinkActions(stakeholder),
+                  // The actions sheet is edit/replace/unlink plus "view
+                  // contacts", so on a closed project it is suppressed
+                  // whole — the roster below still reads normally.
+                  onTap: widget.isClosed
+                      ? null
+                      : () => _openLinkActions(stakeholder),
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 8.h),
                     child: Row(
@@ -1655,6 +1722,7 @@ class _StakeholdersSectionState extends State<_StakeholdersSection> {
                 ),
               ),
             verticalSpace(8.h),
+            if (!widget.isClosed)
             Row(
               children: [
                 Expanded(
@@ -1845,6 +1913,66 @@ class _ProjectDetailSkeleton extends StatelessWidget {
           card(120.h),
           card(140.h),
           card(180.h),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shown at the top of a project whose outcome a manager has confirmed.
+///
+/// The stage reaching `WON`/`LOST` is only ever the result of
+/// `POST /outcomes/{id}/confirm`, which moves the project in the same
+/// transaction — so this state means "a second person signed this off", not
+/// "the rep marked it done". That is why the record freezes rather than
+/// merely warning: it is now evidence, and the activities and stakeholders
+/// on it are what the decision was judged against.
+class _ClosedBanner extends StatelessWidget {
+  final ProjectStage stage;
+
+  const _ClosedBanner({required this.stage});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final won = stage == ProjectStage.won;
+    final status = won ? colors.statusWon : colors.statusLost;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: status.badgeBg,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: status.core.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.lock_outline_rounded, size: 18.sp, color: status.core),
+          horizontalSpace(10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context
+                      .tr('projects_detail_closed_title')
+                      .replaceAll('{outcome}', context.tr(stage.labelKey)),
+                  style: context.textStyles.smBold.copyWith(
+                    color: status.badgeText,
+                  ),
+                ),
+                verticalSpace(3.h),
+                Text(
+                  context.tr('projects_detail_closed_subtitle'),
+                  style: context.textStyles.xsMedium.copyWith(
+                    color: status.badgeText,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
