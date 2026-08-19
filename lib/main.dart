@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import 'core/config/feature_flags.dart';
 import 'core/di/dependency_injection.dart';
 import 'core/helpers/cache_helper.dart';

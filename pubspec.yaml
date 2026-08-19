@@ -64,7 +64,7 @@ dependencies:
   connectivity_plus: ^6.1.5
   # Activity attachments: §Workflow 1 accepts photos, voice notes and
   # PDF/Word, so capture needs more than image_picker alone.
-  record: ^5.2.1          # microphone capture (voice notes)
+  record: ^6.2.1           # microphone capture (voice notes)
   just_audio: ^0.9.42     # playback with a scrub bar
   file_picker: ^8.1.7     # choosing PDFs / documents
   open_filex: ^4.7.0      # handing a downloaded file to the OS viewer
