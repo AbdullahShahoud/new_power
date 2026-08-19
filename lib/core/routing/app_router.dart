@@ -109,7 +109,10 @@ class AppRouter {
       case Routes.activityDetailScreen:
         final args = settings.arguments as Map;
         return _slideRoute(
-          ActivityDetailScreen(activityId: args['activityId'] as String),
+          ActivityDetailScreen(
+            activityId: args['activityId'] as String,
+            projectClosed: args['projectClosed'] as bool? ?? false,
+          ),
           settings,
         );
       // ========================== Outcomes =================================

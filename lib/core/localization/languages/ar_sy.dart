@@ -123,6 +123,11 @@ final Map<String, String> arSY = {
   'projects_register_territory_rejected_title': 'خارج منطقتك',
   'projects_register_territory_rejected_message':
       'هذا الموقع يقع ضمن منطقة مندوب آخر.',
+  // {territory} يأتي من رسالة الخادم — هو المكان الوحيد الذي يرد فيه اسم
+  // المنطقة، ولا يوجد حقل آخر يحمله.
+  'projects_register_territory_rejected_named':
+      'هذا الموقع يقع في {territory}، وهي ليست ضمن المناطق المُسندة إليك.\n\n'
+      'حرّك الدبوس إلى داخل منطقتك، أو اطلب من مديرك إسناد هذه المنطقة إليك.',
 
   // المشاريع — شاشة التفاصيل
   'projects_detail_not_found': 'هذا المشروع لم يعد متاحًا.',
@@ -141,8 +146,7 @@ final Map<String, String> arSY = {
   'voice_note_title': 'ملاحظة صوتية',
   'voice_note_discard': 'حذف',
   'voice_note_attach': 'إرفاق',
-  'voice_note_permission_denied':
-      'نحتاج إذن الميكروفون لتسجيل ملاحظة صوتية',
+  'voice_note_permission_denied': 'نحتاج إذن الميكروفون لتسجيل ملاحظة صوتية',
   'voice_note_too_short': 'التسجيل قصير جدًا',
   'voice_note_error': 'فشل التسجيل. حاول مرة أخرى',
 
@@ -158,6 +162,9 @@ final Map<String, String> arSY = {
   'projects_detail_section_images': 'صور المشروع',
   'projects_detail_section_history': 'سجل المشروع',
   'projects_detail_section_outcome': 'إغلاق المشروع',
+  'projects_detail_closed_title': 'المشروع مُغلق بنتيجة: {outcome}',
+  'projects_detail_closed_subtitle':
+      'تمت الموافقة على نتيجة المشروع، فأصبح سجلًا للعرض فقط. لا يمكن إضافة أو تعديل أي شيء فيه.',
   'projects_detail_territory': 'المنطقة',
   'projects_detail_stage': 'المرحلة',
   'projects_detail_stage_terminal_note':
@@ -198,7 +205,7 @@ final Map<String, String> arSY = {
   'project_stage_boq_received': 'استلام جدول الكميات',
   'project_stage_quote_issued': 'عرض سعر مُصدر',
   'project_stage_committed': 'ملتزم',
-  'project_stage_won': 'مربوح',
+  'project_stage_won': 'ربح',
   'project_stage_lost': 'خسارة',
 
   // حالة المشروع
@@ -358,6 +365,7 @@ final Map<String, String> arSY = {
   'projects_detail_outcome': 'النتيجة',
   'projects_detail_mark_as_lost': 'تحديد كمشروع خاسر',
   'projects_detail_mark_as_won': 'تحديد كمشروع رابح',
+  'projects_detail_submit_outcome': 'تحديد نتيجة المشروع',
 
   'submit_outcome_title': 'تسجيل نتيجة المشروع',
   'submit_outcome_lost_notice':
@@ -376,6 +384,7 @@ final Map<String, String> arSY = {
   'submit_outcome_narrative': 'التفاصيل',
   'submit_outcome_narrative_hint': 'ماذا حدث؟ (اختياري)',
   'submit_outcome_notes': 'ملاحظات',
+  'submit_won_files': 'مستندات داعمة',
   'submit_outcome_notes_hint': 'ملاحظات إضافية (اختياري)',
   'submit_outcome_submit': 'إرسال',
   'submit_outcome_text_too_long': 'لا يمكن أن يتجاوز ٢٠٠٠ حرف',
@@ -940,7 +949,13 @@ final Map<String, String> arSY = {
   'catalog_filters_apply': 'عرض النتائج',
   'catalog_filters_clear_all': 'مسح الكل',
   'catalog_filters_search_values': 'ابحث في القيم…',
-  'catalog_filters_truncated': 'تُعرض أكثر {shown} قيمة شيوعًا من أصل {total}',
+  'catalog_filters_general': 'عام',
+  'catalog_filters_has_datasheet': 'يحتوي ورقة بيانات',
+  'catalog_filters_available_only': 'المتوفر فقط',
+  'catalog_filters_unavailable_only': 'غير المتوفر فقط',
+  'catalog_filters_truncated':
+      'تُعرض القيم الأكثر شيوعًا فقط. ابحث في الأعلى للوصول إلى غيرها.',
+  'catalog_filters_show_more': 'عرض {count} أخرى',
   'catalog_filter_dropped': 'أحد الفلاتر لم يعد متاحًا وتمت إزالته.',
 
   // Sort
@@ -960,8 +975,7 @@ final Map<String, String> arSY = {
   'catalog_unavailable_subtitle':
       'لم يتم نشر أي نسخة من الكتالوج بعد. يرجى المحاولة لاحقًا.',
   'catalog_product_not_found_title': 'المنتج غير متاح',
-  'catalog_product_not_found_subtitle':
-      'هذا المنتج ليس ضمن الكتالوج المنشور.',
+  'catalog_product_not_found_subtitle': 'هذا المنتج ليس ضمن الكتالوج المنشور.',
   'catalog_search_intro_title': 'ابحث في الكتالوج',
   'catalog_search_intro_subtitle':
       'يشمل البحث أسماء المنتجات والأكواد والفئات. وللبحث حسب المواصفات استخدم الفلاتر.',

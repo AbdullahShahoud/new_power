@@ -499,12 +499,34 @@ class DioFactory {
           return; // hold the handler — do NOT call next() yet
         }
 
-        // 403: security violation (access denied) on a protected route.
+        // 403 is **never** a reason to log out.
+        //
+        // This used to clear the tokens and bounce to the login screen for
+        // any 403 on a protected route, which was a category error: 401
+        // means "I don't know who you are", 403 means "I know exactly who
+        // you are, and you may not do this". The session is valid in every
+        // 403 this API produces.
+        //
+        // Concretely, it was throwing reps out of the app for ordinary
+        // business refusals — registering a building outside their
+        // territory (`PROJECT_OUTSIDE_OWN_TERRITORY`), confirming their own
+        // outcome (`PROJECT_OUTCOME_SELF_CONFIRMATION`), or touching a
+        // manager-only route. Those must surface as a message on the screen
+        // that asked, which is what passing the error through does.
+        //
+        // The one 403 family that needs *routing* rather than a message is
+        // the scope lockdown, and even the docs are explicit there: "Do not
+        // log out." Its richer fields are stripped by the server's global
+        // filter, so `message` is the only signal available.
         if (error.response?.statusCode == 403) {
-          final path = error.requestOptions.path;
-          if (!_noAuthHeaderEndpoints.contains(path)) {
-            await _clearAuthTokens();
-            _navigateToLogin();
+          final message =
+              (error.response?.data is Map
+                      ? (error.response!.data as Map)['message']
+                      : null)
+                  as String? ??
+              '';
+          if (message.contains('must change your temporary password')) {
+            _navigateToChangePassword();
           }
           return handler.next(error);
         }
@@ -719,6 +741,26 @@ class DioFactory {
       Routes.loginScreen,
       (route) => false,
     );
+  }
+
+  /// A provisioned account is locked to `/users/me/password` and `/logout`
+  /// until its temporary password is changed — every other route answers
+  /// 403. Pushed rather than replacing the stack, and **without** clearing
+  /// tokens: the session is valid, it just cannot go anywhere else yet.
+  static bool _changePasswordRouteOpen = false;
+
+  static void _navigateToChangePassword() {
+    final navigator = navigatorKey.currentState;
+    if (navigator == null || _changePasswordRouteOpen) return;
+    // A locked-down account 403s on *every* route, so a screen firing three
+    // parallel requests would otherwise stack three copies of this screen.
+    // A flag rather than inspecting the route stack: `ModalRoute.of` on the
+    // navigator's own context resolves the route the Navigator sits in, not
+    // the one on top of it, so it cannot answer this question.
+    _changePasswordRouteOpen = true;
+    navigator
+        .pushNamed(Routes.changePasswordScreen)
+        .whenComplete(() => _changePasswordRouteOpen = false);
   }
 
   /// Log security events for audit trail (token reuse, offline queue rejection, etc.)

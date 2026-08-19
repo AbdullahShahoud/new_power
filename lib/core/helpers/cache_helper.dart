@@ -16,6 +16,10 @@ class CacheHelper {
   // cubit suppresses outgoing read receipts in conversations.
   static const String hideReadReceipts = 'hideReadReceipts';
 
+  /// Grid vs list for the catalogue's category tree. A display preference,
+  /// so it lives here rather than in secure storage.
+  static const String catalogCategoryViewMode = 'catalogCategoryViewMode';
+
   // ── SharedPreferences instance ──────────────────────────────────────────────
   static SharedPreferences? sharedPreferences;
 

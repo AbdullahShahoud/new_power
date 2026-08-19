@@ -131,6 +131,13 @@ final Map<String, String> enUS = {
   'projects_register_territory_rejected_title': 'Outside your territory',
   'projects_register_territory_rejected_message':
       'This location falls inside another representative\'s territory.',
+  // {territory} comes from the server message — it is the only place the
+  // territory name appears; no field on the error carries it.
+  'projects_register_territory_rejected_named':
+      'This location is in {territory}, which isn\'t one of the territories '
+      'assigned to you.\n\n'
+      'Move the pin inside your own area, or ask your manager to assign this '
+      'territory to you.',
 
   // Projects — detail screen
   'projects_detail_not_found': 'This project isn\'t available anymore.',
@@ -167,6 +174,9 @@ final Map<String, String> enUS = {
   'projects_detail_section_images': 'Project images',
   'projects_detail_section_history': 'Project history',
   'projects_detail_section_outcome': 'Close the project',
+  'projects_detail_closed_title': 'Project closed as {outcome}',
+  'projects_detail_closed_subtitle':
+      'The outcome has been confirmed, so this project is now a read-only record. Nothing can be added or edited.',
   'projects_detail_territory': 'Territory',
   'projects_detail_stage': 'Stage',
   'projects_detail_stage_terminal_note':
@@ -391,6 +401,7 @@ final Map<String, String> enUS = {
   'submit_outcome_narrative': 'Narrative',
   'submit_outcome_narrative_hint': 'What happened? (optional)',
   'submit_outcome_notes': 'Notes',
+  'submit_won_files': 'Supporting documents',
   'submit_outcome_notes_hint': 'Additional notes (optional)',
   'submit_outcome_submit': 'Submit',
   'submit_outcome_text_too_long': 'Cannot exceed 2000 characters',
@@ -417,6 +428,7 @@ final Map<String, String> enUS = {
   'submit_won_units_exceed_total': 'Units supplied cannot exceed units total',
 
   'projects_detail_mark_as_won': 'Mark as won',
+  'projects_detail_submit_outcome': 'Submit project outcome',
 
   'outcome_detail_title': 'Outcome',
   'outcome_detail_not_found': 'This outcome could not be found',
@@ -939,8 +951,13 @@ final Map<String, String> enUS = {
   'catalog_filters_apply': 'Show results',
   'catalog_filters_clear_all': 'Clear all',
   'catalog_filters_search_values': 'Search values…',
+  'catalog_filters_general': 'General',
+  'catalog_filters_has_datasheet': 'Has a datasheet',
+  'catalog_filters_available_only': 'Available only',
+  'catalog_filters_unavailable_only': 'Unavailable only',
   'catalog_filters_truncated':
-      'Showing the {shown} most common values of {total}',
+      'Only the most common values are listed. Search above to find others.',
+  'catalog_filters_show_more': 'Show {count} more',
   'catalog_filter_dropped':
       'A filter is no longer available and was removed.',
 
