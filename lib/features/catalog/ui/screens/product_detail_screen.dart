@@ -20,6 +20,7 @@ import '../../data/models/category_view.dart';
 import '../../data/models/localized.dart';
 import '../../data/models/product_view.dart';
 import '../../logic/product_detail_bloc/product_detail_bloc.dart';
+import '../widgets/catalog_image.dart';
 import '../widgets/catalog_skeletons.dart';
 
 /// Full product detail.
@@ -122,34 +123,6 @@ class _Content extends StatelessWidget {
 
   const _Content({required this.product});
 
-  /// Downloads the PDF to the cache, then hands the **local** path to the OS
-  /// viewer — the same route `AttachmentOpener` takes, because `open_filex`
-  /// cannot open a remote URL.
-  ///
-  /// §7.9 — datasheet URLs are **stable and unsigned** (a signed URL would
-  /// expire before a rep opened the app in the field), so no resolve step is
-  /// needed here, unlike activity attachments.
-  Future<void> _openDatasheet(BuildContext context) async {
-    final media = product.datasheet;
-    if (media == null) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    final failedMessage = context.tr('catalog_datasheet_failed');
-
-    try {
-      final directory = await getTemporaryDirectory();
-      final name = Uri.parse(media.url).pathSegments.last;
-      final path =
-          '${directory.path}/${name.isEmpty ? '${product.slug}.pdf' : name}';
-      await Dio().download(media.url, path);
-      final result = await OpenFilex.open(path);
-      if (result.type != ResultType.done) {
-        messenger.showSnackBar(SnackBar(content: Text(failedMessage)));
-      }
-    } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(failedMessage)));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -284,38 +257,130 @@ class _Content extends StatelessWidget {
               ),
               child: SafeArea(
                 top: false,
-                child: PressableScale(
-                  onTap: () => _openDatasheet(context),
-                  child: Container(
-                    height: 46.h,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colors.brand500,
-                      borderRadius: BorderRadius.circular(AppRadius.field),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.description_outlined,
-                          size: 18.sp,
-                          color: colors.white,
-                        ),
-                        horizontalSpace(8),
-                        Text(
-                          context.tr('catalog_datasheet'),
-                          style: context.textStyles.smBold.copyWith(
-                            color: colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                child: _DatasheetButton(product: product),
               ),
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The datasheet button, with its own download state.
+///
+/// Stateful because the work it does is **not instant and gives no feedback
+/// of its own**: `open_filex` can only open a *local* path, so the PDF has
+/// to be fetched to the cache first. Over a field connection that is several
+/// seconds during which the OS viewer has not appeared yet — without a
+/// spinner the button reads as dead and reps tap it repeatedly, starting a
+/// second download on top of the first.
+class _DatasheetButton extends StatefulWidget {
+  final ProductDetailView product;
+
+  const _DatasheetButton({required this.product});
+
+  @override
+  State<_DatasheetButton> createState() => _DatasheetButtonState();
+}
+
+class _DatasheetButtonState extends State<_DatasheetButton> {
+  bool _downloading = false;
+
+  /// Downloads the PDF to the cache, then hands the **local** path to the OS
+  /// viewer — the same route `AttachmentOpener` takes.
+  ///
+  /// §7.9 — datasheet URLs are **stable and unsigned** (a signed URL would
+  /// expire before a rep opened the app in the field), so no resolve step is
+  /// needed here, unlike activity attachments.
+  Future<void> _open() async {
+    final media = widget.product.datasheet;
+    // Re-entrancy guard: a second tap while the first download is in flight
+    // would write the same file twice and open it twice.
+    if (media == null || _downloading) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final failedMessage = context.tr('catalog_datasheet_failed');
+    setState(() => _downloading = true);
+
+    try {
+      final directory = await getTemporaryDirectory();
+      final name = Uri.parse(media.url).pathSegments.last;
+      final path =
+          '${directory.path}/'
+          '${name.isEmpty ? '${widget.product.slug}.pdf' : name}';
+      await Dio().download(media.url, path);
+      final result = await OpenFilex.open(path);
+      if (result.type != ResultType.done) {
+        messenger.showSnackBar(SnackBar(content: Text(failedMessage)));
+      }
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(failedMessage)));
+    } finally {
+      // The screen can be popped mid-download — the OS viewer takes focus
+      // and a rep may back out before it opens.
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return PressableScale(
+      onTap: _downloading ? null : _open,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 46.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          // Dimmed rather than greyed: the button is still the same action,
+          // just already running.
+          color: _downloading ? colors.brand400 : colors.brand500,
+          borderRadius: BorderRadius.circular(AppRadius.field),
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: _downloading
+              ? Row(
+                  key: const ValueKey('downloading'),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16.w,
+                      height: 16.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colors.white,
+                      ),
+                    ),
+                    horizontalSpace(8),
+                    Text(
+                      context.tr('catalog_datasheet_opening'),
+                      style: context.textStyles.smBold.copyWith(
+                        color: colors.white,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  key: const ValueKey('idle'),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.description_outlined,
+                      size: 18.sp,
+                      color: colors.white,
+                    ),
+                    horizontalSpace(8),
+                    Text(
+                      context.tr('catalog_datasheet'),
+                      style: context.textStyles.smBold.copyWith(
+                        color: colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }
@@ -381,13 +446,15 @@ class _GalleryState extends State<_Gallery> {
                 ),
                 child: Container(
                   color: colors.surface,
-                  child: Image.network(
-                    media.url,
+                  // Full `url` here, not the thumbnail: this is the one place
+                  // the photo is shown large and can be zoomed, so the
+                  // bandwidth is what the rep is actually asking for. Cards
+                  // and tiles take the thumbnail instead.
+                  child: CatalogImage(
+                    url: media.url,
                     fit: BoxFit.contain,
-                    loadingBuilder: (_, child, progress) => progress == null
-                        ? child
-                        : Container(color: colors.Color13),
-                    errorBuilder: (_, _, _) => Icon(
+                    placeholderBuilder: (_) => const CatalogImagePlaceholder(),
+                    errorBuilder: (_) => Icon(
                       Icons.broken_image_outlined,
                       color: colors.ink300,
                     ),
@@ -536,38 +603,59 @@ class _HighlightGrid extends StatelessWidget {
       runSpacing: 8.h,
       children: [
         for (final highlight in highlights)
-          Container(
-            width: (1.sw - 40.w - 16.w) / 3,
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.card),
-              boxShadow: AppShadows.card,
+          // Sized to its content, not forced to a third of the row.
+          //
+          // A hard `1/3` width assumed every facet value is short. Real ones
+          // are not — "بولي إيثيلين / نحاس" and "أسود / أحمر / أبيض" were
+          // both cut to an ellipsis, hiding exactly the part that
+          // distinguishes the product. These values are **pre-rendered
+          // server-side** and cannot be shortened or reformatted here, so
+          // the layout has to bend around them instead.
+          //
+          // `Wrap` still packs three short values onto one line; a long one
+          // simply takes the room it needs and pushes the rest down.
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: (1.sw - 40.w - 16.w) / 3,
+              // Never wider than the row, so a very long value wraps inside
+              // its own card rather than overflowing the screen.
+              maxWidth: 1.sw - 40.w,
             ),
-            child: Column(
-              children: [
-                Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Text(
-                    highlight.display.resolve(context),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                boxShadow: AppShadows.card,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      highlight.display.resolve(context),
+                      // Two lines: enough for a compound value like
+                      // "أسود / أحمر / أبيض" to read in full.
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: context.textStyles.smBold,
+                    ),
+                  ),
+                  verticalSpace(3.h),
+                  Text(
+                    highlight.label.resolve(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: context.textStyles.smBold,
+                    style: context.textStyles.xsMedium.copyWith(
+                      color: colors.ink400,
+                      fontSize: 10.sp,
+                    ),
                   ),
-                ),
-                verticalSpace(3.h),
-                Text(
-                  highlight.label.resolve(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: context.textStyles.xsMedium.copyWith(
-                    color: colors.ink400,
-                    fontSize: 10.sp,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
       ],

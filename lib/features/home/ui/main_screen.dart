@@ -12,6 +12,7 @@ import '../../projects/ui/screens/projects_list_screen.dart';
 import 'screens/home_dashboard_screen.dart';
 import '../../catalog/ui/screens/catalog_home_screen.dart';
 import 'screens/profile_screen.dart';
+import '../../notifications/data/repo/push_service.dart';
 import '../../notifications/logic/badge_cubit/unread_badge_cubit.dart';
 
 /// Post-login shell: four tabs (Home, Projects, Products, Profile) over
@@ -42,6 +43,17 @@ class _MainScreenState extends State<MainScreen>
     // and directory, and the count is write-through cached server-side, so
     // polling would cost more and be no fresher.
     getIt<UnreadBadgeCubit>().refresh();
+
+    // Started here rather than in `main()` because this is the first screen
+    // that only exists once the user is **authenticated** — reached both
+    // from a warm start and straight after login. Registering a token
+    // without a session would 401.
+    //
+    // ⚠️ Runs on **every** app start, not just the first login: when
+    // Firebase reports a token as unregistered the backend nulls the stored
+    // value, so a reinstalled app silently stops receiving push until it
+    // re-registers.
+    getIt<PushService>().initialise();
   }
 
   @override

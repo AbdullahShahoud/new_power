@@ -16,9 +16,13 @@ import '../../data/models/localized.dart';
 import '../../data/models/product_query.dart';
 
 /// How many filter options are revealed per step — the initial batch and
-/// every "show more" after it. Nothing here assumes a total: the reveal
-/// simply stops when the list runs out, whatever length the server sent.
-const int kOptionPageSize = 15;
+/// every "show more" after it.
+///
+/// Nothing here assumes a total, and **nothing is ever withheld**: every
+/// option the server returns stays reachable. This only controls how many
+/// land on screen at once, so one long attribute cannot bury every filter
+/// below it. The last step shows whatever remains, however few.
+const int kOptionPageSize = 10;
 
 /// The filter rail, as a scrollable bottom sheet.
 ///
@@ -38,11 +42,8 @@ Future<ProductQuery?> showFiltersSheet({
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => _FiltersSheet(
-      filters: filters,
-      query: query,
-      resultCount: resultCount,
-    ),
+    builder: (_) =>
+        _FiltersSheet(filters: filters, query: query, resultCount: resultCount),
   );
 }
 
@@ -157,6 +158,11 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                             (_visibleCounts[filter.code] ?? kOptionPageSize) +
                             kOptionPageSize;
                       }),
+                      // Back to a single page. Dropping the entry entirely
+                      // rather than storing `kOptionPageSize` keeps the map
+                      // holding only the groups the rep actually expanded.
+                      onShowLess: () =>
+                          setState(() => _visibleCounts.remove(filter.code)),
                     ),
                     // `NONE` never reaches a client; if it ever does, the
                     // filter is ignored rather than guessed at.
@@ -219,15 +225,15 @@ class _FixedFilterGroup extends StatelessWidget {
         ),
         verticalSpace(10.h),
 
-
         // `hasDatasheet: false` is accepted but has **no effect** server-side
         // (the handler skips a falsy value), so this is a two-state toggle —
         // on, or absent — never a three-way choice that would silently lie.
         _SwitchRow(
           label: context.tr('catalog_filters_has_datasheet'),
           value: query.hasDatasheet == true,
-          onChanged: (on) =>
-              onChanged(query.copyWith(hasDatasheet: on ? true : null, page: 1)),
+          onChanged: (on) => onChanged(
+            query.copyWith(hasDatasheet: on ? true : null, page: 1),
+          ),
         ),
 
         // Availability is opt-in and genuinely three-state: omitted means no
@@ -248,7 +254,6 @@ class _FixedFilterGroup extends StatelessWidget {
   }
 }
 
-
 class _SwitchRow extends StatelessWidget {
   final String label;
   final bool value;
@@ -267,9 +272,7 @@ class _SwitchRow extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 2.h),
       child: Row(
         children: [
-          Expanded(
-            child: Text(label, style: context.textStyles.smMedium),
-          ),
+          Expanded(child: Text(label, style: context.textStyles.smMedium)),
           Switch.adaptive(
             value: value,
             activeTrackColor: colors.brand500,
@@ -295,9 +298,10 @@ class _DiscreteGroup extends StatelessWidget {
   final ValueChanged<ProductQuery> onChanged;
 
   /// How many options are on screen right now. Grows by [kOptionPageSize]
-  /// each time the rep asks for more.
+  /// each time the rep asks for more, and collapses back to one page.
   final int visibleCount;
   final VoidCallback onShowMore;
+  final VoidCallback onShowLess;
 
   const _DiscreteGroup({
     required this.filter,
@@ -307,11 +311,11 @@ class _DiscreteGroup extends StatelessWidget {
     required this.onChanged,
     required this.visibleCount,
     required this.onShowMore,
+    required this.onShowLess,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final options = filter.options ?? const <FilterOptionView>[];
     if (options.isEmpty) return const SizedBox.shrink();
 
@@ -350,51 +354,60 @@ class _DiscreteGroup extends StatelessWidget {
                 onChanged(query.toggleAttribute(filter.code, option.code)),
           ),
 
+        // More to reveal → expand. Everything already on screen but the
+        // group was expanded → offer the way back, so a long attribute the
+        // rep opened out of curiosity doesn't stay in the way of every
+        // filter below it.
         if (visible.length > visibleCount)
-          PressableScale(
+          _RevealToggle(
+            label: context.tr('catalog_filters_show_more'),
+            icon: Icons.keyboard_arrow_down_rounded,
             onTap: onShowMore,
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.h),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    context.tr('catalog_filters_show_more'),
-                    style: context.textStyles.xsBold.copyWith(
-                      color: colors.brand600,
-                    ),
-                  ),
-                  horizontalSpace(4),
-                  Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 16.sp,
-                    color: colors.brand600,
-                  ),
-                ],
-              ),
-            ),
           )
-        // Only once everything the client *holds* is on screen is it honest
-        // to mention the server's own cap.
-        //
-        // ⚠️ The old copy read "showing 24 of {filter.count}" — which was
-        // wrong: `filters[].count` counts **products carrying the
-        // attribute**, not distinct values (§7.5), so it compared values
-        // against products and produced a nonsense ratio. The API exposes no
-        // total-distinct-values figure at all, so no denominator is claimed
-        // here; the search box is the only way to reach the rest.
-        else if (filter.truncated)
-          Padding(
-            padding: EdgeInsets.only(top: 4.h),
-            child: Text(
-              context.tr('catalog_filters_truncated'),
-              style: context.textStyles.xsMedium.copyWith(
-                color: colors.ink400,
-              ),
-            ),
+        else if (visibleCount > kOptionPageSize)
+          _RevealToggle(
+            label: context.tr('catalog_filters_show_less'),
+            icon: Icons.keyboard_arrow_up_rounded,
+            onTap: onShowLess,
           ),
         verticalSpace(18.h),
       ],
+    );
+  }
+}
+
+/// "Show more" / "Show less" — one widget so the two read identically and
+/// only the label and the arrow flip.
+class _RevealToggle extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _RevealToggle({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return PressableScale(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: context.textStyles.xsBold.copyWith(color: colors.brand600),
+            ),
+            horizontalSpace(4),
+            Icon(icon, size: 16.sp, color: colors.brand600),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -553,19 +566,14 @@ class _GroupHeader extends StatelessWidget {
     final colors = context.colors;
     return Row(
       children: [
-        Text(
-          filter.label.resolve(context),
-          style: context.textStyles.smBold,
-        ),
+        Text(filter.label.resolve(context), style: context.textStyles.smBold),
         if (filter.unit != null) ...[
           horizontalSpace(6),
           Directionality(
             textDirection: TextDirection.ltr,
             child: Text(
               filter.unit!,
-              style: context.textStyles.xsMedium.copyWith(
-                color: colors.ink400,
-              ),
+              style: context.textStyles.xsMedium.copyWith(color: colors.ink400),
             ),
           ),
         ],
@@ -623,9 +631,7 @@ class _OptionRow extends StatelessWidget {
             ),
             Text(
               '$count',
-              style: context.textStyles.xsMedium.copyWith(
-                color: colors.ink400,
-              ),
+              style: context.textStyles.xsMedium.copyWith(color: colors.ink400),
             ),
           ],
         ),

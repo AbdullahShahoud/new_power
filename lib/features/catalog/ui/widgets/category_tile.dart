@@ -10,6 +10,7 @@ import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/pressable_scale.dart';
 import '../../data/models/category_view.dart';
 import '../../data/models/localized.dart';
+import 'catalog_image.dart';
 
 /// A category as a grid tile — image-led, for recognising product families
 /// by shape.
@@ -177,12 +178,19 @@ class _CategoryArt extends StatelessWidget {
     );
 
     if (url == null) return fallback();
-    return Image.network(
-      url,
-      fit: BoxFit.cover,
-      loadingBuilder: (_, child, progress) =>
-          progress == null ? child : Container(color: colors.Color13),
-      errorBuilder: (_, _, _) => fallback(),
+    // Disk-cached like every other catalogue image: the tree is the screen a
+    // rep re-enters most often, and re-downloading the same handful of
+    // category photos on each visit is the most avoidable traffic in the app.
+    return LayoutBuilder(
+      builder: (context, constraints) => CatalogImage(
+        url: url,
+        decodeWidth: constraints.maxWidth.isFinite
+            ? (constraints.maxWidth * MediaQuery.devicePixelRatioOf(context))
+                  .round()
+            : null,
+        placeholderBuilder: (_) => const CatalogImagePlaceholder(),
+        errorBuilder: (_) => fallback(),
+      ),
     );
   }
 }

@@ -9,6 +9,7 @@ import '../../../../core/theming/app_shadows.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/pressable_scale.dart';
 import '../../data/models/localized.dart';
+import 'catalog_image.dart';
 import '../../data/models/product_view.dart';
 
 /// The grid geometry every product grid must use — the category screen and
@@ -34,9 +35,35 @@ SliverGridDelegateWithFixedCrossAxisCount productGridDelegate(
     crossAxisCount: columns,
     crossAxisSpacing: spacing,
     mainAxisSpacing: 12.h,
-    // Room for three lines of name, the code line, and one row of chips.
-    mainAxisExtent: columnWidth + 132.h,
+    mainAxisExtent: columnWidth + kProductTextBlockHeight,
   );
+}
+
+/// The exact height the text under the image needs.
+///
+/// Derived from the same units the text is actually laid out in rather than
+/// guessed as one round number — that is what left the third line of the
+/// name sliced in half. A flat `132.h` reserve is expressed in *height*
+/// units while the glyphs are sized in `.sp`, so on any device where the two
+/// scales diverge (a larger system font, a different aspect ratio) the
+/// reserve stopped covering the text it was supposed to hold.
+///
+/// Adding the parts up in their own units means the box grows with the type
+/// instead of drifting away from it.
+double get kProductTextBlockHeight {
+  const nameLines = 3;
+  // `xsBold` is 12sp; the card sets height: 1.35 on it.
+  final nameHeight = 12.sp * 1.35 * nameLines;
+  // `xsMedium` at 12sp, single line, default leading.
+  final codeHeight = 12.sp * 1.3;
+  const chipsHeight = 18.0;
+  // 8 top + 10 bottom padding, 4 under the name, 8 above the chips.
+  final spacingTotal = 8.h + 10.h + 4.h + 8.h + chipsHeight.h;
+  // A line box is not exactly `fontSize * height` — the font's own ascent
+  // and descent add a little on top. Without this the last line lands a
+  // hair short and gets sliced, which is the whole symptom.
+  final safety = 8.h;
+  return nameHeight + codeHeight + spacingTotal + safety;
 }
 
 /// One product in the grid.
@@ -96,17 +123,20 @@ class ProductCard extends StatelessWidget {
                     // Three lines rather than two: product names here carry
                     // the wattage, colour and finish, and cutting at two
                     // routinely hid the part that distinguishes one fitting
-                    // from the next. `Flexible` lets it give way first if a
-                    // large system font leaves nothing to spare.
-                    Flexible(
-                      child: Text(
-                        product.name.resolve(context),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.xsBold.copyWith(
-                          height: 1.35,
-                        ),
-                      ),
+                    // from the next.
+                    //
+                    // Deliberately **not** `Flexible`. Letting the name give
+                    // way meant a squeezed cell handed it less height than
+                    // three lines need, and the third line rendered sliced
+                    // through the middle — visible, but unreadable. Now it
+                    // asks for its full height and the cell reserves exactly
+                    // that (see [kProductTextBlockHeight]), so a line is
+                    // either drawn whole or ellipsised — never half-drawn.
+                    Text(
+                      product.name.resolve(context),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.xsBold.copyWith(height: 1.35),
                     ),
                     if (product.sku != null) ...[
                       verticalSpace(4.h),
@@ -132,18 +162,36 @@ class ProductCard extends StatelessWidget {
                     // as ragged.
                     const Spacer(),
                     if (product.highlights.isNotEmpty)
+                      // A `Wrap` under a clip, not a horizontal strip.
+                      //
+                      // The strip laid three chips in a row and simply ran
+                      // off the card, leaving the first one sliced down the
+                      // middle — a stray ")" at the edge that reads as a
+                      // rendering fault. `Wrap` pushes whatever does not fit
+                      // onto a second line, and the clip hides that line
+                      // entirely, so the card shows *fewer* chips rather
+                      // than a broken one.
+                      //
+                      // `OverflowBox` is what keeps that legal: it hands the
+                      // Wrap an unbounded height to lay out in, so the extra
+                      // line is clipped rather than reported as an overflow.
                       SizedBox(
                         height: 18.h,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            for (final highlight
-                                in product.highlights.take(3)) ...[
-                              HighlightChip(highlight: highlight),
-                              horizontalSpace(4),
-                            ],
-                          ],
+                        width: double.infinity,
+                        child: ClipRect(
+                          child: OverflowBox(
+                            alignment: AlignmentDirectional.topStart,
+                            maxHeight: double.infinity,
+                            child: Wrap(
+                              spacing: 4.w,
+                              runSpacing: 4.h,
+                              children: [
+                                for (final highlight
+                                    in product.highlights.take(3))
+                                  HighlightChip(highlight: highlight),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                   ],
@@ -230,21 +278,26 @@ class _ProductThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    // Always the full `url`, never `thumbnailUrl`. The thumbnails this
-    // catalogue serves are too small for a half-width card and render
-    // visibly soft; the bandwidth saved is not worth a blurry grid.
-    final url = product.primaryImage?.url;
+    // `thumbnailUrl` first — it is what a half-width card needs, and the
+    // full-resolution `url` costs bandwidth and cache room this grid cannot
+    // spare. §7.7 marks `thumbnailUrl` itself nullable, so the full image is
+    // the fallback rather than the default.
+    final url =
+        product.primaryImage?.thumbnailUrl ?? product.primaryImage?.url;
 
     if (url == null) return _Placeholder(product: product);
 
-    return Image.network(
-      url,
-      fit: BoxFit.cover,
-      loadingBuilder: (_, child, progress) => progress == null
-          ? child
-          : Container(color: colors.Color13),
-      errorBuilder: (_, _, _) => _Placeholder(product: product),
+    return LayoutBuilder(
+      builder: (context, constraints) => CatalogImage(
+        url: url,
+        // Decoded to the cell's real width at this device's pixel ratio, so
+        // a card never holds a full-resolution bitmap it cannot show.
+        decodeWidth:
+            (constraints.maxWidth * MediaQuery.devicePixelRatioOf(context))
+                .round(),
+        placeholderBuilder: (_) => const CatalogImagePlaceholder(),
+        errorBuilder: (_) => _Placeholder(product: product),
+      ),
     );
   }
 }
