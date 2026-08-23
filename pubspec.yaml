@@ -50,9 +50,9 @@ dependencies:
   safe_device: ^1.1.6
   lottie: ^3.3.2
   uuid: ^4.5.3
-  # firebase_core: ^3.13.0
-  # firebase_messaging: ^15.2.5
-  # flutter_local_notifications: ^18.0.1
+  firebase_core: ^3.13.0
+  firebase_messaging: ^15.2.5
+  flutter_local_notifications: ^18.0.1
   synchronized: ^3.4.0
   flutter_native_splash: ^2.4.3
   smooth_page_indicator: ^1.1.0
@@ -73,6 +73,11 @@ dependencies:
   # temp path — relying on a transitive dep would break on any upstream
   # bump that drops it.
   path_provider: ^2.1.5
+  # Disk-backed image cache. Flutter's built-in ImageCache holds *decoded*
+  # images in memory only, so anything evicted when scrolling is fetched over
+  # the network again — which is exactly what a rep on mobile data notices.
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.10+1  # brand logo lockup
   shimmer: ^3.0.0
   google_maps_flutter: ^2.9.0
 

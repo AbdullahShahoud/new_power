@@ -1,0 +1,1944 @@
+<title>NewPower Release Gate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F4F2F2;
+  --surface:#FFFFFF;
+  --surface-sunk:#EDEAEA;
+  --ink:#17151A;
+  --ink-2:#453E42;
+  --muted:#726A6D;
+  --rule:#E1DCDC;
+  --rule-soft:#EEEAEA;
+
+  --brand:#D71920;
+  --brand-soft:#FBE9EA;
+  --brand-ink:#96131A;
+
+  --req:#9A5B00;
+  --req-soft:#FAF0DF;
+  --rec:#1B6579;
+  --rec-soft:#E4F0F4;
+  --opt:#5F585B;
+  --opt-soft:#EBE7E7;
+
+  --ok:#1E6B45;
+  --ok-soft:#E3F1EA;
+
+  --shadow:0 1px 2px rgba(23,21,26,.05), 0 8px 24px -18px rgba(23,21,26,.35);
+
+  --f-display:"IBM Plex Sans Condensed","IBM Plex Sans",Segoe UI,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",Segoe UI,system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#131113;
+    --surface:#1B181A;
+    --surface-sunk:#221E20;
+    --ink:#F1ECEC;
+    --ink-2:#CFC7C9;
+    --muted:#9A9093;
+    --rule:#332D2F;
+    --rule-soft:#272224;
+
+    --brand:#F4535A;
+    --brand-soft:#331A1C;
+    --brand-ink:#FF8A8F;
+
+    --req:#E0A03C;
+    --req-soft:#2F2618;
+    --rec:#68B9D4;
+    --rec-soft:#17282E;
+    --opt:#9A9093;
+    --opt-soft:#262123;
+
+    --ok:#5FBE8C;
+    --ok-soft:#16281F;
+
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
+  }
+}
+
+:root[data-theme="dark"]{
+  --ground:#131113;
+  --surface:#1B181A;
+  --surface-sunk:#221E20;
+  --ink:#F1ECEC;
+  --ink-2:#CFC7C9;
+  --muted:#9A9093;
+  --rule:#332D2F;
+  --rule-soft:#272224;
+
+  --brand:#F4535A;
+  --brand-soft:#331A1C;
+  --brand-ink:#FF8A8F;
+
+  --req:#E0A03C;
+  --req-soft:#2F2618;
+  --rec:#68B9D4;
+  --rec-soft:#17282E;
+  --opt:#9A9093;
+  --opt-soft:#262123;
+
+  --ok:#5FBE8C;
+  --ok-soft:#16281F;
+
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:15.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- shell ---------- */
+.shell{
+  display:grid;
+  grid-template-columns:236px minmax(0,1fr);
+  gap:0;
+  max-width:1320px;
+  margin:0 auto;
+  align-items:start;
+}
+.rail{
+  position:sticky;
+  top:0;
+  align-self:start;
+  max-height:100vh;
+  overflow-y:auto;
+  padding:34px 20px 48px 26px;
+  border-right:1px solid var(--rule);
+  background:var(--ground);
+}
+.doc{
+  padding:34px 40px 120px;
+  min-width:0;
+}
+@media (max-width:1000px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--rule);padding:22px 22px 20px}
+  .doc{padding:26px 22px 90px}
+}
+
+/* ---------- rail ---------- */
+.rail-mark{
+  font-family:var(--f-display);
+  font-weight:700;
+  font-size:14px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--brand);
+  margin:0 0 4px;
+}
+.rail-sub{
+  font-family:var(--f-mono);
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:.02em;
+  margin:0 0 26px;
+}
+.rail nav{display:flex;flex-direction:column;gap:1px}
+.rail nav a{
+  display:block;
+  font-size:13.5px;
+  color:var(--ink-2);
+  text-decoration:none;
+  padding:5px 8px;
+  border-radius:4px;
+  border-left:2px solid transparent;
+}
+.rail nav a:hover{background:var(--surface);color:var(--ink);border-left-color:var(--brand)}
+.rail nav a:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.rail nav .grp{
+  font-family:var(--f-mono);
+  font-size:10.5px;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:22px 0 6px 8px;
+}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:30px}
+.eyebrow{
+  font-family:var(--f-mono);
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--brand);
+  margin:0 0 12px;
+}
+h1{
+  font-family:var(--f-display);
+  font-weight:700;
+  font-size:clamp(34px,5.2vw,52px);
+  line-height:1.04;
+  letter-spacing:-.015em;
+  margin:0 0 14px;
+  text-wrap:balance;
+}
+.standfirst{
+  font-size:17px;
+  color:var(--ink-2);
+  max-width:64ch;
+  margin:0 0 22px;
+}
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0 30px;
+  font-family:var(--f-mono);
+  font-size:11.5px;
+  color:var(--muted);
+}
+.meta b{color:var(--ink-2);font-weight:500}
+
+/* ---------- verdict strip ---------- */
+.verdict{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+  gap:1px;
+  background:var(--rule);
+  border:1px solid var(--rule);
+  border-radius:6px;
+  overflow:hidden;
+  margin:0 0 40px;
+}
+.vcell{background:var(--surface);padding:16px 18px}
+.vnum{
+  font-family:var(--f-display);
+  font-weight:700;
+  font-size:30px;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+}
+.vlab{
+  font-family:var(--f-mono);
+  font-size:10.5px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-top:7px;
+}
+.vcell.is-block .vnum{color:var(--brand)}
+.vcell.is-req .vnum{color:var(--req)}
+.vcell.is-rec .vnum{color:var(--rec)}
+.vcell.is-opt .vnum{color:var(--opt)}
+
+/* ---------- headings ---------- */
+h2{
+  font-family:var(--f-display);
+  font-weight:700;
+  font-size:27px;
+  letter-spacing:-.01em;
+  margin:60px 0 6px;
+  padding-top:16px;
+  border-top:1px solid var(--rule);
+  scroll-margin-top:18px;
+  text-wrap:balance;
+}
+h2 .num{
+  font-family:var(--f-mono);
+  font-size:12px;
+  font-weight:500;
+  color:var(--brand);
+  letter-spacing:.1em;
+  display:block;
+  margin-bottom:8px;
+}
+h3{
+  font-family:var(--f-display);
+  font-weight:600;
+  font-size:19px;
+  margin:34px 0 10px;
+  letter-spacing:-.005em;
+  scroll-margin-top:18px;
+}
+h4{
+  font-family:var(--f-mono);
+  font-weight:500;
+  font-size:11px;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:20px 0 6px;
+}
+p{margin:0 0 13px;max-width:74ch}
+ul,ol{margin:0 0 14px;padding-left:22px;max-width:74ch}
+li{margin:0 0 6px}
+li::marker{color:var(--muted)}
+a{color:var(--brand-ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:2px}
+strong{font-weight:600}
+code{
+  font-family:var(--f-mono);
+  font-size:.86em;
+  background:var(--surface-sunk);
+  border:1px solid var(--rule-soft);
+  border-radius:3px;
+  padding:.08em .34em;
+  word-break:break-word;
+}
+pre{
+  font-family:var(--f-mono);
+  font-size:12.5px;
+  line-height:1.55;
+  background:var(--surface-sunk);
+  border:1px solid var(--rule);
+  border-left:3px solid var(--brand);
+  border-radius:4px;
+  padding:13px 16px;
+  overflow-x:auto;
+  margin:0 0 16px;
+}
+pre code{background:none;border:0;padding:0;font-size:inherit}
+
+/* ---------- chips ---------- */
+.imp{
+  display:inline-block;
+  font-family:var(--f-mono);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:3px;
+  white-space:nowrap;
+  border:1px solid transparent;
+}
+.imp--block{background:var(--brand-soft);color:var(--brand-ink);border-color:var(--brand)}
+.imp--req{background:var(--req-soft);color:var(--req);border-color:var(--req)}
+.imp--rec{background:var(--rec-soft);color:var(--rec);border-color:var(--rec)}
+.imp--opt{background:var(--opt-soft);color:var(--opt);border-color:var(--rule)}
+
+/* ---------- findings ---------- */
+.finding{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:6px;
+  padding:16px 20px;
+  margin:0 0 12px;
+  box-shadow:var(--shadow);
+}
+.finding.sev-block{border-left:4px solid var(--brand)}
+.finding.sev-should{border-left:4px solid var(--req)}
+.finding.sev-later{border-left:4px solid var(--rule)}
+.fhead{
+  display:flex;
+  align-items:baseline;
+  gap:11px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+.fid{
+  font-family:var(--f-mono);
+  font-size:12px;
+  font-weight:600;
+  color:var(--brand);
+  letter-spacing:.04em;
+}
+.sev-should .fid{color:var(--req)}
+.sev-later .fid{color:var(--muted)}
+.ftitle{
+  font-family:var(--f-display);
+  font-weight:600;
+  font-size:17.5px;
+  line-height:1.28;
+  flex:1;
+  min-width:200px;
+}
+.finding p:last-child{margin-bottom:0}
+.finding ul:last-child{margin-bottom:0}
+
+/* ---------- steps ---------- */
+.phase{
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  margin:48px 0 16px;
+  padding-bottom:9px;
+  border-bottom:1px solid var(--ink);
+}
+.phase .tag{
+  font-family:var(--f-mono);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--surface);
+  background:var(--ink);
+  padding:3px 9px;
+  border-radius:3px;
+}
+.phase .name{
+  font-family:var(--f-display);
+  font-weight:700;
+  font-size:20px;
+  letter-spacing:-.005em;
+}
+.phase .rng{
+  font-family:var(--f-mono);
+  font-size:11.5px;
+  color:var(--muted);
+  margin-left:auto;
+}
+
+.step{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:6px;
+  margin:0 0 14px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  scroll-margin-top:18px;
+}
+.step > header{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:13px 20px;
+  background:var(--surface-sunk);
+  border-bottom:1px solid var(--rule);
+}
+.snum{
+  font-family:var(--f-mono);
+  font-size:12px;
+  font-weight:600;
+  color:var(--surface);
+  background:var(--ink);
+  min-width:30px;
+  height:26px;
+  border-radius:3px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-variant-numeric:tabular-nums;
+  flex:none;
+}
+.step.sev-block .snum{background:var(--brand)}
+.sobj{
+  font-family:var(--f-display);
+  font-weight:600;
+  font-size:17px;
+  line-height:1.3;
+  flex:1;
+  min-width:0;
+}
+.sbody{padding:16px 20px 18px}
+.sbody > :last-child{margin-bottom:0}
+.sgrid{
+  display:grid;
+  grid-template-columns:104px minmax(0,1fr);
+  gap:2px 18px;
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px dashed var(--rule);
+  font-size:14px;
+}
+.sgrid dt{
+  font-family:var(--f-mono);
+  font-size:10.5px;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding-top:4px;
+}
+.sgrid dd{margin:0 0 8px}
+.sgrid dd:last-of-type{margin-bottom:0}
+@media (max-width:620px){
+  .sgrid{grid-template-columns:1fr;gap:0}
+  .sgrid dt{margin-top:10px}
+}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);border-radius:6px;background:var(--surface)}
+table{
+  border-collapse:collapse;
+  width:100%;
+  font-family:var(--f-body);
+  font-size:14px;
+  min-width:520px;
+}
+th,td{
+  text-align:left;
+  padding:10px 16px;
+  border-bottom:1px solid var(--rule-soft);
+  vertical-align:top;
+}
+thead th{
+  font-family:var(--f-mono);
+  font-size:10.5px;
+  font-weight:500;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--muted);
+  background:var(--surface-sunk);
+  border-bottom:1px solid var(--rule);
+  white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted);width:1%;white-space:nowrap}
+td.st{font-family:var(--f-mono);font-size:12.5px}
+
+/* ---------- callout ---------- */
+.callout{
+  background:var(--brand-soft);
+  border:1px solid var(--brand);
+  border-radius:6px;
+  padding:18px 22px;
+  margin:0 0 22px;
+}
+.callout h3{margin-top:0;color:var(--brand-ink)}
+.callout > :last-child{margin-bottom:0}
+.callout code{background:rgba(255,255,255,.5);border-color:transparent}
+:root[data-theme="dark"] .callout code{background:rgba(0,0,0,.28)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .callout code{background:rgba(0,0,0,.28)}}
+
+.note{
+  border-left:3px solid var(--rec);
+  background:var(--rec-soft);
+  padding:12px 18px;
+  border-radius:0 5px 5px 0;
+  margin:0 0 20px;
+  font-size:14.5px;
+}
+.note > :last-child{margin-bottom:0}
+
+/* ---------- checklist ---------- */
+.cl{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:6px;
+  padding:6px 20px 14px;
+  margin:0 0 18px;
+  box-shadow:var(--shadow);
+}
+.cl h4{margin-top:16px}
+.cl label{
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+  padding:5px 0;
+  font-size:14.5px;
+  cursor:pointer;
+  border-bottom:1px solid var(--rule-soft);
+}
+.cl label:last-child{border-bottom:0}
+.cl input{
+  appearance:none;
+  -webkit-appearance:none;
+  width:15px;height:15px;
+  margin:5px 0 0;
+  flex:none;
+  border:1.5px solid var(--muted);
+  border-radius:3px;
+  background:var(--surface);
+  cursor:pointer;
+  position:relative;
+}
+.cl input:checked{background:var(--ok);border-color:var(--ok)}
+.cl input:checked::after{
+  content:"";
+  position:absolute;
+  left:4px;top:.5px;
+  width:4px;height:9px;
+  border:solid #fff;
+  border-width:0 2px 2px 0;
+  transform:rotate(42deg);
+}
+.cl input:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.cl input:checked + span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--rule)}
+.cl-bar{
+  display:flex;align-items:center;gap:12px;
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;
+  color:var(--muted);
+  margin:0 0 12px;
+}
+.cl-bar button{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--rule);border-radius:3px;
+  padding:4px 10px;cursor:pointer;
+}
+.cl-bar button:hover{border-color:var(--brand);color:var(--brand-ink)}
+.cl-bar button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.track{flex:1;height:4px;background:var(--surface-sunk);border-radius:2px;overflow:hidden;min-width:60px}
+.track i{display:block;height:100%;background:var(--ok);width:0%;transition:width .18s ease}
+
+/* ---------- gates ---------- */
+.gates{counter-reset:g;display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.gate{background:var(--surface);padding:14px 20px;display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;align-items:baseline}
+.gate::before{
+  counter-increment:g;
+  content:counter(g,decimal-leading-zero);
+  font-family:var(--f-mono);font-size:12px;font-weight:600;
+  color:var(--brand);font-variant-numeric:tabular-nums;
+}
+.gate b{font-family:var(--f-display);font-weight:600;font-size:16px;display:block;margin-bottom:3px}
+.gate span{font-size:14.5px;color:var(--ink-2)}
+.gate:last-child{background:var(--brand-soft)}
+.gate:last-child b{color:var(--brand-ink)}
+
+.foot{
+  margin-top:64px;padding-top:20px;border-top:1px solid var(--rule);
+  font-family:var(--f-mono);font-size:11.5px;color:var(--muted);
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+html{scroll-behavior:smooth}
+
+/* ---------- language toggle ---------- */
+.langbar{
+  display:flex;gap:0;margin:0 0 22px;
+  border:1px solid var(--rule);border-radius:4px;overflow:hidden;
+  background:var(--surface);width:fit-content;
+}
+.langbar button{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  background:none;border:0;color:var(--muted);
+  padding:6px 13px;cursor:pointer;
+}
+.langbar button + button{border-left:1px solid var(--rule)}
+.langbar button[aria-pressed="true"]{background:var(--brand);color:#fff}
+.langbar button:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+
+/* Arabic mode: mirror the document column, keep code/commands LTR. */
+[data-lang="ar"] .doc{direction:rtl;text-align:right}
+[data-lang="ar"] .rail nav a,
+[data-lang="ar"] .rail .grp,
+[data-lang="ar"] .rail-mark,
+[data-lang="ar"] .rail-sub{direction:rtl;text-align:right}
+[data-lang="ar"] .rail nav a{border-left:0;border-right:2px solid transparent}
+[data-lang="ar"] .rail nav a:hover{border-right-color:var(--brand)}
+[data-lang="ar"] .rail{border-right:0;border-left:1px solid var(--rule)}
+[data-lang="ar"] .shell{grid-template-columns:minmax(0,1fr) 236px}
+[data-lang="ar"] .rail{order:2}
+[data-lang="ar"] .doc{order:1}
+@media (max-width:1000px){
+  [data-lang="ar"] .shell{grid-template-columns:1fr}
+  [data-lang="ar"] .rail{order:1;border-left:0;border-bottom:1px solid var(--rule)}
+  [data-lang="ar"] .doc{order:2}
+}
+[data-lang="ar"] ul,[data-lang="ar"] ol{padding-left:0;padding-right:22px}
+[data-lang="ar"] .finding.sev-block,
+[data-lang="ar"] .finding.sev-should,
+[data-lang="ar"] .finding.sev-later{border-left-width:1px;border-left-color:var(--rule);border-right-width:4px;border-right-style:solid}
+[data-lang="ar"] .finding.sev-block{border-right-color:var(--brand)}
+[data-lang="ar"] .finding.sev-should{border-right-color:var(--req)}
+[data-lang="ar"] .finding.sev-later{border-right-color:var(--rule)}
+[data-lang="ar"] pre{border-left:1px solid var(--rule);border-right:3px solid var(--brand)}
+[data-lang="ar"] .note{border-left:0;border-right:3px solid var(--rec);border-radius:5px 0 0 5px}
+[data-lang="ar"] th,[data-lang="ar"] td{text-align:right}
+[data-lang="ar"] .phase .rng{margin-left:0;margin-right:auto}
+[data-lang="ar"] .sgrid{grid-template-columns:104px minmax(0,1fr)}
+[data-lang="ar"] .gate{grid-template-columns:34px minmax(0,1fr)}
+/* Code, commands and file paths stay left-to-right even in Arabic mode. */
+[data-lang="ar"] pre,[data-lang="ar"] code,[data-lang="ar"] .meta{direction:ltr;text-align:left;unicode-bidi:isolate}
+[data-lang="ar"] .sgrid dd code{unicode-bidi:isolate}
+
+/* Arabic typography */
+[data-lang="ar"] .doc,
+[data-lang="ar"] .rail{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",Segoe UI,system-ui,sans-serif}
+[data-lang="ar"] h1,[data-lang="ar"] h2,[data-lang="ar"] h3,
+[data-lang="ar"] .sobj,[data-lang="ar"] .ftitle,
+[data-lang="ar"] .phase .name,[data-lang="ar"] .gate b,
+[data-lang="ar"] .vnum{font-family:"IBM Plex Sans Arabic","IBM Plex Sans Condensed",sans-serif;letter-spacing:0}
+[data-lang="ar"] h1{font-size:clamp(30px,4.6vw,46px);line-height:1.22}
+[data-lang="ar"] h2{line-height:1.35}
+[data-lang="ar"] .sobj,[data-lang="ar"] .ftitle{line-height:1.45}
+[data-lang="ar"] p,[data-lang="ar"] li{line-height:1.85}
+
+/* Bilingual pairs */
+.ar-only{display:none}
+[data-lang="ar"] .ar-only{display:revert}
+[data-lang="ar"] .en-only{display:none}
+.tnote{
+  font-family:var(--f-mono);font-size:11px;color:var(--muted);
+  border:1px dashed var(--rule);border-radius:4px;
+  padding:9px 13px;margin:0 0 22px;direction:rtl;text-align:right;
+}
+</style>
+
+<div class="shell">
+
+<aside class="rail">
+  <p class="rail-mark">NewPower</p>
+  <p class="rail-sub">Release Gate&nbsp;· v1.0.0+1</p>
+  <div class="langbar" role="group" aria-label="Language / اللغة">
+    <button type="button" id="lang-en" aria-pressed="true">EN</button>
+    <button type="button" id="lang-ar" aria-pressed="false">ع</button>
+  </div>
+  <nav>
+    <a href="#assessment">Current assessment</a>
+    <a href="#work">Everything to be done</a>
+    <div class="grp">The plan</div>
+    <a href="#plan">Step-by-step (1–34)</a>
+    <a href="#pa">A · Reproducible</a>
+    <a href="#pb">B · Fix the build</a>
+    <a href="#pc">C · Correctness</a>
+    <a href="#pd">D · Account deletion</a>
+    <a href="#pe">E · Assets &amp; identity</a>
+    <a href="#pf">F · Android platform</a>
+    <a href="#pg">G · iOS platform</a>
+    <a href="#ph">H · External services</a>
+    <a href="#pi">I · Legal &amp; privacy</a>
+    <a href="#pj">J · Cleanup</a>
+    <a href="#pk">K · Testing</a>
+    <a href="#pl">L · Release builds</a>
+    <a href="#pm">M · Submission</a>
+    <div class="grp">By platform</div>
+    <a href="#android">Android plan</a>
+    <a href="#ios">iOS plan</a>
+    <a href="#external">External config</a>
+    <div class="grp">Before you ship</div>
+    <a href="#testing">Testing plan</a>
+    <a href="#checklist">Final checklist</a>
+    <a href="#criteria">Readiness criteria</a>
+    <a href="#critical">Critical path</a>
+  </nav>
+</aside>
+
+<main class="doc">
+
+<header class="masthead">
+  <p class="eyebrow">Production release roadmap</p>
+  <h1>From current state to first store submission</h1>
+  <p class="standfirst">A dependency-ordered execution plan for shipping <b>new_power</b> to Google&nbsp;Play and the Apple App&nbsp;Store. Every item below was derived from inspecting this repository — not from a generic checklist.</p>
+  <div class="meta">
+    <span><b>Repo</b> i:\FLUTTER\poject\new_power</span>
+    <span><b>Branch</b> notifications</span>
+    <span><b>Flutter</b> 3.38.7 · Dart 3.10.7</span>
+    <span><b>Version</b> 1.0.0+1</span>
+    <span><b>Analysed</b> 2026-08-22</span>
+  </div>
+</header>
+
+<div class="verdict">
+  <div class="vcell is-block"><div class="vnum">22</div><div class="vlab">Blocking steps</div></div>
+  <div class="vcell is-req"><div class="vnum">7</div><div class="vlab">Required</div></div>
+  <div class="vcell is-rec"><div class="vnum">1</div><div class="vlab">Recommended</div></div>
+  <div class="vcell is-opt"><div class="vnum">1</div><div class="vlab">Optional</div></div>
+  <div class="vcell"><div class="vnum">34</div><div class="vlab">Total steps</div></div>
+</div>
+
+<p class="tnote ar-only">ملاحظة: العناوين والخطوات والتسميات مترجمة إلى العربية. أما التفاصيل التقنية — أسماء الملفات، الأوامر، معرّفات الكود ورسائل الأخطاء — فتبقى بالإنجليزية عمداً، لأنها قيم حرفية يجب كتابتها كما هي.</p>
+
+<div class="callout">
+  <h3>Two facts that frame everything else</h3>
+  <p><b>The Android release build currently fails.</b> Verified by running it: <code>:flutter_local_notifications:generateReleaseLintModel</code> cannot resolve <code>com.android.tools:desugar_jdk_libs:1.2.2</code>. The task only runs on release builds, which is exactly why debug works and release does not.</p>
+  <p style="margin-bottom:0"><b>iOS has never been built.</b> There is no <code>ios/Podfile</code>, no <code>Pods-Runner.release.xcconfig</code> include, and no <code>.entitlements</code> file — meaning push notifications are entirely non-functional on iOS today.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="assessment"><span class="num">Section 01</span>Current project assessment</h2>
+
+<p><b>What this app is.</b> <code>new_power</code> is a Flutter&nbsp;3.38.7 / Dart&nbsp;3.10.7 field-sales operations app for construction sales representatives. 290 hand-written Dart files (509 including generated code) in a feature-first Bloc/Cubit + GetIt + Retrofit/Dio architecture. Six feature modules: <b>auth</b>, <b>projects</b> (registration, activities, outcomes, stakeholders, map picking, file / voice / photo attachments), <b>catalog</b>, <b>notifications</b> (FCM + in-app inbox), <b>user</b>, <b>onboarding</b>. Bilingual AR/EN with RTL, custom light and dark theming, IBM Plex Sans Arabic.</p>
+
+<h3>Health of the codebase: good</h3>
+<p><code>flutter analyze</code> returns 6 issues, all informational — 2 unused private declarations, 3 naming lints, 1 unused widget class. All 15 tests pass. There are no hardcoded UI strings, no <code>http://</code> endpoints, no localhost leftovers, and no committed secrets beyond the Google&nbsp;Maps keys. The networking layer — single-flight token refresh, disciplined 401-vs-403 handling, explicit FormData-stream rejection — is unusually well considered.</p>
+
+<h3>Health of the release path: not ready</h3>
+<p>Nothing about this project has ever been configured for distribution.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Area</th><th>Current state</th></tr></thead>
+  <tbody>
+    <tr><td>Android release build</td><td class="st"><b style="color:var(--brand)">Fails</b> — verified, <code>BUILD FAILED</code>, exit&nbsp;1</td></tr>
+    <tr><td>Android application ID</td><td class="st">com.example.new_power <em>(placeholder)</em></td></tr>
+    <tr><td>Android signing</td><td class="st">Debug keystore</td></tr>
+    <tr><td>iOS project</td><td class="st">No Podfile; CocoaPods never run</td></tr>
+    <tr><td>iOS bundle ID</td><td class="st">com.example.newPower <em>(placeholder)</em></td></tr>
+    <tr><td>iOS deployment target</td><td class="st">13.0 — below dependency requirements</td></tr>
+    <tr><td>iOS push capability</td><td class="st">No entitlements file → APNs will not work</td></tr>
+    <tr><td>App icon</td><td class="st">Non-square 896×1200, squashed</td></tr>
+    <tr><td>Account deletion</td><td class="st">Absent, though the app supports account creation</td></tr>
+    <tr><td>Privacy policy</td><td class="st">Does not exist</td></tr>
+    <tr><td>Crash reporting</td><td class="st">None</td></tr>
+    <tr><td>Git</td><td class="st">Files the build needs are untracked</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <p><b>The most important structural finding.</b> The only meaningful debug-versus-release behavioural divergence in the entire codebase is emulator-based login blocking. That means the release build's authentication path <b>has never been executed by anyone</b> — and it is the first path both app stores' automated tooling will hit.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="work"><span class="num">Section 02</span>Everything that must be done</h2>
+
+<h3><span class="imp imp--block">Must do before release</span></h3>
+
+<h4>Build</h4>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B1</span><span class="ftitle">Android release build fails on desugaring artifact resolution</span></div>
+  <p>Verified by running <code>flutter build apk --release</code>:</p>
+  <pre><code>Execution failed for task ':flutter_local_notifications:generateReleaseLintModel'.
+&gt; Could not find desugar_jdk_libs-1.2.2.jar
+  (com.android.tools:desugar_jdk_libs:1.2.2)</code></pre>
+  <p><code>flutter_local_notifications-18.0.1/android/build.gradle:45</code> pins <code>com.android.tools:desugar_jdk_libs:1.2.2</code> for its own subproject. Only <code>2.1.4</code> exists in the local Gradle cache, and <code>dl.google.com</code> is unreachable from this machine. The existing <code>subprojects { resolutionStrategy }</code> block in <code>android/build.gradle.kts</code> forces AGP only, and only on the <code>classpath</code> configuration — which is why it does not cover this.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B2</span><span class="ftitle">iOS has no CocoaPods integration</span></div>
+  <p>No <code>ios/Podfile</code> exists, and <code>ios/Flutter/Release.xcconfig</code> contains only <code>#include "Generated.xcconfig"</code> — the <code>Pods-Runner.release.xcconfig</code> include that <code>pod install</code> adds is absent. iOS has never been built.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B3</span><span class="ftitle">iOS deployment target is too low for its own dependencies</span></div>
+  <p><code>project.pbxproj:349</code> sets <code>IPHONEOS_DEPLOYMENT_TARGET = 13.0</code> and <code>AppFrameworkInfo.plist</code> sets <code>MinimumOSVersion 13.0</code>. But <code>google_maps_flutter_ios</code> 2.18.4 declares <code>s.platform = :ios, '14.0'</code>. <code>pod install</code> will refuse to resolve.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B4</span><span class="ftitle">Files the build requires are untracked in git</span></div>
+  <p><code>git status</code> shows these as <code>??</code>: <code>lib/firebase_options.dart</code>, <code>lib/features/notifications/data/repo/push_service.dart</code>, <code>lib/features/catalog/ui/widgets/catalog_image.dart</code>, <code>lib/features/projects/ui/widgets/stakeholder_slot_field.dart</code>, <code>android/app/google-services.json</code>, <code>ios/Runner/GoogleService-Info.plist</code>, <code>assets/images/newpower-logo.svg</code>.</p>
+  <p>A clean checkout does not compile. Any CI, any second machine, and any recovery from this working copy is broken.</p>
+</div>
+
+<h4>Identity &amp; signing</h4>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B5</span><span class="ftitle">Android application ID is still the placeholder</span></div>
+  <p><code>com.example.new_power</code> in both <code>namespace</code> and <code>applicationId</code> (<code>android/app/build.gradle.kts:11,35</code>). Confirmed present in the merged release manifest as <code>com.example.new_power.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION</code>. Google Play rejects <code>com.example.*</code>, and this value is <b>permanent once published</b>.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B6</span><span class="ftitle">iOS bundle identifier is still the placeholder</span></div>
+  <p><code>com.example.newPower</code> appears in the pbxproj, in <code>GoogleService-Info.plist</code> (<code>BUNDLE_ID</code>), and in <code>firebase_options.dart:69</code>.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B7</span><span class="ftitle">Android release signs with the debug keystore</span></div>
+  <p><code>android/app/build.gradle.kts:44-47</code>. There is no <code>key.properties</code> and no <code>.jks</code> anywhere in the tree. Play rejects debug-signed uploads.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B8</span><span class="ftitle">iOS has no signing configuration and no entitlements file</span></div>
+  <p><code>CODE_SIGN_IDENTITY[sdk=iphoneos*] = "iPhone Developer"</code>, no <code>DEVELOPMENT_TEAM</code>, and <code>find ios -name "*.entitlements"</code> returns nothing.</p>
+  <p>Without an entitlements file carrying <code>aps-environment</code>, <b>iOS push notifications will not function at all</b> — the entire <code>PushService</code> is inert on iOS.</p>
+</div>
+
+<h4>Functional &amp; release-mode</h4>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B9</span><span class="ftitle">Release builds block login on emulators, and can permanently lock out real users</span></div>
+  <p><code>device_integrity_service.dart:35</code> — emulator detection is gated <code>if (!kDebugMode)</code>. <code>AuthRepository._integrityGuard()</code> runs before <code>register</code>, <code>login</code> and <code>verifyOtp</code>, returning <code>DEVICE_INTEGRITY_FAILED</code>. Two consequences:</p>
+  <ul>
+    <li>Google Play's pre-launch report and Firebase Test Lab run on virtual devices — they will report the app as unusable.</li>
+    <li><code>_check()</code> defaults to <code>true</code> (compromised) when the underlying call throws, and <code>safe_device</code>'s Android root check has well-known false positives on OEM ROMs. A legitimate user hitting either case is <b>locked out of the app forever with no recovery path</b>.</li>
+  </ul>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B10</span><span class="ftitle">Server error messages are corrupted before display</span></div>
+  <p><code>ApiErrorHandler._sanitizeMessage</code> (<code>api_error_handler.dart:161-201</code>) replaces <code>\b(SELECT|FROM|WHERE|INSERT|DELETE|UPDATE|DROP|TABLE|CREATE|ALTER|EXEC|EXECUTE)\b</code> with <code>[sql]</code>, and any <code>/…</code> sequence with <code>[path]</code>.</p>
+  <p>Every feature Bloc displays <code>error.message</code> verbatim — <code>listErrorMessage: error.message</code> in <code>projects_bloc</code>, <code>activities_bloc</code> and <code>outcomes_bloc</code>; <code>error.message ?? 'Login failed'</code> in <code>login_cubit.dart:74</code>. So <em>"You cannot update a confirmed outcome"</em> renders as <em>"You cannot <b>[sql]</b> a confirmed outcome"</em>, and <em>"Owner/Manager required"</em> becomes <em>"Owner<b>[path]</b>"</em>. This affects essentially every business error in the app.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B11</span><span class="ftitle">Five localization keys used in code exist only in Arabic</span></div>
+  <p><code>error_rate_limited_login</code>, <code>_register</code>, <code>_otp</code>, <code>_forgot_password</code> and <code>_reset_password</code> are defined in <code>ar_sy.dart:854-864</code> and consumed by five auth screens, but are missing from <code>en_us.dart</code>.</p>
+  <p><code>AppLocalizations.translate</code> returns the raw key on a miss (<code>_localizedStrings[key] ?? key</code>) — despite the doc comment claiming an English fallback. An English-speaking reviewer who trips a rate limit sees the literal text <code>error_rate_limited_login</code>.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B12</span><span class="ftitle">Android auto-backup will brick restored installs</span></div>
+  <p>The manifest sets no <code>android:allowBackup</code>, so it defaults to <code>true</code>. <code>SecureStorageHelper</code> uses <code>AndroidOptions(encryptedSharedPreferences: true)</code>, whose keys live in the hardware keystore and do not migrate.</p>
+  <p>On a device-to-device restore the prefs blob is present but undecryptable → <code>readSafe</code> throws <code>SecureStorageException</code> → <code>AppStartupRouter.resolve()</code> catches it and routes to <code>startupError</code> permanently, and the Dio <code>onRequest</code> interceptor throws on every subsequent request. Confirmed in the merged release manifest: no <code>allowBackup</code> attribute, <code>androidx.security_security-crypto</code> present.</p>
+</div>
+
+<h4>Store policy</h4>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B13</span><span class="ftitle">No in-app account deletion</span></div>
+  <p>The app supports account creation (<code>/auth/register</code>; <code>RegisterScreen</code> is routable). Apple Guideline&nbsp;5.1.1(v) requires in-app account deletion for any app offering account creation. Google Play's data-deletion policy requires both in-app deletion <em>and</em> a publicly reachable web URL.</p>
+  <p><code>api_constants.dart</code> has no delete or deactivate endpoint — <b>this requires backend work</b>, not just UI.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B14</span><span class="ftitle">Photo and video permissions are merged in but not needed</span></div>
+  <p>Verified from <code>build/app/intermediates/merged_manifests/release/processReleaseManifest/AndroidManifest.xml</code>:</p>
+  <pre><code>android.permission.READ_MEDIA_IMAGES
+android.permission.READ_MEDIA_VIDEO
+android.permission.READ_MEDIA_AUDIO</code></pre>
+  <p>All three come from <code>open_filex</code>, which only ever hands app-internal downloaded files to the OS viewer. Play requires a Photo and Video Permissions declaration for these and rejects apps whose declared use is not core functionality.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B15</span><span class="ftitle">No privacy policy exists</span></div>
+  <p>Required as a Play listing URL, for the Play Data Safety form, and for App Store Connect App Privacy. The app collects location, camera images, audio, device identifiers and account data.</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B16</span><span class="ftitle">Reviewers cannot create an account</span></div>
+  <p>Registration requires a <code>managerCode</code> (<code>SM-XXXXXXXX</code>, validated in <code>register_request.dart:114</code>). Both stores need a working demo account plus written walkthrough instructions, or the submission is rejected as "unable to review".</p>
+</div>
+
+<div class="finding sev-block">
+  <div class="fhead"><span class="fid">B17</span><span class="ftitle">The app icon is a non-square wordmark</span></div>
+  <p><code>assets/images/icon.png</code> is <b>896×1200</b>. <code>flutter_launcher_icons</code> squashed it into 192×192, 432×432 and the iOS 1024×1024. Rendered and inspected: the result is a horizontally-compressed "NEW POWER" wordmark floating in white space, illegible below roughly 120&nbsp;px.</p>
+  <p>Worse, the Android adaptive icon inset is only 16%, so the circular launcher mask will clip the wordmark to read <em>"EW POWE"</em>.</p>
+</div>
+
+<h3><span class="imp imp--req">Should do before release</span></h3>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S1</span><span class="ftitle">Restrict the Google Maps API keys</span></div>
+  <p>Two distinct unrestricted-looking keys are hardcoded: <code>AIzaSyAQ9x9vMDWrRfNL21hu2I4iCIN45BVtniw</code> in <code>AndroidManifest.xml:22</code> and <code>AIzaSyCOmv1TLhNOfXKPIEVDwe196BWMnRHWVcI</code> in <code>AppDelegate.swift:11</code>. These are extractable from any shipped binary — console-side restriction is the only defence. An unrestricted key on a billed project is an open invoice.</p>
+</div>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S2</span><span class="ftitle">Add crash reporting</span></div>
+  <p>Zero crash visibility exists — grepping for crashlytics or sentry returns nothing. The Firebase project <code>newpower-bgx</code> is already provisioned, so <code>firebase_crashlytics</code> is a near-free addition. Shipping a first release with no crash telemetry means the first production defect is invisible until a user reports it.</p>
+</div>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S3</span><span class="ftitle">Theme and language break after logout</span></div>
+  <p><code>AuthService.logout()</code> calls <code>resetGetIt()</code> un-awaited, and <code>resetGetIt</code> is itself <code>async</code> but calls <code>setupGetIt()</code> without awaiting. That replaces the <code>ThemeNotifier</code> and <code>LanguageManager</code> singletons while <code>MyApp</code>'s two <code>ValueListenableBuilder</code>s still hold references to the originals. After a logout, theme and language switching silently stop working until the app is killed.</p>
+</div>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S4</span><span class="ftitle">Clear secure storage on first run after install (iOS)</span></div>
+  <p>The iOS Keychain survives app deletion. A reinstall reads the previous user's <code>refreshToken</code> and <code>deviceId</code> from <code>SecureStorageHelper</code> and resumes their session.</p>
+</div>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S5</span><span class="ftitle">Remove <code>DeviceCompromisedApp</code></span></div>
+  <p><code>device_compromised_screen.dart:73</code> calls <code>exit(0)</code>. It is dead code — never referenced — but Apple rejects programmatic termination. Leave no such call in a submitted binary.</p>
+</div>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S6</span><span class="ftitle">Never flip <code>FeatureFlags.offlineSyncEnabled</code></span></div>
+  <p>The analyzer confirms <code>_retryOfflineQueue</code> is unreferenced: nothing in <code>DioFactory</code> subscribes to connectivity. With the flag on, <code>_enqueueOfflineRequest</code> parks the handler and nothing ever calls <code>_retryOfflineQueue</code> — every GET during a network blip hangs for the full three-minute timeout. The flag is correctly <code>false</code>; the plan must ensure it ships that way.</p>
+</div>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S7</span><span class="ftitle">Replace the raw <code>print()</code> security logger</span></div>
+  <p><code>dio_factory.dart:773</code> logs endpoints and failure details to unfiltered device logs in release.</p>
+</div>
+
+<div class="finding sev-should">
+  <div class="fhead"><span class="fid">S8</span><span class="ftitle">Add <code>ITSAppUsesNonExemptEncryption = false</code> to iOS Info.plist</span></div>
+  <p>Without it, every single TestFlight and App Store upload stalls on the export-compliance question.</p>
+</div>
+
+<h3><span class="imp imp--opt">Can be done later</span></h3>
+
+<div class="finding sev-later">
+  <ul>
+    <li>Remove unused dependencies: <code>lottie</code>, <code>carousel_slider</code>, <code>smooth_page_indicator</code> (verified 0 imports each) and <code>intl</code> as a direct dependency.</li>
+    <li><code>hive</code> / <code>hive_flutter</code> serve only the disabled offline feature — but <code>main.dart</code> calls <code>Hive.initFlutter()</code> and <code>OfflineQueueStore</code> imports it, so removal means touching suspended code. Leaving them is the lower-risk choice.</li>
+    <li>Downscale the onboarding PNGs — <code>onbarding1/2/3.png</code> are 2.78&nbsp;MB combined out of a 65&nbsp;MB fat APK.</li>
+    <li>Repo hygiene: <code>photo_2026-08-21_18-38-04.jpg</code>, <code>image.png</code>, <code>flutter_01.log</code>, the deleted <code>index (2).html</code>, and roughly 600&nbsp;KB of <code>.md</code> specs sit in the repository root.</li>
+    <li>Clear the 6 analyzer infos and warnings.</li>
+    <li>Remove the <code>web/</code>, <code>linux/</code>, <code>macos/</code> and <code>windows/</code> platform folders — <code>firebase_options.dart</code> explicitly throws on all four.</li>
+    <li>Add an iOS notification-permission priming screen before <code>PushService.initialise()</code> fires the OS prompt on <code>MainScreen.initState</code>.</li>
+    <li>Add <code>CFBundleLocalizations</code> for Arabic so the App Store listing shows both languages.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="plan"><span class="num">Section 03</span>Step-by-step implementation plan</h2>
+<p>Thirty-four steps in thirteen phases. The order encodes real dependencies — a step's prerequisites are named explicitly, and later steps consume earlier outputs. Do not reorder without checking the <b>Dependencies</b> row.</p>
+
+<!-- PHASE A -->
+<div class="phase" id="pa"><span class="tag">Phase A</span><span class="name">Make the project reproducible</span><span class="rng">Steps 1–2</span></div>
+
+<article class="step sev-block" id="s1">
+  <header><span class="snum">01</span><span class="sobj">Get the repository into a state where a clean checkout compiles</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p><code>git add</code> the seven untracked build-critical files: <code>lib/firebase_options.dart</code>, <code>lib/features/notifications/data/repo/push_service.dart</code>, <code>lib/features/catalog/ui/widgets/catalog_image.dart</code>, <code>lib/features/projects/ui/widgets/stakeholder_slot_field.dart</code>, <code>android/app/google-services.json</code>, <code>ios/Runner/GoogleService-Info.plist</code>, <code>assets/images/newpower-logo.svg</code>, plus <code>test/register_stakeholder_dto_test.dart</code>. Stage the deletion of <code>index (2).html</code>. Delete <code>photo_2026-08-21_18-38-04.jpg</code>, <code>image.png</code> and <code>flutter_01.log</code>, and add <code>*.log</code> to <code>.gitignore</code>. Commit. Create a <code>release/1.0.0</code> branch off <code>notifications</code>.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd>Repository root, <code>.gitignore</code>, git index</dd>
+      <dt>Reason</dt><dd>Every subsequent step is unverifiable if the tree cannot be reconstructed. Firebase config files are not secrets — they identify a project and are designed to ship inside the binary, as <code>firebase_options.dart</code>'s own header notes.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd><code>git clone</code> into a scratch directory, then <code>flutter pub get &amp;&amp; flutter analyze</code> — same 6 issues, no missing-file errors.</dd>
+      <dt>Result</dt><dd>A reproducible build from a clean checkout.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s2">
+  <header><span class="snum">02</span><span class="sobj">Restore reliable access to Google's Maven repository</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Confirm <code>dl.google.com</code> is reachable:</p>
+    <pre><code>curl -I https://dl.google.com/dl/android/maven2/com/android/tools/\
+desugar_jdk_libs/2.1.4/desugar_jdk_libs-2.1.4.pom</code></pre>
+    <p>If it is not, configure a mirror or VPN before proceeding. The existing timeout and retry tuning in <code>android/gradle.properties</code> documents that this has been failing repeatedly.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd>Environment only</dd>
+      <dt>Reason</dt><dd>The release build failure has two causes; one is environmental, and a code fix cannot be verified while the network is down.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd><code>curl</code> returns 200.</dd>
+      <dt>Result</dt><dd>Gradle can resolve artifacts.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE B -->
+<div class="phase" id="pb"><span class="tag">Phase B</span><span class="name">Fix the release build</span><span class="rng">Step 3</span></div>
+
+<article class="step sev-block" id="s3">
+  <header><span class="snum">03</span><span class="sobj">Make <code>flutter build apk --release</code> and <code>appbundle</code> succeed</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>In <code>android/build.gradle.kts</code>, add a block alongside the existing AGP-forcing one:</p>
+    <pre><code>subprojects {
+  configurations.all {
+    resolutionStrategy {
+      force("com.android.tools:desugar_jdk_libs:2.1.4")
+      force("com.android.tools:desugar_jdk_libs_configuration:2.1.4")
+    }
+  }
+}</code></pre>
+    <p>Note the existing block matches only the <code>classpath</code> configuration, which is why it does not cover this. As a belt-and-braces measure add <code>lint { checkReleaseBuilds = false }</code> to the <code>android { }</code> block in <code>android/app/build.gradle.kts</code> — the failing task is <code>generateReleaseLintModel</code>, invoked transitively from the app's release lint.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>android/build.gradle.kts</code>, <code>android/app/build.gradle.kts</code></dd>
+      <dt>Reason</dt><dd><code>flutter_local_notifications-18.0.1/android/build.gradle:45</code> pins an artifact version Google no longer serves at that coordinate. Forcing 2.1.4 — already cached, already used by the app module — resolves it without changing behaviour, since 2.1.4 is a strict superset of 1.2.2's desugaring.</dd>
+      <dt>Depends on</dt><dd>Steps 1, 2</dd>
+      <dt>Verify</dt><dd><code>flutter build apk --release</code> exits 0 and produces <code>build/app/outputs/flutter-apk/app-release.apk</code>.</dd>
+      <dt>Result</dt><dd>Android release builds succeed — the first time in this project's history that will be reliably true.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE C -->
+<div class="phase" id="pc"><span class="tag">Phase C</span><span class="name">Correctness fixes</span><span class="rng">Steps 4–9</span></div>
+
+<article class="step sev-block" id="s4">
+  <header><span class="snum">04</span><span class="sobj">Stop release builds from blocking authentication</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>In <code>DeviceIntegrityService</code>, change <code>_check</code>'s default from <code>true</code> to <code>false</code> so a plugin failure never locks a user out. Remove the emulator branch from <code>isCompromised()</code> (delete the <code>if (!kDebugMode)</code> block at line 35) and from <code>getDetailedReport()</code>, keeping root/jailbreak and mock-location detection. If the business genuinely requires blocking emulators, replace the client-side check with Play Integrity / App Attest verified server-side — do not ship a client-side check the store's own tooling trips.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>lib/core/services/device_integrity_service.dart</code></dd>
+      <dt>Reason</dt><dd>This is the only behavioural difference between debug and release in the codebase, it sits in front of <code>login</code>/<code>register</code>/<code>verifyOtp</code>, and it fails closed on any exception. It will fail Play's pre-launch report and can permanently lock out real users on OEM ROMs.</dd>
+      <dt>Depends on</dt><dd>Step 3</dd>
+      <dt>Verify</dt><dd>Build a release APK, install on an Android emulator, log in successfully. Confirm <code>flutter analyze</code> stays clean.</dd>
+      <dt>Result</dt><dd>Release-mode authentication works everywhere debug-mode authentication works.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s5">
+  <header><span class="snum">05</span><span class="sobj">Stop corrupting user-facing error messages</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>In <code>ApiErrorHandler._sanitizeMessage</code>, remove the SQL-keyword replacement and the filesystem-path replacement. Keep the password / PIN / token / Authorization / deviceId masking and the 150-character cap. The server is the trust boundary for its own message text; blanket keyword scrubbing of a message that is <em>displayed to the user</em> only damages legitimate copy.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>lib/core/networking/api_error_handler.dart:161-201</code></dd>
+      <dt>Reason</dt><dd>Every business error in the app renders through <code>error.message</code>. Common English business messages contain <em>update</em>, <em>create</em>, <em>delete</em>, <em>from</em>, <em>where</em> — all currently replaced with <code>[sql]</code>.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd>Add a unit test asserting <code>_sanitizeMessage("You cannot update this project")</code> returns the input unchanged, and that <code>"password: hunter2"</code> is still masked. Trigger a real 409/422 from the backend and read the on-screen text.</dd>
+      <dt>Result</dt><dd>Server error messages display as written.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s6">
+  <header><span class="snum">06</span><span class="sobj">Eliminate raw localization keys from the English UI</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Add the five missing rate-limit keys to <code>en_us.dart</code>. Additionally, change <code>AppLocalizations.translate</code> to fall back to <code>enUS[key]</code> before returning the raw key, so any future gap degrades to English rather than to a debug string. Then reconcile the remaining 21 Arabic-only and 13 English-only keys: delete the dead wallet leftovers (<code>error_insufficient_balance</code>, <code>error_wallet_frozen</code>, <code>error_kyc_required</code>, <code>error_self_transfer</code>, <code>qr_tx_status_*</code>) and the unused <code>lang_french</code>/<code>german</code>/<code>russian</code>/<code>turkish</code>, and add real translations for anything a future step will use.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>lib/core/localization/languages/en_us.dart</code>, <code>ar_sy.dart</code>, <code>lib/core/localization/app_localizations.dart:42</code></dd>
+      <dt>Reason</dt><dd>English is the language App Store reviewers use. <code>error_rate_limited_login</code> appearing on screen reads as a broken app.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd>Add a test asserting <code>arSY.keys</code> and <code>enUS.keys</code> are equal sets. Run the app in English, deliberately trip the login rate limit, confirm readable copy.</dd>
+      <dt>Result</dt><dd>Key parity between locales, enforced by a test.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s7">
+  <header><span class="snum">07</span><span class="sobj">Prevent Android backup/restore from bricking the app</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Add <code>android:allowBackup="false"</code> and <code>android:fullBackupContent="false"</code> to the <code>&lt;application&gt;</code> element. If backup is wanted for non-credential data, instead supply <code>android:dataExtractionRules</code> and <code>android:fullBackupContent</code> XML that exclude the <code>FlutterSecureStorage</code> shared-prefs file.</p>
+    <p><b>In addition</b>, make <code>SecureStorageHelper.readSafe</code> return <code>null</code> instead of throwing on a read failure, and have <code>save</code> / <code>delete</code> swallow-and-log — a corrupt keystore should force a re-login, not a permanent startup-error screen.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>android/app/src/main/AndroidManifest.xml</code>, <code>lib/core/helpers/secure_storage_helper.dart</code></dd>
+      <dt>Reason</dt><dd><code>EncryptedSharedPreferences</code> keys are non-migratable. With backup on, restore produces an undecryptable blob; <code>readSafe</code> throws; <code>AppStartupRouter</code> routes to <code>startupError</code> on every launch, and the Dio <code>onRequest</code> interceptor throws on every request. There is no user-recoverable path out.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd>Install the release APK, log in, <code>adb shell bmgr backupnow &lt;appId&gt;</code>, uninstall, reinstall, <code>adb shell bmgr restore</code> — the app must reach the login screen, not the error screen. Separately, corrupt the prefs file on a rooted test device and confirm a clean fall-through to login.</dd>
+      <dt>Result</dt><dd>No unrecoverable state after a device restore.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step" id="s8">
+  <header><span class="snum">08</span><span class="sobj">Fix post-logout theme and language breakage</span><span class="imp imp--req">Required</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Move <code>ThemeNotifier</code> and <code>LanguageManager</code> registration out of <code>setupGetIt()</code> into a separate <code>setupCoreSingletons()</code> called once from <code>main()</code>, and have <code>resetGetIt()</code> re-register only the session-scoped graph. <code>await</code> <code>resetGetIt()</code> in <code>AuthService.logout()</code>, and <code>await setupGetIt()</code> inside <code>resetGetIt()</code>.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>lib/core/di/dependency_injection.dart</code>, <code>lib/core/services/auth_service.dart:207</code></dd>
+      <dt>Reason</dt><dd><code>MyApp</code> captures both notifiers in <code>ValueListenableBuilder</code>s at first build. <code>resetGetIt()</code> swaps the instances underneath them; the widgets keep listening to orphans.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd>Log in → log out → log in → toggle theme and language. Both must respond.</dd>
+      <dt>Result</dt><dd>Session teardown no longer breaks app-wide preferences.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step" id="s9">
+  <header><span class="snum">09</span><span class="sobj">Remove the App-Store-hostile and dead-code hazards</span><span class="imp imp--req">Required</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Delete <code>lib/core/widget/device_compromised_screen.dart</code> — unreferenced, and it calls <code>exit(0)</code>. Replace the <code>print()</code> in <code>DioFactory._logSecurityEvent</code> with <code>debugPrint</code>, or route it to Crashlytics once Step 22 lands. Confirm <code>FeatureFlags.offlineSyncEnabled</code> is <code>false</code> and add a comment recording that <code>_retryOfflineQueue</code> is unwired, so the flag must not be flipped. Clear the 6 analyzer findings.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>device_compromised_screen.dart</code>, <code>dio_factory.dart:773</code>, <code>feature_flags.dart</code>, <code>app_colors.dart</code>, <code>category_screen.dart</code></dd>
+      <dt>Reason</dt><dd><code>exit(0)</code> is an Apple rejection trigger; unfiltered release logging leaks endpoints; the offline flag is a live trap.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd><code>flutter analyze</code> → 0 issues. <code>grep -rn "exit(0)" lib</code> → empty.</dd>
+      <dt>Result</dt><dd>No known rejection triggers or dead traps in the shipped binary.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE D -->
+<div class="phase" id="pd"><span class="tag">Phase D</span><span class="name">Account deletion</span><span class="rng">Steps 10–11</span></div>
+
+<article class="step sev-block" id="s10">
+  <header><span class="snum">10</span><span class="sobj">Get a backend account-deletion endpoint</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p><b>External / backend work.</b> Specify and have the backend team implement <code>DELETE /users/me</code> (or <code>POST /users/me/delete-request</code>) with password or OTP re-authentication, returning a confirmation and revoking all sessions and FCM tokens. Define the retention window and what is anonymised versus hard-deleted — you will need to state this verbatim on the store forms.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd>None in this repo — a specification document only</dd>
+      <dt>Reason</dt><dd>Neither store will accept the app without it, and no client-side change can substitute.</dd>
+      <dt>Depends on</dt><dd>Nothing — <b>start this first; it has the longest lead time of anything in this plan</b></dd>
+      <dt>Verify</dt><dd>Endpoint responds correctly to curl against the production API.</dd>
+      <dt>Result</dt><dd>A deletion contract the client can implement against.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s11">
+  <header><span class="snum">11</span><span class="sobj">Ship in-app account deletion</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Add the endpoint to <code>ApiConstants</code>, a method to <code>ApiService</code> (regenerate <code>api_service.g.dart</code> via <code>build_runner</code>), a repository method on <code>UserRepository</code>, and a cubit action. Add a "Delete account" entry to the Profile screen's settings section, with a confirmation dialog naming the consequences, re-authentication, then full local teardown — <code>SecureStorageHelper.deleteAll()</code>, <code>CacheHelper.clearData()</code>, <code>PushService.dispose()</code>, <code>resetGetIt()</code> — and a hard navigation to login. The <code>delete_account</code> / <code>cancel_delete_account</code> Arabic keys already exist at <code>ar_sy.dart:917</code>; add English equivalents and any new keys to both files.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>api_constants.dart</code>, <code>api_service.dart</code> (+ <code>.g.dart</code>), <code>user_repository.dart</code>, <code>account_settings_cubit/</code>, <code>profile_screen.dart</code>, both language files</dd>
+      <dt>Reason</dt><dd>Apple Guideline 5.1.1(v) and Google Play's data-deletion policy.</dd>
+      <dt>Depends on</dt><dd>Steps 6, 10</dd>
+      <dt>Verify</dt><dd>Delete a test account end-to-end; confirm the account is gone server-side, local storage is empty, and the app returns to login.</dd>
+      <dt>Result</dt><dd>Both stores' deletion requirements satisfied in-app.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE E -->
+<div class="phase" id="pe"><span class="tag">Phase E</span><span class="name">Assets and identity</span><span class="rng">Steps 12–14</span></div>
+
+<article class="step sev-block" id="s12">
+  <header><span class="snum">12</span><span class="sobj">Produce a correct app icon set</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Commission or produce a <b>square 1024×1024</b> icon — a mark, not the full wordmark, because the wordmark is unreadable at 60×60 and will be clipped by Android's circular mask. Produce a separate 1024×1024 adaptive foreground with the mark occupying the centre ~66% (the safe zone) on transparency. Update <code>flutter_launcher_icons</code> in <code>pubspec.yaml</code> to point <code>image_path</code> at the square icon and <code>adaptive_icon_foreground</code> at the padded foreground. Run <code>dart run flutter_launcher_icons</code>. Also produce the 512×512 Play listing icon and the 1024×1024 App Store icon — no alpha, no rounded corners; <code>remove_alpha_ios: true</code> is already set, keep it.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>assets/images/</code>, <code>pubspec.yaml</code>, <code>android/app/src/main/res/mipmap-*</code>, <code>ios/Runner/Assets.xcassets/AppIcon.appiconset/</code></dd>
+      <dt>Reason</dt><dd>The current source is 896×1200. Verified visually: the generated 1024 icon is a horizontally-squashed wordmark with unbalanced whitespace; the 192×192 launcher icon is unreadable.</dd>
+      <dt>Depends on</dt><dd>Nothing</dd>
+      <dt>Verify</dt><dd>Confirm the 1024 PNG is square and colortype 2 (<code>od -An -tu1 -j24 -N2</code> → <code>8 2</code>). Install on a Pixel (circle mask) and a Samsung (squircle) and confirm nothing is clipped. Check the iOS home screen and Settings-app icon sizes.</dd>
+      <dt>Result</dt><dd>A legible, correctly proportioned icon on both platforms and both stores.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s13">
+  <header><span class="snum">13</span><span class="sobj">Set the final Android application ID</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Choose the permanent ID — for example <code>com.newpower.sales</code>; confirm with the business, as it can never change after publication. Set both <code>namespace</code> and <code>applicationId</code> in <code>android/app/build.gradle.kts</code>. <b>Then</b> regenerate <code>google-services.json</code> from the Firebase console for the new package name (Step 21) and rename the Kotlin package directory under <code>android/app/src/main/kotlin/</code> to match.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>android/app/build.gradle.kts</code>, <code>android/app/src/main/kotlin/</code>, <code>android/app/google-services.json</code></dd>
+      <dt>Reason</dt><dd><code>com.example.*</code> is rejected by Play and is permanent once published.</dd>
+      <dt>Depends on</dt><dd>Steps 3, 21</dd>
+      <dt>Verify</dt><dd><code>flutter build apk --release</code>, then confirm <code>package="…"</code> in the merged release manifest. Install and confirm <code>Firebase.initializeApp</code> succeeds — no <code>[push] Firebase unavailable</code> in logcat.</dd>
+      <dt>Result</dt><dd>A permanent, store-acceptable Android identity.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s14">
+  <header><span class="snum">14</span><span class="sobj">Set the final iOS bundle identifier</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>In Xcode set <code>PRODUCT_BUNDLE_IDENTIFIER</code> for both <code>Runner</code> and <code>RunnerTests</code> — the latter as <code>&lt;id&gt;.RunnerTests</code>. Regenerate <code>GoogleService-Info.plist</code> for the new bundle ID (Step 21). Update <code>firebase_options.dart</code>'s <code>ios</code> block — <code>appId</code>, <code>apiKey</code>, <code>iosBundleId</code> — to match. The file's own header warns that a mismatch produces a native build talking to the wrong project.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>ios/Runner.xcodeproj/project.pbxproj</code>, <code>ios/Runner/GoogleService-Info.plist</code>, <code>lib/firebase_options.dart:59-69</code></dd>
+      <dt>Reason</dt><dd>Placeholder identifier; must match the App Store Connect record and the APNs key registration.</dd>
+      <dt>Depends on</dt><dd>Step 21</dd>
+      <dt>Verify</dt><dd><code>grep BUNDLE_ID ios/Runner/GoogleService-Info.plist</code> matches <code>PRODUCT_BUNDLE_IDENTIFIER</code> matches <code>firebase_options.dart:iosBundleId</code>.</dd>
+      <dt>Result</dt><dd>One consistent iOS identity across Xcode, Firebase and Dart.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE F -->
+<div class="phase" id="pf"><span class="tag">Phase F</span><span class="name">Android platform configuration</span><span class="rng">Steps 15–18</span></div>
+
+<article class="step sev-block" id="s15">
+  <header><span class="snum">15</span><span class="sobj">Create and wire the upload keystore</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <pre><code>keytool -genkey -v -keystore ~/newpower-upload.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias upload</code></pre>
+    <p>Create <code>android/key.properties</code> with <code>storePassword</code>, <code>keyPassword</code>, <code>keyAlias</code> and <code>storeFile</code> — already gitignored. In <code>android/app/build.gradle.kts</code>, load it and define <code>signingConfigs { create("release") { … } }</code>, then set <code>buildTypes { release { signingConfig = signingConfigs.getByName("release") } }</code>, replacing the debug config. Guard the load so the build still works when <code>key.properties</code> is absent (fall back to debug), so contributors aren't blocked.</p>
+    <p><b>Back up the keystore and passwords to two separate secure locations.</b> Losing it means losing the ability to update the app.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>android/key.properties</code> (untracked), <code>android/app/build.gradle.kts:43-48</code></dd>
+      <dt>Reason</dt><dd>Play rejects debug-signed uploads, and the debug key is not reproducible across machines.</dd>
+      <dt>Depends on</dt><dd>Step 3</dd>
+      <dt>Verify</dt><dd><code>flutter build appbundle --release</code>, then <code>keytool -printcert -jarfile build/app/outputs/bundle/release/app-release.aab</code> shows your alias, not <code>androiddebugkey</code>.</dd>
+      <dt>Result</dt><dd>A reproducible, Play-acceptable signing setup.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s16">
+  <header><span class="snum">16</span><span class="sobj">Remove unnecessary media permissions from the manifest</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Add <code>xmlns:tools="http://schemas.android.com/tools"</code> to the <code>&lt;manifest&gt;</code> element and:</p>
+    <pre><code>&lt;uses-permission android:name="android.permission.READ_MEDIA_IMAGES"     tools:node="remove"/&gt;
+&lt;uses-permission android:name="android.permission.READ_MEDIA_VIDEO"      tools:node="remove"/&gt;
+&lt;uses-permission android:name="android.permission.READ_MEDIA_AUDIO"      tools:node="remove"/&gt;
+&lt;uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/&gt;</code></pre>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>android/app/src/main/AndroidManifest.xml</code></dd>
+      <dt>Reason</dt><dd>All four are merged in by <code>open_filex</code>, which in this app only hands app-internal downloaded files to the OS viewer via its own <code>FileProvider</code>. Play requires a Photo and Video Permissions declaration for <code>READ_MEDIA_*</code> and rejects non-core uses.</dd>
+      <dt>Depends on</dt><dd>Step 3</dd>
+      <dt>Verify</dt><dd>Rebuild and re-inspect the merged release manifest — the three <code>READ_MEDIA_*</code> lines must be gone. Then <b>regression-test <code>open_filex</code></b>: download and open a PDF attachment from an activity, on Android 13 and Android 14.</dd>
+      <dt>Result</dt><dd>A permission set that matches what the app actually does.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step" id="s17">
+  <header><span class="snum">17</span><span class="sobj">Confirm Android SDK and Gradle settings are release-appropriate</span><span class="imp imp--req">Required</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>No change expected — verify only. Confirmed values from the merged manifest: <code>minSdkVersion=24</code>, <code>targetSdkVersion=36</code>, <code>compileSdk=36</code>, AGP 8.11.1, Kotlin 2.2.20, Java 17, <code>extractNativeLibs=false</code>, core library desugaring on with <code>desugar_jdk_libs:2.1.4</code>. Cross-check <code>record_android</code> (minSdk 23) and <code>flutter_secure_storage</code> (19) against minSdk 24 — both satisfied. Confirm <code>versionCode</code> / <code>versionName</code> flow from <code>pubspec.yaml</code> (<code>1.0.0+1</code>).</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>android/app/build.gradle.kts</code>, <code>android/settings.gradle.kts</code>, <code>pubspec.yaml</code></dd>
+      <dt>Reason</dt><dd>Play requires targetSdk ≥ 35 for new apps; 36 satisfies it. Recording explicitly that these are correct prevents a speculative change breaking them.</dd>
+      <dt>Depends on</dt><dd>Step 3</dd>
+      <dt>Verify</dt><dd>Re-read <code>&lt;uses-sdk&gt;</code> in the merged release manifest.</dd>
+      <dt>Result</dt><dd>SDK configuration confirmed compliant, unchanged.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step" id="s18">
+  <header><span class="snum">18</span><span class="sobj">Verify release-mode notification icon and channels</span><span class="imp imp--rec">Recommended</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>No config change anticipated. The manifest already declares <code>default_notification_channel_id = newpower_security</code> and a <code>default_notification_icon</code>, and <code>PushService._configureChannels</code> creates both channels with matching importance. Verify the notification icon renders as a silhouette rather than a white square — <code>@mipmap/ic_launcher</code> is a full-colour icon, which Android 5+ renders as a white blob in the status bar. If so, add a dedicated white-on-transparent <code>@drawable/ic_notification</code> and point both the manifest meta-data and <code>AndroidNotificationDetails.icon</code> at it.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>AndroidManifest.xml:55-60</code>, <code>push_service.dart</code></dd>
+      <dt>Reason</dt><dd>The manifest comment asserts the icon meta-data prevents the white-square problem, but it points at the colour launcher icon — which is exactly what causes it.</dd>
+      <dt>Depends on</dt><dd>Steps 12, 13</dd>
+      <dt>Verify</dt><dd>Send a test push from the Firebase console to a backgrounded release build; inspect the status-bar icon on Android 13+.</dd>
+      <dt>Result</dt><dd>A correctly rendered tray notification.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE G -->
+<div class="phase" id="pg"><span class="tag">Phase G</span><span class="name">iOS platform configuration</span><span class="rng">Steps 19–20</span></div>
+
+<article class="step sev-block" id="s19">
+  <header><span class="snum">19</span><span class="sobj">Bring the iOS project to a buildable state <em>(requires a Mac)</em></span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>On a macOS machine with Xcode 15+ and CocoaPods: raise <code>IPHONEOS_DEPLOYMENT_TARGET</code> to <code>15.0</code> for all configurations in the Xcode project — 14.0 is the floor for <code>google_maps_flutter_ios</code>; 15.0 gives headroom and matches where the Firebase pods are heading. Update <code>ios/Flutter/AppFrameworkInfo.plist</code> <code>MinimumOSVersion</code> to <code>15.0</code>. Then:</p>
+    <pre><code>flutter precache --ios
+cd ios &amp;&amp; pod install</code></pre>
+    <p>This generates the Podfile and adds the <code>Pods-Runner.release.xcconfig</code> include to <code>Release.xcconfig</code>. Set <code>platform :ios, '15.0'</code> at the top of the generated Podfile and add a <code>post_install</code> hook forcing <code>IPHONEOS_DEPLOYMENT_TARGET = 15.0</code> on all pod targets. Commit <code>ios/Podfile</code> and <code>ios/Podfile.lock</code>.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>project.pbxproj</code>, <code>AppFrameworkInfo.plist</code>, <code>ios/Podfile</code> (new), <code>ios/Podfile.lock</code> (new)</dd>
+      <dt>Reason</dt><dd>No Podfile exists; <code>Release.xcconfig</code> has no Pods include; <code>google_maps_flutter_ios</code> 2.18.4 declares <code>s.platform = :ios, '14.0'</code> against a project targeting 13.0. iOS cannot build today.</dd>
+      <dt>Depends on</dt><dd>Steps 1, 14</dd>
+      <dt>Verify</dt><dd><code>flutter build ios --release --no-codesign</code> completes.</dd>
+      <dt>Result</dt><dd>The first successful iOS build in this project's history.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s20">
+  <header><span class="snum">20</span><span class="sobj">Configure iOS signing, capabilities and Info.plist</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>In Xcode → Signing &amp; Capabilities: set the team, enable automatic signing, and <b>add the Push Notifications capability</b> — this creates <code>ios/Runner/Runner.entitlements</code> with <code>aps-environment</code>. Add the Background Modes capability with <em>Remote notifications</em> checked so <code>firebaseBackgroundHandler</code> can run.</p>
+    <p>In <code>Info.plist</code> add <code>ITSAppUsesNonExemptEncryption = false</code> and <code>CFBundleLocalizations = [en, ar]</code>. Verify the four existing usage-description strings read naturally to a reviewer — they currently do, and each maps to a real feature: location → map picker, camera → site photos, photo library → attachments, microphone → voice notes. Confirm <code>MARKETING_VERSION</code> / <code>CURRENT_PROJECT_VERSION</code> derive from <code>FLUTTER_BUILD_NAME</code> / <code>FLUTTER_BUILD_NUMBER</code> for the Runner target — currently only line 364 does, and line 386's <code>MARKETING_VERSION = 1.0</code> on another configuration should be reconciled.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>project.pbxproj</code>, <code>ios/Runner/Runner.entitlements</code> (new), <code>ios/Runner/Info.plist</code></dd>
+      <dt>Reason</dt><dd><code>find ios -name "*.entitlements"</code> returns nothing today — <b>push notifications are completely non-functional on iOS</b>, and the entire notifications feature would ship dead. Without <code>ITSAppUsesNonExemptEncryption</code> every upload stalls on export compliance.</dd>
+      <dt>Depends on</dt><dd>Steps 14, 19, 21</dd>
+      <dt>Verify</dt><dd>Archive in Xcode; inspect the <code>.ipa</code>'s embedded entitlements for <code>aps-environment = production</code>. Send a test push to a TestFlight build.</dd>
+      <dt>Result</dt><dd>A signable, push-capable, submittable iOS binary.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE H -->
+<div class="phase" id="ph"><span class="tag">Phase H</span><span class="name">External services</span><span class="rng">Steps 21–23</span></div>
+
+<article class="step sev-block" id="s21">
+  <header><span class="snum">21</span><span class="sobj">Reconfigure Firebase for the final identifiers</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>In the <code>newpower-bgx</code> Firebase console: add a new Android app with the final <code>applicationId</code> and a new iOS app with the final bundle ID, or delete and recreate the <code>com.example.*</code> ones. Download the new <code>google-services.json</code> and <code>GoogleService-Info.plist</code>. Register the <b>release</b> SHA-1 and SHA-256 from the Step 15 keystore on the Android app. Upload the <b>APNs Authentication Key</b> (<code>.p8</code>) from the Apple Developer portal to Firebase → Cloud Messaging → Apple app configuration. Hand-update <code>lib/firebase_options.dart</code> to match both new files exactly.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>android/app/google-services.json</code>, <code>ios/Runner/GoogleService-Info.plist</code>, <code>lib/firebase_options.dart</code></dd>
+      <dt>Reason</dt><dd>The current configs are bound to <code>com.example.new_power</code> / <code>com.example.newPower</code>. Without the APNs key, iOS push silently never delivers.</dd>
+      <dt>Depends on</dt><dd>Steps 13, 14, 15</dd>
+      <dt>Verify</dt><dd>Fresh release install on both platforms; confirm no <code>[push] Firebase unavailable</code> in logs, confirm <code>POST /device/fcm-token</code> succeeds, and send a console test push to each platform.</dd>
+      <dt>Result</dt><dd>Firebase bound to the real app identities on both platforms.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step" id="s22">
+  <header><span class="snum">22</span><span class="sobj">Add crash reporting</span><span class="imp imp--req">Required</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Add <code>firebase_crashlytics</code> to <code>pubspec.yaml</code>, apply the <code>com.google.firebase.crashlytics</code> Gradle plugin, and in <code>main()</code> wire <code>FlutterError.onError</code> and <code>PlatformDispatcher.instance.onError</code> to Crashlytics — inside the existing <code>_initialiseFirebase()</code> try/catch, so a Firebase failure still degrades gracefully rather than blocking first frame. Route <code>DioFactory._logSecurityEvent</code> to <code>recordError</code> as non-fatal.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>pubspec.yaml</code>, <code>lib/main.dart</code>, <code>android/app/build.gradle.kts</code>, <code>android/settings.gradle.kts</code>, <code>dio_factory.dart</code></dd>
+      <dt>Reason</dt><dd>There is currently zero crash visibility. For a first release of a 290-file app whose release path has never been exercised, this is the difference between diagnosing the first production defect in an hour versus a week.</dd>
+      <dt>Depends on</dt><dd>Step 21</dd>
+      <dt>Verify</dt><dd>Force a test crash in a release build; confirm it appears in the Crashlytics console with a symbolicated stack.</dd>
+      <dt>Result</dt><dd>Production failures become visible.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step" id="s23">
+  <header><span class="snum">23</span><span class="sobj">Secure the Maps API keys and confirm the production API</span><span class="imp imp--req">Required</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>In Google Cloud Console, restrict the Android key to <em>Android apps</em> with the final package name plus release SHA-1, and to the <em>Maps SDK for Android</em> API only. Restrict the iOS key to <em>iOS apps</em> with the final bundle ID, and to the <em>Maps SDK for iOS</em> only. Set daily quota caps and billing alerts.</p>
+    <p>Separately, confirm with the backend team that <code>https://gyrostack.cloud/api/v1</code> — the <code>String.fromEnvironment('API_BASE_URL')</code> default at <code>api_constants.dart:2</code> — is the production host, that its TLS certificate is valid and not near expiry, and that production CORS and rate limits are configured for real traffic volume.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd>External consoles; optionally pass <code>--dart-define=API_BASE_URL=…</code> at build time so the value is never implicit</dd>
+      <dt>Reason</dt><dd>Both Maps keys ship in plaintext inside the binary and are trivially extractable. Console-side restriction is the only control.</dd>
+      <dt>Depends on</dt><dd>Steps 13, 14, 15</dd>
+      <dt>Verify</dt><dd>Open the map picker in a release build on both platforms — tiles must render. Then attempt the same key from <code>curl</code> with no matching restrictions — it must be refused.</dd>
+      <dt>Result</dt><dd>Keys that cannot be reused outside your apps.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE I -->
+<div class="phase" id="pi"><span class="tag">Phase I</span><span class="name">Legal and privacy</span><span class="rng">Step 24</span></div>
+
+<article class="step sev-block" id="s24">
+  <header><span class="snum">24</span><span class="sobj">Publish a privacy policy and prepare the data declarations</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Write and host a privacy policy at a public HTTPS URL. Based on what this app actually collects, it must cover: precise location (<code>ACCESS_FINE_LOCATION</code>, for project pinning and visit records), photos and camera captures, audio recordings (voice notes), files, account identity (name, email, phone, username), a derived device fingerprint (SHA-256 of hardware identifiers, <code>device_service.dart</code>), FCM tokens, and device metadata (model, OS version, app version) sent on every login.</p>
+    <p>Also publish a public account-deletion request page — Play requires a web URL in addition to in-app deletion. Add links to both from the Profile screen.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd>External hosting; <code>profile_screen.dart</code>; both language files</dd>
+      <dt>Reason</dt><dd>Mandatory for the Play listing, the Play Data Safety form, and App Store Connect App Privacy. <code>grep -rni "privacy" lib</code> currently returns nothing relevant.</dd>
+      <dt>Depends on</dt><dd>Step 10 — deletion semantics must be described accurately</dd>
+      <dt>Verify</dt><dd>Both URLs load over HTTPS from a device outside your network.</dd>
+      <dt>Result</dt><dd>The legal artefacts both store forms demand.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE J -->
+<div class="phase" id="pj"><span class="tag">Phase J</span><span class="name">Optional cleanup</span><span class="rng">Step 25</span></div>
+
+<article class="step" id="s25">
+  <header><span class="snum">25</span><span class="sobj">Reduce binary size and dependency surface</span><span class="imp imp--opt">Optional</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Remove <code>lottie</code>, <code>carousel_slider</code> and <code>smooth_page_indicator</code> (verified 0 imports each) and <code>intl</code> as a direct dependency. Consider removing <code>hive</code> / <code>hive_flutter</code> if the offline feature stays suspended — but note <code>main.dart</code> calls <code>Hive.initFlutter()</code> and <code>OfflineQueueStore</code> imports it, so this requires touching the suspended code; leaving it is the lower-risk choice. Re-export the three onboarding PNGs at display resolution. Optionally delete the <code>web/</code>, <code>linux/</code>, <code>macos/</code> and <code>windows/</code> folders — <code>firebase_options.dart</code> explicitly throws on all four.</p>
+    <dl class="sgrid">
+      <dt>Files</dt><dd><code>pubspec.yaml</code>, <code>assets/images/</code>, platform folders</dd>
+      <dt>Reason</dt><dd>Smaller download, smaller attack surface, fewer transitive updates to track. Not required for a correct release.</dd>
+      <dt>Depends on</dt><dd>Step 3</dd>
+      <dt>Verify</dt><dd><code>flutter pub get &amp;&amp; flutter analyze &amp;&amp; flutter test</code> all clean; AAB size decreases.</dd>
+      <dt>Result</dt><dd>A leaner binary with the same behaviour.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE K -->
+<div class="phase" id="pk"><span class="tag">Phase K</span><span class="name">Testing</span><span class="rng">Steps 26–29</span></div>
+
+<article class="step" id="s26">
+  <header><span class="snum">26</span><span class="sobj">Automated gate — establish a green baseline</span><span class="imp imp--req">Required</span></header>
+  <div class="sbody">
+    <p><code>flutter analyze</code> (expect 0) and <code>flutter test</code> (expect all pass, including the new locale-parity and sanitizer tests from Steps 5–6).</p>
+    <dl class="sgrid">
+      <dt>Depends on</dt><dd>Steps 1–25</dd>
+      <dt>Verify</dt><dd>Both commands exit 0.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s27">
+  <header><span class="snum">27</span><span class="sobj">Android release-build device testing</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <p>Install the release-signed <code>app-release.apk</code> on <b>at least three</b> real devices spanning Android 8/9 (minSdk-adjacent), Android 13 (runtime notification permission) and Android 14/15. Run the full matrix in the <a href="#testing">Testing plan</a>. Also run one pass on an <b>emulator</b> specifically, to confirm the Step 4 fix.</p>
+    <dl class="sgrid">
+      <dt>Depends on</dt><dd>Steps 15, 16, 21, 26</dd>
+      <dt>Verify</dt><dd>Every scenario passes; Crashlytics shows no crashes.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s28">
+  <header><span class="snum">28</span><span class="sobj">iOS release-build device testing via TestFlight</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <p>Upload a signed build to TestFlight; install on a real iPhone (iOS 15 minimum and current iOS) and one iPad if iPad is a supported destination. Run the full matrix. <b>Push notification testing is the highest-risk item</b> — it has never worked on this platform.</p>
+    <dl class="sgrid">
+      <dt>Depends on</dt><dd>Steps 19, 20, 21, 26</dd>
+      <dt>Verify</dt><dd>Every scenario passes, including a push arriving on a real device.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step" id="s29">
+  <header><span class="snum">29</span><span class="sobj">Store pre-checks — catch what the stores will catch</span><span class="imp imp--req">Required</span></header>
+  <div class="sbody">
+    <p>Upload the AAB to a Play <b>Internal testing</b> track and read the <b>pre-launch report</b> in full — crashes, accessibility, performance, screenshots across device types. For iOS, run Xcode Organizer validation before submitting.</p>
+    <dl class="sgrid">
+      <dt>Depends on</dt><dd>Steps 27, 28</dd>
+      <dt>Verify</dt><dd>Pre-launch report shows no crashes; Xcode validation passes.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE L -->
+<div class="phase" id="pl"><span class="tag">Phase L</span><span class="name">Release builds</span><span class="rng">Steps 30–31</span></div>
+
+<article class="step sev-block" id="s30">
+  <header><span class="snum">30</span><span class="sobj">Produce the final Android App Bundle</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <p>Confirm <code>version: 1.0.0+1</code> in <code>pubspec.yaml</code>. <code>flutter clean &amp;&amp; flutter pub get</code>. Then:</p>
+    <pre><code>flutter build appbundle --release \
+  --dart-define=API_BASE_URL=https://gyrostack.cloud/api/v1 \
+  --obfuscate --split-debug-info=build/symbols/android</code></pre>
+    <p>Archive <code>build/symbols/android</code> — without it, obfuscated Crashlytics stack traces are unreadable, permanently.</p>
+    <dl class="sgrid">
+      <dt>Depends on</dt><dd>Steps 15, 22, 26, 29</dd>
+      <dt>Verify</dt><dd><code>keytool -printcert -jarfile …/app-release.aab</code> shows the upload alias. Install the AAB via <code>bundletool build-apks --connected-device</code> and smoke-test — <b>do not submit an artifact you have not installed from bundle form</b>, since AAB splitting can break assets and native libs in ways the fat APK never reveals.</dd>
+      <dt>Result</dt><dd>A submittable, verified AAB with archived symbols.</dd>
+    </dl>
+  </div>
+</article>
+
+<article class="step sev-block" id="s31">
+  <header><span class="snum">31</span><span class="sobj">Produce the final iOS archive</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <h4>Actions</h4>
+    <pre><code>flutter build ipa --release \
+  --dart-define=API_BASE_URL=https://gyrostack.cloud/api/v1 \
+  --obfuscate --split-debug-info=build/symbols/ios</code></pre>
+    <p>Archive the symbols. Upload via Xcode Organizer, <code>xcrun altool</code>, or Transporter.</p>
+    <dl class="sgrid">
+      <dt>Depends on</dt><dd>Steps 19, 20, 21, 22, 26, 29</dd>
+      <dt>Verify</dt><dd>Xcode validation passes; the build appears in App Store Connect and clears processing without an "Invalid Binary" email. Missing entitlements and non-square icons are the two most common causes here — Steps 12 and 20 address both.</dd>
+      <dt>Result</dt><dd>A submittable IPA with archived symbols.</dd>
+    </dl>
+  </div>
+</article>
+
+<!-- PHASE M -->
+<div class="phase" id="pm"><span class="tag">Phase M</span><span class="name">Store submission</span><span class="rng">Steps 32–34</span></div>
+
+<article class="step" id="s32">
+  <header><span class="snum">32</span><span class="sobj">Google Play submission</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <p>Create the app in Play Console. Set up <b>Play App Signing</b> — upload the Step 15 key as the upload key; Play holds the signing key. Complete: store listing (title, short and full description, 512×512 icon, 1024×500 feature graphic, at least 2 phone screenshots per supported form factor), content rating questionnaire, target audience, <b>Data safety form</b> declaring location, photos, audio, files, personal info and device IDs — matching Step 24's policy exactly — the <b>account-deletion web URL</b>, the privacy policy URL, ads declaration (none), and app category.</p>
+    <p>Provide <b>test credentials under "App access"</b> — mandatory here, because registration requires a manager code (finding B16). Upload the AAB to Internal testing → Closed → Production.</p>
+  </div>
+</article>
+
+<article class="step" id="s33">
+  <header><span class="snum">33</span><span class="sobj">Apple App Store submission</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <p>Create the App ID with Push Notifications enabled, and the App Store Connect record. Complete: app name, subtitle, description, keywords, support URL, privacy policy URL, screenshots for every required device size (6.7"/6.5" iPhone, and 12.9" iPad if iPad is supported), the 1024×1024 icon, age rating, and the <b>App Privacy</b> questionnaire matching Step 24.</p>
+    <p>In <b>App Review Information</b>, supply demo account credentials plus a written walkthrough — explain that registration requires a manager code, that the app is an internal B2B sales tool, and which features need location, camera and microphone so the reviewer exercises the permission prompts deliberately.</p>
+  </div>
+</article>
+
+<article class="step" id="s34">
+  <header><span class="snum">34</span><span class="sobj">Final gate and post-launch watch</span><span class="imp imp--block">Blocking</span></header>
+  <div class="sbody">
+    <p>Walk the <a href="#criteria">Release readiness criteria</a>. Submit both. Monitor Crashlytics, Play vitals and App Store Connect crash reports daily for the first week. Keep the keystore, the <code>.p8</code> APNs key, and both symbol archives backed up.</p>
+  </div>
+</article>
+
+<!-- ============================================================ -->
+<h2 id="android"><span class="num">Section 04</span>Android release plan</h2>
+<p>The Android-specific work, extracted from the sequence above and ordered as it appears there.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Step</th><th>Work</th><th>Impact</th></tr></thead>
+  <tbody>
+    <tr><td class="n">03</td><td>Force <code>desugar_jdk_libs</code> 2.1.4 across subprojects; disable release lint — <b>fixes the failing build</b></td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">13</td><td>Replace <code>com.example.new_power</code> with the final application ID, namespace and Kotlin package directory</td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">15</td><td>Generate the upload keystore, <code>key.properties</code> and release <code>signingConfig</code>; back it up</td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">16</td><td><code>tools:node="remove"</code> for <code>READ_MEDIA_IMAGES/VIDEO/AUDIO</code> and <code>READ_EXTERNAL_STORAGE</code></td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">07</td><td><code>android:allowBackup="false"</code> — prevents restore-bricking with EncryptedSharedPreferences</td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">12</td><td>Square icon plus padded adaptive foreground; regenerate mipmaps</td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">21</td><td>New <code>google-services.json</code>; register release SHA-1 and SHA-256 in Firebase</td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">23</td><td>Restrict the Android Maps key by package and SHA-1, Maps SDK only</td><td><span class="imp imp--req">Required</span></td></tr>
+    <tr><td class="n">17</td><td>Verify minSdk 24 / targetSdk 36 / compileSdk 36 / AGP 8.11.1 — no change expected</td><td><span class="imp imp--req">Required</span></td></tr>
+    <tr><td class="n">18</td><td>Dedicated white notification icon instead of <code>@mipmap/ic_launcher</code></td><td><span class="imp imp--rec">Recommended</span></td></tr>
+    <tr><td class="n">30</td><td><code>flutter build appbundle</code> with obfuscation and split-debug-info; verify via <code>bundletool</code></td><td><span class="imp imp--block">Blocking</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <p><b>Deliberately not needed for this app:</b> a cleartext-traffic config (all endpoints are HTTPS), ProGuard rules (R8 minification is off by default in the Flutter Gradle plugin, and there is no reflection-based serialization — <code>json_serializable</code> generates static code), and multidex (not triggered).</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="ios"><span class="num">Section 05</span>iOS release plan</h2>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Step</th><th>Work</th><th>Impact</th></tr></thead>
+  <tbody>
+    <tr><td class="n">19</td><td>Raise the deployment target to 15.0 (project, <code>AppFrameworkInfo.plist</code>, Podfile <code>post_install</code>); run <code>pod install</code>; commit Podfile and Podfile.lock — <b>first buildable iOS state</b></td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">14</td><td>Replace <code>com.example.newPower</code> in the pbxproj (Runner and RunnerTests), the plist, and <code>firebase_options.dart</code></td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">20</td><td>Team plus automatic signing; <b>add the Push Notifications capability</b> → creates the missing <code>Runner.entitlements</code> with <code>aps-environment</code></td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">20</td><td>Background Modes → Remote notifications, for <code>firebaseBackgroundHandler</code></td><td><span class="imp imp--req">Required</span></td></tr>
+    <tr><td class="n">20</td><td><code>ITSAppUsesNonExemptEncryption = false</code>; <code>CFBundleLocalizations = [en, ar]</code></td><td><span class="imp imp--req">Required</span></td></tr>
+    <tr><td class="n">21</td><td>New <code>GoogleService-Info.plist</code>; upload the APNs <code>.p8</code> key to Firebase</td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">12</td><td>1024×1024 no-alpha icon — already colortype 2; the problem is aspect ratio, not alpha</td><td><span class="imp imp--block">Blocking</span></td></tr>
+    <tr><td class="n">23</td><td>Restrict the iOS Maps key by bundle ID, Maps SDK for iOS only</td><td><span class="imp imp--req">Required</span></td></tr>
+    <tr><td class="n">31</td><td><code>flutter build ipa</code> with obfuscation; Xcode validation; Transporter upload</td><td><span class="imp imp--block">Blocking</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>The Info.plist usage strings are already present and correctly worded for all four permissions the app requests — no change needed there.</p>
+
+<!-- ============================================================ -->
+<h2 id="external"><span class="num">Section 06</span>External configuration plan</h2>
+<p>Everything that cannot be solved by editing this repository.</p>
+
+<h3>Backend</h3>
+<ul>
+  <li>Implement the account-deletion endpoint (Step 10).</li>
+  <li>Confirm <code>https://gyrostack.cloud/api/v1</code> is the production host, with a valid non-expiring certificate and production-appropriate rate limits.</li>
+  <li>Confirm the server emits the <code>Retry-After</code> header on 429 — the client depends on it in three places.</li>
+  <li>Confirm push senders are configured against the new Firebase apps.</li>
+</ul>
+
+<h3>Firebase — project <code>newpower-bgx</code></h3>
+<ul>
+  <li>New Android app (final applicationId) and new iOS app (final bundle ID).</li>
+  <li>Release SHA-1 and SHA-256 registered on the Android app.</li>
+  <li><b>APNs Authentication Key uploaded</b> — without it, iOS push silently never delivers.</li>
+  <li>Crashlytics enabled for both apps.</li>
+</ul>
+
+<h3>Google Cloud Console</h3>
+<ul>
+  <li>Restrict both Maps keys by app identity plus SHA-1 / bundle ID, and by API.</li>
+  <li>Set quotas and billing alerts.</li>
+</ul>
+
+<h3>Apple Developer Portal</h3>
+<ul>
+  <li>App ID with Push Notifications enabled.</li>
+  <li>APNs <code>.p8</code> key — <b>Apple lets you download it exactly once; store it immediately.</b></li>
+  <li>Distribution certificate and App Store provisioning profile, or automatic signing.</li>
+</ul>
+
+<h3>Google Play Console</h3>
+<ul>
+  <li>App record, Play App Signing enrolment, store listing, content rating, Data safety, target audience.</li>
+  <li>Account-deletion URL, privacy policy URL.</li>
+  <li>App access test credentials.</li>
+  <li>Internal → Closed → Production track progression.</li>
+</ul>
+
+<h3>App Store Connect</h3>
+<ul>
+  <li>App record, metadata, screenshots for all required sizes.</li>
+  <li>App Privacy questionnaire, age rating.</li>
+  <li>Demo account and review notes explaining the manager-code registration gate.</li>
+</ul>
+
+<h3>Hosting</h3>
+<ul>
+  <li>Privacy policy page and account-deletion request page, both public HTTPS.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="testing"><span class="num">Section 07</span>Testing plan</h2>
+<p>Minimum required before release. Run every scenario against a <b>signed release build</b>, on both platforms.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>#</th><th>Scenario</th><th>What it proves</th></tr></thead>
+  <tbody>
+    <tr><td class="n">1</td><td>First install — onboarding shows on a genuinely fresh install; <code>CacheHelper.onBoarding</code> persists; second launch goes to login, not onboarding</td><td>Startup routing</td></tr>
+    <tr><td class="n">2</td><td>Login: valid → home. Invalid → readable localized error in <b>both</b> English and Arabic. Manager-code registration, OTP verification, forgot/reset password</td><td>Finding B11</td></tr>
+    <tr><td class="n">3</td><td><b>Emulator login must succeed</b></td><td>Step 4; Play pre-launch report</td></tr>
+    <tr><td class="n">4</td><td>App restart with a valid session — <code>AppStartupRouter</code> restores to home without a login prompt</td><td>Session restore</td></tr>
+    <tr><td class="n">5</td><td>Expired access token: wait past <code>expiresIn</code>, make a request, confirm silent refresh. Then fire several requests at once and confirm only one <code>/auth/refresh</code> goes out</td><td>Single-flight refresh</td></tr>
+    <tr><td class="n">6</td><td>Expired or revoked refresh token — a clean bounce to login, not a hang or crash</td><td>Auth failure path</td></tr>
+    <tr><td class="n">7</td><td>Provisioned account with a temporary password — the 403 path pushes <code>changePasswordScreen</code> <b>exactly once</b> even when three parallel requests 403</td><td><code>_changePasswordRouteOpen</code> guard</td></tr>
+    <tr><td class="n">8</td><td>Business 403s: register a project outside the rep's territory; the app shows the refusal and <b>does not log out</b></td><td>401-vs-403 discipline</td></tr>
+    <tr><td class="n">9</td><td>Trigger a server error whose message contains "update", "delete" or a slash — no <code>[sql]</code> or <code>[path]</code> may appear on screen</td><td>Step 5</td></tr>
+    <tr><td class="n">10</td><td>Network failure: airplane mode during a list fetch, during login, and during startup. Startup error screen with a working retry; requests fail promptly rather than hanging</td><td>Offline queue correctly disabled</td></tr>
+    <tr><td class="n">11</td><td>Permissions — grant <b>and</b> deny each: location (map picker must still allow manual long-press pinning), camera, photo library, microphone, notifications. Then <b>permanently deny</b> each and confirm no crash and no dead end</td><td>Permission denial</td></tr>
+    <tr><td class="n">12</td><td>Push: foreground (in-app localized notification, badge refresh), background (system tray, correct channel and icon), and cold-start-from-tap (<code>getInitialMessage</code>). <b>Both platforms</b> — iOS is untested territory</td><td>Findings B8, S8</td></tr>
+    <tr><td class="n">13</td><td>Logout: <code>DELETE /device/fcm-token</code> fires before <code>/auth/logout</code>, local storage is cleared, and <b>theme and language switching still work afterward</b></td><td>Step 8</td></tr>
+    <tr><td class="n">14</td><td>Account deletion, end-to-end</td><td>Step 11</td></tr>
+    <tr><td class="n">15</td><td>File flows: photo capture and attach; voice note record and play back with the scrub bar; PDF pick and open via <code>open_filex</code> on Android 13 <b>and</b> 14</td><td>Step 16 regression</td></tr>
+    <tr><td class="n">16</td><td>RTL / Arabic on every screen — <code>filters_sheet_rtl_test.dart</code> covers one widget; the rest needs manual passes</td><td>Localization</td></tr>
+    <tr><td class="n">17</td><td>Backup and restore: full <code>adb shell bmgr</code> cycle</td><td>Step 7</td></tr>
+    <tr><td class="n">18</td><td>Reinstall on iOS — must <b>not</b> silently resume the previous session</td><td>Finding S4</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Additional testing that meaningfully reduces risk</h3>
+<ul>
+  <li>Install the AAB via <code>bundletool</code> on a real device rather than testing only the fat APK — asset and native-library splitting failures appear only in bundle form.</li>
+  <li>A low-memory, slow-network device (Android Go class). The app ships 2.8&nbsp;MB of onboarding PNGs and initialises Hive, Firebase, SharedPreferences and GetIt before the first frame.</li>
+  <li>Read the Play pre-launch report's crash <em>and</em> accessibility sections in full.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="checklist"><span class="num">Section 08</span>Final release checklist</h2>
+<p>Only tasks that are actually relevant to this application. Ticks are saved in this browser.</p>
+
+<div class="cl-bar">
+  <span id="clcount">0 / 0</span>
+  <span class="track"><i id="cltrack"></i></span>
+  <button type="button" id="clreset">Reset</button>
+</div>
+
+<div class="cl" id="checklist-root">
+  <h4>Code</h4>
+  <label><input type="checkbox"><span>All build-critical files committed; clean checkout compiles</span></label>
+  <label><input type="checkbox"><span><code>flutter analyze</code> → 0 issues</span></label>
+  <label><input type="checkbox"><span><code>flutter test</code> → all pass, including locale-parity and sanitizer tests</span></label>
+  <label><input type="checkbox"><span>Emulator/integrity login block removed; <code>_check</code> fails open</span></label>
+  <label><input type="checkbox"><span><code>_sanitizeMessage</code> no longer strips SQL keywords or paths</span></label>
+  <label><input type="checkbox"><span>AR/EN key parity, with an English fallback in <code>translate()</code></span></label>
+  <label><input type="checkbox"><span><code>allowBackup="false"</code> and <code>readSafe</code> fails soft</span></label>
+  <label><input type="checkbox"><span>Theme and language survive logout</span></label>
+  <label><input type="checkbox"><span><code>device_compromised_screen.dart</code> deleted — <code>exit(0)</code> gone</span></label>
+  <label><input type="checkbox"><span><code>FeatureFlags.offlineSyncEnabled == false</code></span></label>
+  <label><input type="checkbox"><span>Account deletion implemented and working end-to-end</span></label>
+
+  <h4>Configuration</h4>
+  <label><input type="checkbox"><span><code>version: 1.0.0+1</code> in <code>pubspec.yaml</code></span></label>
+  <label><input type="checkbox"><span><code>API_BASE_URL</code> passed explicitly at build time; points at production</span></label>
+  <label><input type="checkbox"><span>Crashlytics wired and receiving</span></label>
+
+  <h4>Android</h4>
+  <label><input type="checkbox"><span>Release build succeeds — desugar fix applied</span></label>
+  <label><input type="checkbox"><span>Final applicationId, not <code>com.example.*</code></span></label>
+  <label><input type="checkbox"><span>Release keystore wired and <b>backed up in two places</b></span></label>
+  <label><input type="checkbox"><span><code>READ_MEDIA_*</code> absent from the merged release manifest</span></label>
+  <label><input type="checkbox"><span>Square icon plus correctly padded adaptive foreground</span></label>
+  <label><input type="checkbox"><span><code>google-services.json</code> matches; release SHA-1 registered</span></label>
+  <label><input type="checkbox"><span>targetSdk 36 confirmed in the merged manifest</span></label>
+
+  <h4>iOS</h4>
+  <label><input type="checkbox"><span><code>pod install</code> succeeds; Podfile and Podfile.lock committed</span></label>
+  <label><input type="checkbox"><span>Deployment target 15.0 everywhere</span></label>
+  <label><input type="checkbox"><span>Final bundle ID in pbxproj, plist and <code>firebase_options.dart</code></span></label>
+  <label><input type="checkbox"><span><code>Runner.entitlements</code> exists with <code>aps-environment</code></span></label>
+  <label><input type="checkbox"><span>Background Modes → Remote notifications</span></label>
+  <label><input type="checkbox"><span><code>ITSAppUsesNonExemptEncryption = false</code></span></label>
+  <label><input type="checkbox"><span><code>GoogleService-Info.plist</code> matches; APNs <code>.p8</code> uploaded to Firebase</span></label>
+  <label><input type="checkbox"><span>Push verified working on a real device</span></label>
+
+  <h4>External</h4>
+  <label><input type="checkbox"><span>Both Maps keys restricted; quotas and billing alerts set</span></label>
+  <label><input type="checkbox"><span>Privacy policy live at a public HTTPS URL</span></label>
+  <label><input type="checkbox"><span>Account-deletion web page live</span></label>
+  <label><input type="checkbox"><span>Demo account created and verified working on both platforms</span></label>
+
+  <h4>Builds</h4>
+  <label><input type="checkbox"><span>AAB built with <code>--obfuscate --split-debug-info</code>; symbols archived</span></label>
+  <label><input type="checkbox"><span>AAB installed via <code>bundletool</code> and smoke-tested</span></label>
+  <label><input type="checkbox"><span>IPA built and archived; symbols archived; Xcode validation passes</span></label>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="criteria"><span class="num">Section 09</span>Release readiness criteria</h2>
+<p>The exact conditions that must be true before submitting. Each gate is derived from this project, not from a template.</p>
+
+<div class="gates">
+  <div class="gate"><div><b>Code ready</b><span>Steps 1, 4–9, 11 and 25 complete. Analyzer clean, all tests pass, account deletion works, no <code>exit(0)</code>, offline flag off.</span></div></div>
+  <div class="gate"><div><b>Configuration ready</b><span>Version set, production API URL confirmed and explicitly passed, Crashlytics reporting.</span></div></div>
+  <div class="gate"><div><b>Android ready</b><span><code>flutter build appbundle</code> succeeds with the release keystore. Merged release manifest shows the final package, <code>minSdk 24</code>, <code>targetSdk 36</code>, <code>allowBackup="false"</code>, and <b>no</b> <code>READ_MEDIA_*</code>. Icon square and unclipped under both mask shapes. Firebase initialises; the FCM token registers.</span></div></div>
+  <div class="gate"><div><b>iOS ready</b><span><code>flutter build ipa</code> succeeds. Deployment target 15.0. Final bundle ID consistent across pbxproj, plist and <code>firebase_options.dart</code>. <code>Runner.entitlements</code> present with <code>aps-environment</code>. A push sent from the Firebase console arrives on a real TestFlight device — this check is the one that proves the iOS notification feature is not shipping dead.</span></div></div>
+  <div class="gate"><div><b>External services ready</b><span>Firebase apps registered for the final identifiers with release SHA-1 and the APNs key. Both Maps keys restricted with quotas. Backend deletion endpoint live. Privacy policy and deletion page reachable over HTTPS from outside your network.</span></div></div>
+  <div class="gate"><div><b>Security verified</b><span>No unrestricted API keys. Tokens only in <code>flutter_secure_storage</code>. No raw <code>print()</code> of security events in release. Business 403s do not log the user out. A corrupt keystore degrades to re-login, not to a permanent error screen.</span></div></div>
+  <div class="gate"><div><b>Testing passed</b><span>All 18 minimum scenarios pass on release builds on both platforms, including on an Android emulator. Play's pre-launch report shows no crashes.</span></div></div>
+  <div class="gate"><div><b>Android release build verified</b><span>AAB signed with the upload key (<code>keytool -printcert</code> confirms), installed via <code>bundletool</code> on a real device, full smoke test passed, symbols archived.</span></div></div>
+  <div class="gate"><div><b>iOS release build verified</b><span>IPA processed by App Store Connect without an Invalid Binary notice, installed via TestFlight, full smoke test passed including push, symbols archived.</span></div></div>
+  <div class="gate"><div><b>Google Play submission ready</b><span>Listing, screenshots, content rating, Data safety, target audience, privacy policy URL, account-deletion URL and App access test credentials all complete. AAB uploaded to Internal testing and validated there first.</span></div></div>
+  <div class="gate"><div><b>App Store submission ready</b><span>Metadata, all required screenshot sizes, App Privacy and age rating complete. Review notes explain the manager-code registration gate and name the demo account.</span></div></div>
+  <div class="gate"><div><b>Final release</b><span>Gates 1–11 all true. Submit. Watch Crashlytics, Play vitals and App Store Connect daily for the first week. Keystore, <code>.p8</code> and both symbol archives backed up to two independent secure locations.</span></div></div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="critical"><span class="num">Section 10</span>Critical path</h2>
+
+<div class="callout">
+  <h3>Start these two today, in parallel with the code work</h3>
+  <p>Both have long external lead times and gate everything downstream.</p>
+  <ol style="margin-bottom:0">
+    <li><b>Step 10 — backend account-deletion endpoint.</b> Steps 11, 24, 32 and 33 all wait on it.</li>
+    <li><b>Step 12 — square app icon design.</b> Steps 13, 21, 30, 31, 32 and 33 all consume its output.</li>
+  </ol>
+</div>
+
+<p>The technical critical path is:</p>
+<pre><code>1 → 2 → 3            unblock the build
+      → 13 / 14      final identifiers
+      → 21           Firebase
+      → 15 / 19 / 20 signing and iOS platform
+      → 27 / 28      device testing
+      → 30 / 31      release builds</code></pre>
+
+<p class="foot">Derived entirely from inspecting this repository on 2026-08-22. The only command run against the project was <code>flutter build apk --release</code>, which failed — that failure is finding B1 and is reproducible. No source files were modified.</p>
+
+</main>
+</div>
+
+<script>
+/* ── Arabic layer ──────────────────────────────────────────────────────
+   Keyed on English text, so counts and repeats (chips, dt labels) take
+   care of themselves. Code identifiers, file paths and shell commands are
+   deliberately left untranslated — they are literals, not prose.        */
+(function(){
+  var D = {
+  /* masthead */
+  "Production release roadmap":"خارطة طريق الإصدار الإنتاجي",
+  "From current state to first store submission":"من الوضع الحالي إلى أول إرسال للمتاجر",
+  /* verdict */
+  "Blocking steps":"خطوات حاجبة","Required":"مطلوب","Recommended":"مستحسن","Optional":"اختياري","Total steps":"إجمالي الخطوات","Blocking":"حاجب",
+  /* step field labels */
+  "Actions":"الإجراءات","Files":"الملفات","Reason":"السبب","Depends on":"يعتمد على","Verify":"التحقق","Result":"النتيجة",
+  /* group labels */
+  "Build":"البناء","Identity & signing":"الهوية والتوقيع","Functional & release-mode":"الوظائف ووضع الإصدار","Store policy":"سياسة المتاجر",
+  "Code":"الكود","Configuration":"الإعدادات","Android":"أندرويد","iOS":"iOS","External":"جهات خارجية","Builds":"حزم الإصدار",
+  /* tables */
+  "Step":"الخطوة","Work":"العمل","Impact":"الأثر","Area":"المجال","Current state":"الوضع الحالي","Scenario":"السيناريو","What it proves":"ما الذي يثبته",
+  /* rail */
+  "Current assessment":"التقييم الحالي","Everything to be done":"كل ما يجب إنجازه","The plan":"الخطة","Step-by-step (1–34)":"خطوة بخطوة (١–٣٤)",
+  "A · Reproducible":"أ · قابلية إعادة البناء","B · Fix the build":"ب · إصلاح البناء","C · Correctness":"ج · تصحيح السلوك",
+  "D · Account deletion":"د · حذف الحساب","E · Assets & identity":"هـ · الأصول والهوية","F · Android platform":"و · منصة أندرويد",
+  "G · iOS platform":"ز · منصة iOS","H · External services":"ح · الخدمات الخارجية","I · Legal & privacy":"ط · القانوني والخصوصية",
+  "J · Cleanup":"ي · التنظيف","K · Testing":"ك · الاختبار","L · Release builds":"ل · حزم الإصدار","M · Submission":"م · الإرسال",
+  "By platform":"حسب المنصة","Android plan":"خطة أندرويد","iOS plan":"خطة iOS","External config":"الإعداد الخارجي",
+  "Before you ship":"قبل الإطلاق","Testing plan":"خطة الاختبار","Final checklist":"القائمة النهائية","Readiness criteria":"معايير الجاهزية","Critical path":"المسار الحرج",
+  /* h2 sections */
+  "Section 01Current project assessment":"<span class='num'>القسم ٠١</span>تقييم المشروع الحالي",
+  "Section 02Everything that must be done":"<span class='num'>القسم ٠٢</span>كل ما يجب إنجازه",
+  "Section 03Step-by-step implementation plan":"<span class='num'>القسم ٠٣</span>خطة التنفيذ خطوة بخطوة",
+  "Section 04Android release plan":"<span class='num'>القسم ٠٤</span>خطة إصدار أندرويد",
+  "Section 05iOS release plan":"<span class='num'>القسم ٠٥</span>خطة إصدار iOS",
+  "Section 06External configuration plan":"<span class='num'>القسم ٠٦</span>خطة الإعداد الخارجي",
+  "Section 07Testing plan":"<span class='num'>القسم ٠٧</span>خطة الاختبار",
+  "Section 08Final release checklist":"<span class='num'>القسم ٠٨</span>قائمة التحقق النهائية",
+  "Section 09Release readiness criteria":"<span class='num'>القسم ٠٩</span>معايير جاهزية الإصدار",
+  "Section 10Critical path":"<span class='num'>القسم ١٠</span>المسار الحرج",
+  /* h3 */
+  "Two facts that frame everything else":"حقيقتان تؤطّران كل ما تبقّى",
+  "Health of the codebase: good":"صحة الكود: جيدة",
+  "Health of the release path: not ready":"صحة مسار الإصدار: غير جاهز",
+  "Must do before release":"يجب إنجازه قبل الإصدار",
+  "Should do before release":"يُستحسن إنجازه قبل الإصدار",
+  "Can be done later":"يمكن تأجيله",
+  "Additional testing that meaningfully reduces risk":"اختبارات إضافية تقلّل المخاطر فعلياً",
+  "Start these two today, in parallel with the code work":"ابدأ هاتين المهمتين اليوم، بالتوازي مع العمل البرمجي",
+  "Backend":"الخادم الخلفي","Google Cloud Console":"وحدة تحكم Google Cloud","Apple Developer Portal":"بوابة مطوّري Apple",
+  "Google Play Console":"وحدة تحكم Google Play","App Store Connect":"App Store Connect","Hosting":"الاستضافة",
+  /* phases */
+  "Make the project reproducible":"جعل المشروع قابلاً لإعادة البناء",
+  "Fix the release build":"إصلاح بناء الإصدار",
+  "Correctness fixes":"إصلاحات في صحة السلوك",
+  "Account deletion":"حذف الحساب",
+  "Assets and identity":"الأصول والهوية",
+  "Android platform configuration":"إعداد منصة أندرويد",
+  "iOS platform configuration":"إعداد منصة iOS",
+  "External services":"الخدمات الخارجية",
+  "Legal and privacy":"القانوني والخصوصية",
+  "Optional cleanup":"تنظيف اختياري",
+  "Testing":"الاختبار",
+  "Release builds":"حزم الإصدار",
+  "Store submission":"الإرسال إلى المتاجر",
+  /* step objectives */
+  "Get the repository into a state where a clean checkout compiles":"جعل المستودع قابلاً للبناء من نسخة نظيفة",
+  "Restore reliable access to Google's Maven repository":"استعادة وصول موثوق إلى مستودع Maven من Google",
+  "Make flutter build apk --release and appbundle succeed":"إنجاح flutter build apk --release و appbundle",
+  "Stop release builds from blocking authentication":"منع بناء الإصدار من حجب تسجيل الدخول",
+  "Stop corrupting user-facing error messages":"إيقاف تشويه رسائل الخطأ الظاهرة للمستخدم",
+  "Eliminate raw localization keys from the English UI":"إزالة مفاتيح الترجمة الخام من الواجهة الإنجليزية",
+  "Prevent Android backup/restore from bricking the app":"منع النسخ الاحتياطي والاستعادة من تعطيل التطبيق",
+  "Fix post-logout theme and language breakage":"إصلاح تعطّل السمة واللغة بعد تسجيل الخروج",
+  "Remove the App-Store-hostile and dead-code hazards":"إزالة مخاطر الكود الميت وما يرفضه App Store",
+  "Get a backend account-deletion endpoint":"توفير واجهة حذف حساب على الخادم",
+  "Ship in-app account deletion":"إطلاق حذف الحساب داخل التطبيق",
+  "Produce a correct app icon set":"إنتاج مجموعة أيقونات صحيحة",
+  "Set the final Android application ID":"تحديد معرّف تطبيق أندرويد النهائي",
+  "Set the final iOS bundle identifier":"تحديد معرّف حزمة iOS النهائي",
+  "Create and wire the upload keystore":"إنشاء وربط مفتاح التوقيع للرفع",
+  "Remove unnecessary media permissions from the manifest":"إزالة أذونات الوسائط غير الضرورية من الـ manifest",
+  "Confirm Android SDK and Gradle settings are release-appropriate":"التأكد من ملاءمة إعدادات SDK وGradle للإصدار",
+  "Verify release-mode notification icon and channels":"التحقق من أيقونة وقنوات الإشعارات في وضع الإصدار",
+  "Bring the iOS project to a buildable state (requires a Mac)":"جعل مشروع iOS قابلاً للبناء (يتطلب جهاز Mac)",
+  "Configure iOS signing, capabilities and Info.plist":"إعداد التوقيع والقدرات وInfo.plist على iOS",
+  "Reconfigure Firebase for the final identifiers":"إعادة إعداد Firebase على المعرّفات النهائية",
+  "Add crash reporting":"إضافة تقارير الأعطال",
+  "Secure the Maps API keys and confirm the production API":"تأمين مفاتيح Maps وتأكيد واجهة الإنتاج",
+  "Publish a privacy policy and prepare the data declarations":"نشر سياسة خصوصية وتجهيز إقرارات البيانات",
+  "Reduce binary size and dependency surface":"تقليل حجم الحزمة وعدد الاعتماديات",
+  "Automated gate — establish a green baseline":"بوابة آلية — تثبيت خط أساس ناجح",
+  "Android release-build device testing":"اختبار بناء الإصدار على أجهزة أندرويد",
+  "iOS release-build device testing via TestFlight":"اختبار بناء إصدار iOS عبر TestFlight",
+  "Store pre-checks — catch what the stores will catch":"فحوص مسبقة — التقاط ما ستلتقطه المتاجر",
+  "Produce the final Android App Bundle":"إنتاج حزمة App Bundle النهائية",
+  "Produce the final iOS archive":"إنتاج أرشيف iOS النهائي",
+  "Google Play submission":"الإرسال إلى Google Play",
+  "Apple App Store submission":"الإرسال إلى Apple App Store",
+  "Final gate and post-launch watch":"البوابة النهائية ومتابعة ما بعد الإطلاق",
+  /* finding titles */
+  "Android release build fails on desugaring artifact resolution":"فشل بناء إصدار أندرويد عند حلّ اعتمادية desugar",
+  "iOS has no CocoaPods integration":"مشروع iOS غير مرتبط بـ CocoaPods",
+  "iOS deployment target is too low for its own dependencies":"هدف نشر iOS أقل مما تتطلبه اعتمادياته",
+  "Files the build requires are untracked in git":"ملفات يحتاجها البناء غير مضافة إلى git",
+  "Android application ID is still the placeholder":"معرّف تطبيق أندرويد ما زال المعرّف الافتراضي",
+  "iOS bundle identifier is still the placeholder":"معرّف حزمة iOS ما زال المعرّف الافتراضي",
+  "Android release signs with the debug keystore":"إصدار أندرويد موقّع بمفتاح التصحيح",
+  "iOS has no signing configuration and no entitlements file":"لا يوجد إعداد توقيع ولا ملف entitlements على iOS",
+  "Release builds block login on emulators, and can permanently lock out real users":"بناء الإصدار يحجب الدخول على المحاكيات، وقد يحبس مستخدمين حقيقيين نهائياً",
+  "Server error messages are corrupted before display":"رسائل الخطأ من الخادم تُشوَّه قبل عرضها",
+  "Five localization keys used in code exist only in Arabic":"خمسة مفاتيح ترجمة مستخدمة في الكود موجودة بالعربية فقط",
+  "Android auto-backup will brick restored installs":"النسخ الاحتياطي التلقائي سيعطّل النسخ المستعادة",
+  "No in-app account deletion":"لا يوجد حذف حساب داخل التطبيق",
+  "Photo and video permissions are merged in but not needed":"أذونات الصور والفيديو مدمَجة دون حاجة إليها",
+  "No privacy policy exists":"لا توجد سياسة خصوصية",
+  "Reviewers cannot create an account":"المراجعون لا يستطيعون إنشاء حساب",
+  "The app icon is a non-square wordmark":"أيقونة التطبيق شعار نصي غير مربّع",
+  "Restrict the Google Maps API keys":"تقييد مفاتيح Google Maps",
+  "Theme and language break after logout":"السمة واللغة تتعطّلان بعد تسجيل الخروج",
+  "Clear secure storage on first run after install (iOS)":"مسح التخزين الآمن عند أول تشغيل بعد التثبيت (iOS)",
+  "Never flip FeatureFlags.offlineSyncEnabled":"لا تفعّل FeatureFlags.offlineSyncEnabled",
+  "Replace the raw print() security logger":"استبدال مسجّل الأحداث الأمنية print()",
+  "Add ITSAppUsesNonExemptEncryption = false to iOS Info.plist":"إضافة ITSAppUsesNonExemptEncryption = false إلى Info.plist",
+  "Remove DeviceCompromisedApp":"إزالة DeviceCompromisedApp",
+  /* gates */
+  "Code ready":"الكود جاهز","Configuration ready":"الإعدادات جاهزة","Android ready":"أندرويد جاهز","iOS ready":"iOS جاهز",
+  "External services ready":"الخدمات الخارجية جاهزة","Security verified":"الأمان مُتحقَّق منه","Testing passed":"الاختبارات ناجحة",
+  "Android release build verified":"بناء إصدار أندرويد مُتحقَّق منه","iOS release build verified":"بناء إصدار iOS مُتحقَّق منه",
+  "Google Play submission ready":"الإرسال إلى Google Play جاهز","App Store submission ready":"الإرسال إلى App Store جاهز","Final release":"الإطلاق النهائي",
+  /* misc */
+  "Reset":"تصفير"
+  };
+
+  var SEL = ".eyebrow,h1,.vlab,.imp,.sgrid dt,h2,h3,h4,.phase .name,.sobj,.ftitle,.gate b,thead th,.rail nav a,.rail nav .grp,#clreset";
+  var nodes = Array.prototype.slice.call(document.querySelectorAll(SEL));
+  var orig = nodes.map(function(n){ return n.innerHTML; });
+  var key  = nodes.map(function(n){ return n.textContent.replace(/\s+/g,' ').trim(); });
+
+  var enBtn = document.getElementById('lang-en');
+  var arBtn = document.getElementById('lang-ar');
+  var KEY = 'newpower-release-lang-v1';
+
+  function apply(lang){
+    var ar = lang === 'ar';
+    document.documentElement.setAttribute('data-lang', lang);
+    nodes.forEach(function(n,i){
+      if(!ar){ n.innerHTML = orig[i]; return; }
+      var t = D[key[i]];
+      if(!t) return;
+      if(t.indexOf('<') !== -1) n.innerHTML = t; else n.textContent = t;
+    });
+    enBtn.setAttribute('aria-pressed', String(!ar));
+    arBtn.setAttribute('aria-pressed', String(ar));
+    try { localStorage.setItem(KEY, lang); } catch(e){}
+  }
+
+  enBtn.addEventListener('click', function(){ apply('en'); });
+  arBtn.addEventListener('click', function(){ apply('ar'); });
+
+  var saved = 'en';
+  try { saved = localStorage.getItem(KEY) || 'en'; } catch(e){}
+  apply(saved === 'ar' ? 'ar' : 'en');
+})();
+
+(function(){
+  var root = document.getElementById('checklist-root');
+  if(!root) return;
+  var boxes = Array.prototype.slice.call(root.querySelectorAll('input[type=checkbox]'));
+  var count = document.getElementById('clcount');
+  var track = document.getElementById('cltrack');
+  var reset = document.getElementById('clreset');
+  var KEY = 'newpower-release-checklist-v1';
+
+  function read(){
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch(e){ return []; }
+  }
+  function write(v){
+    try { localStorage.setItem(KEY, JSON.stringify(v)); } catch(e){}
+  }
+  function paint(){
+    var done = boxes.filter(function(b){ return b.checked; }).length;
+    count.textContent = done + ' / ' + boxes.length;
+    track.style.width = boxes.length ? (done / boxes.length * 100) + '%' : '0%';
+  }
+
+  var saved = read();
+  boxes.forEach(function(b, i){
+    b.checked = saved.indexOf(i) !== -1;
+    b.addEventListener('change', function(){
+      write(boxes.reduce(function(a, x, j){ if(x.checked) a.push(j); return a; }, []));
+      paint();
+    });
+  });
+  reset.addEventListener('click', function(){
+    boxes.forEach(function(b){ b.checked = false; });
+    write([]);
+    paint();
+  });
+  paint();
+})();
+</script>

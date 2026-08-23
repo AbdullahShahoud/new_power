@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "141224916519",
+    "project_id": "newpower-bgx",
+    "storage_bucket": "newpower-bgx.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141224916519:android:7f8ada3af18da0aa538002",
+        "android_client_info": {
+          "package_name": "com.example.new_power"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmemC33trUPQqhgf2JKW-Z-f1SvSfULt8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
