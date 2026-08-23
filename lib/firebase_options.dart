@@ -66,6 +66,6 @@ class DefaultFirebaseOptions {
     // Firebase project is registered, so it is reproduced verbatim rather
     // than "corrected" — changing it here would break iOS push while
     // looking tidier.
-    iosBundleId: 'com.example.newPower',
+    iosBundleId: 'com.newpower.app',
   );
 }

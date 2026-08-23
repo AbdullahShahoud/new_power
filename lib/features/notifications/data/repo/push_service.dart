@@ -121,7 +121,12 @@ class PushService {
   }
 
   Future<void> _configureChannels() async {
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    // ⚠️ A **drawable** name, no `@mipmap/` prefix. The plugin resolves
+    // this with `getIdentifier(name, "drawable", package)`, so both
+    // `@mipmap/ic_launcher` and a bare `ic_launcher` (which lives only in
+    // mipmap/) resolve to 0 — and Android silently drops any notification
+    // whose small icon is invalid. That was why the tray never showed one.
+    const android = AndroidInitializationSettings('ic_stat_notification');
     const ios = DarwinInitializationSettings(
       // The foreground presentation is handled in Dart so it can be shown
       // in Arabic; letting iOS present it would show the server's English.
@@ -147,6 +152,21 @@ class PushService {
 
   Future<void> _requestPermission() async {
     await FirebaseMessaging.instance.requestPermission();
+
+    // Asked through the local plugin as well, because that plugin is what
+    // actually posts the foreground notification. On Android 13+ the OS
+    // gates every post behind `POST_NOTIFICATIONS`, and a denied (or never
+    // requested) permission produces no error at `show()` — the call
+    // succeeds and nothing appears, which is indistinguishable from the
+    // invalid-icon failure above.
+    //
+    // Declaring the permission in the manifest is not enough on its own;
+    // it has to be granted at runtime.
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
     // iOS would otherwise render the OS banner itself, in English, on top of
     // the in-app one. Suppressed so the foreground path has a single owner.
     await FirebaseMessaging.instance
@@ -190,7 +210,7 @@ class PushService {
           channelDescription: channel.description,
           importance: channel.importance,
           priority: isSecurity ? Priority.high : Priority.defaultPriority,
-          icon: '@mipmap/ic_launcher',
+          icon: 'ic_stat_notification',
         ),
         iOS: const DarwinNotificationDetails(),
       ),
