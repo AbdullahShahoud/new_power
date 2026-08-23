@@ -87,10 +87,8 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
   final _companyNameController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _positionController = TextEditingController();
   final _phoneController = TextEditingController();
   final _phoneFieldKey = GlobalKey<PhoneTextFieldState>();
-  final _emailController = TextEditingController();
   final _noteController = TextEditingController();
 
   AccountType _accountType = AccountType.company;
@@ -101,9 +99,7 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
     _companyNameController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _positionController.dispose();
     _phoneController.dispose();
-    _emailController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -158,9 +154,7 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
             NewAccountContact(
               firstName: _firstNameController.text.trim(),
               lastName: _lastNameController.text.trim(),
-              position: _textOrNull(_positionController),
               phone: _phoneOrNull,
-              email: _textOrNull(_emailController),
               // The only person on a freshly created company is, by
               // definition, who to ask for there.
               isPrimary: true,
@@ -284,16 +278,6 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
                           ),
                           verticalSpace(16.h),
 
-                          // ── Optional detail ───────────────────────────
-                          _Label(
-                            context.tr('add_contact_position'),
-                            optional: true,
-                          ),
-                          AppTextField(
-                            hintText: context.tr('add_contact_position_hint'),
-                            controller: _positionController,
-                          ),
-                          verticalSpace(16.h),
                           _Label(
                             context.tr('add_contact_phone'),
                             optional: true,
@@ -306,16 +290,6 @@ class _AddStakeholderLinkViewState extends State<_AddStakeholderLinkView> {
                             key: _phoneFieldKey,
                             controller: _phoneController,
                             hintText: context.tr('add_contact_phone_hint'),
-                          ),
-                          verticalSpace(16.h),
-                          _Label(
-                            context.tr('add_contact_email'),
-                            optional: true,
-                          ),
-                          AppTextField(
-                            hintText: context.tr('add_contact_email_hint'),
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
                           ),
                           verticalSpace(16.h),
                           _Label(

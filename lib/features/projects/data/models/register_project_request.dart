@@ -7,15 +7,47 @@ import 'stored_file.dart';
 part 'register_project_request.freezed.dart';
 part 'register_project_request.g.dart';
 
-/// §4 `ProjectStakeholderRefDto` — a stakeholder at registration. Modeled
-/// now for wire-contract completeness; the register-project screen's
-/// stakeholder picker itself is Phase 6 (implementation map §2, Phase 6),
-/// so this ships with an empty default and no UI sends it yet.
+/// §4 — one stakeholder on a registration body.
+///
+/// The server accepts **four shapes** through this one object, and the rule
+/// binding them is: *each element names its account exactly one way*.
+///
+/// | Shape | Fields | Meaning |
+/// | --- | --- | --- |
+/// | New company + its first contact | `accountName` + `accountType` + `contact` | Both are created now |
+/// | New individual, no contact | `accountName` + `accountType: INDIVIDUAL` | A person who *is* the account (an owner) |
+/// | Existing account + a new face | `accountId` + `contact` | The person is created and linked |
+/// | Existing account + existing contact | `accountId` + `primaryContactId` | The original shape |
+///
+/// ⚠️ `accountId` and `accountName` are **mutually exclusive** — sending
+/// both is ambiguous about whether to create or reuse. `primaryContactId`
+/// is only meaningful beside `accountId`: a contact id cannot refer into an
+/// account that does not exist yet.
+///
+/// `includeIfNull: false` is load-bearing rather than cosmetic. Without it
+/// json_serializable emits every key, so a "create new" element would ship
+/// `"accountId": null` next to its `accountName` and trip the server's
+/// one-way rule.
 @freezed
 abstract class ProjectStakeholderRefDto with _$ProjectStakeholderRefDto {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
   const factory ProjectStakeholderRefDto({
-    required String accountId,
+    /// An account already in the directory.
+    String? accountId,
+
+    /// A company or person to create as part of this registration.
+    String? accountName,
+
+    /// Only meaningful with [accountName]. Defaults to `COMPANY`
+    /// server-side; sent explicitly so an individual owner is unambiguous.
+    AccountType? accountType,
     required StakeholderRole role,
+
+    /// A contact to create and attach. Valid with either account form.
+    NewStakeholderContact? contact,
+
+    /// An existing contact. ⚠️ Never sent without [accountId].
     String? primaryContactId,
     String? note,
   }) = _ProjectStakeholderRefDto;
@@ -24,8 +56,46 @@ abstract class ProjectStakeholderRefDto with _$ProjectStakeholderRefDto {
       _$ProjectStakeholderRefDtoFromJson(json);
 }
 
+/// The person inlined beside a stakeholder — created with the link rather
+/// than in a separate round trip.
+@freezed
+abstract class NewStakeholderContact with _$NewStakeholderContact {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
+  const factory NewStakeholderContact({
+    required String firstName,
+    required String lastName,
+    String? phone,
+    String? email,
+    String? position,
+  }) = _NewStakeholderContact;
+
+  factory NewStakeholderContact.fromJson(Map<String, dynamic> json) =>
+      _$NewStakeholderContactFromJson(json);
+}
+
 extension ProjectStakeholderRefDtoValidation on ProjectStakeholderRefDto {
   void validate() {
+    final id = accountId?.trim();
+    final name = accountName?.trim();
+    final hasId = id != null && id.isNotEmpty;
+    final hasName = name != null && name.isNotEmpty;
+
+    // Caught here rather than at the server: a 400 on registration loses the
+    // whole form, including photos the rep already waited to upload.
+    if (hasId == hasName) {
+      throw ArgumentError(
+        'a stakeholder needs exactly one of accountId or accountName',
+      );
+    }
+    if (primaryContactId != null && !hasId) {
+      throw ArgumentError(
+        'primaryContactId is only valid alongside accountId',
+      );
+    }
+    if (hasName && (name.length < 2 || name.length > 200)) {
+      throw ArgumentError('accountName must be 2-200 characters');
+    }
     final trimmedNote = note?.trim();
     if (trimmedNote != null && trimmedNote.length > 500) {
       throw ArgumentError('stakeholder note cannot exceed 500 characters');

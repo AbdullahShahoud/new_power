@@ -15,7 +15,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProjectStakeholderRefDto {
 
- String get accountId; StakeholderRole get role; String? get primaryContactId; String? get note;
+/// An account already in the directory.
+ String? get accountId;/// A company or person to create as part of this registration.
+ String? get accountName;/// Only meaningful with [accountName]. Defaults to `COMPANY`
+/// server-side; sent explicitly so an individual owner is unambiguous.
+ AccountType? get accountType; StakeholderRole get role;/// A contact to create and attach. Valid with either account form.
+ NewStakeholderContact? get contact;/// An existing contact. ⚠️ Never sent without [accountId].
+ String? get primaryContactId; String? get note;
 /// Create a copy of ProjectStakeholderRefDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +34,16 @@ $ProjectStakeholderRefDtoCopyWith<ProjectStakeholderRefDto> get copyWith => _$Pr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProjectStakeholderRefDto&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.role, role) || other.role == role)&&(identical(other.primaryContactId, primaryContactId) || other.primaryContactId == primaryContactId)&&(identical(other.note, note) || other.note == note));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProjectStakeholderRefDto&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.accountName, accountName) || other.accountName == accountName)&&(identical(other.accountType, accountType) || other.accountType == accountType)&&(identical(other.role, role) || other.role == role)&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.primaryContactId, primaryContactId) || other.primaryContactId == primaryContactId)&&(identical(other.note, note) || other.note == note));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,accountId,role,primaryContactId,note);
+int get hashCode => Object.hash(runtimeType,accountId,accountName,accountType,role,contact,primaryContactId,note);
 
 @override
 String toString() {
-  return 'ProjectStakeholderRefDto(accountId: $accountId, role: $role, primaryContactId: $primaryContactId, note: $note)';
+  return 'ProjectStakeholderRefDto(accountId: $accountId, accountName: $accountName, accountType: $accountType, role: $role, contact: $contact, primaryContactId: $primaryContactId, note: $note)';
 }
 
 
@@ -48,11 +54,11 @@ abstract mixin class $ProjectStakeholderRefDtoCopyWith<$Res>  {
   factory $ProjectStakeholderRefDtoCopyWith(ProjectStakeholderRefDto value, $Res Function(ProjectStakeholderRefDto) _then) = _$ProjectStakeholderRefDtoCopyWithImpl;
 @useResult
 $Res call({
- String accountId, StakeholderRole role, String? primaryContactId, String? note
+ String? accountId, String? accountName, AccountType? accountType, StakeholderRole role, NewStakeholderContact? contact, String? primaryContactId, String? note
 });
 
 
-
+$NewStakeholderContactCopyWith<$Res>? get contact;
 
 }
 /// @nodoc
@@ -65,16 +71,31 @@ class _$ProjectStakeholderRefDtoCopyWithImpl<$Res>
 
 /// Create a copy of ProjectStakeholderRefDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? accountId = null,Object? role = null,Object? primaryContactId = freezed,Object? note = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? accountId = freezed,Object? accountName = freezed,Object? accountType = freezed,Object? role = null,Object? contact = freezed,Object? primaryContactId = freezed,Object? note = freezed,}) {
   return _then(_self.copyWith(
-accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
-as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as StakeholderRole,primaryContactId: freezed == primaryContactId ? _self.primaryContactId : primaryContactId // ignore: cast_nullable_to_non_nullable
+accountId: freezed == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
+as String?,accountName: freezed == accountName ? _self.accountName : accountName // ignore: cast_nullable_to_non_nullable
+as String?,accountType: freezed == accountType ? _self.accountType : accountType // ignore: cast_nullable_to_non_nullable
+as AccountType?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as StakeholderRole,contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
+as NewStakeholderContact?,primaryContactId: freezed == primaryContactId ? _self.primaryContactId : primaryContactId // ignore: cast_nullable_to_non_nullable
 as String?,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
+/// Create a copy of ProjectStakeholderRefDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$NewStakeholderContactCopyWith<$Res>? get contact {
+    if (_self.contact == null) {
+    return null;
+  }
 
+  return $NewStakeholderContactCopyWith<$Res>(_self.contact!, (value) {
+    return _then(_self.copyWith(contact: value));
+  });
+}
 }
 
 
@@ -156,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String accountId,  StakeholderRole role,  String? primaryContactId,  String? note)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? accountId,  String? accountName,  AccountType? accountType,  StakeholderRole role,  NewStakeholderContact? contact,  String? primaryContactId,  String? note)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProjectStakeholderRefDto() when $default != null:
-return $default(_that.accountId,_that.role,_that.primaryContactId,_that.note);case _:
+return $default(_that.accountId,_that.accountName,_that.accountType,_that.role,_that.contact,_that.primaryContactId,_that.note);case _:
   return orElse();
 
 }
@@ -177,10 +198,10 @@ return $default(_that.accountId,_that.role,_that.primaryContactId,_that.note);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String accountId,  StakeholderRole role,  String? primaryContactId,  String? note)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? accountId,  String? accountName,  AccountType? accountType,  StakeholderRole role,  NewStakeholderContact? contact,  String? primaryContactId,  String? note)  $default,) {final _that = this;
 switch (_that) {
 case _ProjectStakeholderRefDto():
-return $default(_that.accountId,_that.role,_that.primaryContactId,_that.note);case _:
+return $default(_that.accountId,_that.accountName,_that.accountType,_that.role,_that.contact,_that.primaryContactId,_that.note);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +218,10 @@ return $default(_that.accountId,_that.role,_that.primaryContactId,_that.note);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String accountId,  StakeholderRole role,  String? primaryContactId,  String? note)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? accountId,  String? accountName,  AccountType? accountType,  StakeholderRole role,  NewStakeholderContact? contact,  String? primaryContactId,  String? note)?  $default,) {final _that = this;
 switch (_that) {
 case _ProjectStakeholderRefDto() when $default != null:
-return $default(_that.accountId,_that.role,_that.primaryContactId,_that.note);case _:
+return $default(_that.accountId,_that.accountName,_that.accountType,_that.role,_that.contact,_that.primaryContactId,_that.note);case _:
   return null;
 
 }
@@ -209,14 +230,23 @@ return $default(_that.accountId,_that.role,_that.primaryContactId,_that.note);ca
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _ProjectStakeholderRefDto implements ProjectStakeholderRefDto {
-  const _ProjectStakeholderRefDto({required this.accountId, required this.role, this.primaryContactId, this.note});
+  const _ProjectStakeholderRefDto({this.accountId, this.accountName, this.accountType, required this.role, this.contact, this.primaryContactId, this.note});
   factory _ProjectStakeholderRefDto.fromJson(Map<String, dynamic> json) => _$ProjectStakeholderRefDtoFromJson(json);
 
-@override final  String accountId;
+/// An account already in the directory.
+@override final  String? accountId;
+/// A company or person to create as part of this registration.
+@override final  String? accountName;
+/// Only meaningful with [accountName]. Defaults to `COMPANY`
+/// server-side; sent explicitly so an individual owner is unambiguous.
+@override final  AccountType? accountType;
 @override final  StakeholderRole role;
+/// A contact to create and attach. Valid with either account form.
+@override final  NewStakeholderContact? contact;
+/// An existing contact. ⚠️ Never sent without [accountId].
 @override final  String? primaryContactId;
 @override final  String? note;
 
@@ -233,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProjectStakeholderRefDto&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.role, role) || other.role == role)&&(identical(other.primaryContactId, primaryContactId) || other.primaryContactId == primaryContactId)&&(identical(other.note, note) || other.note == note));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProjectStakeholderRefDto&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.accountName, accountName) || other.accountName == accountName)&&(identical(other.accountType, accountType) || other.accountType == accountType)&&(identical(other.role, role) || other.role == role)&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.primaryContactId, primaryContactId) || other.primaryContactId == primaryContactId)&&(identical(other.note, note) || other.note == note));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,accountId,role,primaryContactId,note);
+int get hashCode => Object.hash(runtimeType,accountId,accountName,accountType,role,contact,primaryContactId,note);
 
 @override
 String toString() {
-  return 'ProjectStakeholderRefDto(accountId: $accountId, role: $role, primaryContactId: $primaryContactId, note: $note)';
+  return 'ProjectStakeholderRefDto(accountId: $accountId, accountName: $accountName, accountType: $accountType, role: $role, contact: $contact, primaryContactId: $primaryContactId, note: $note)';
 }
 
 
@@ -253,11 +283,11 @@ abstract mixin class _$ProjectStakeholderRefDtoCopyWith<$Res> implements $Projec
   factory _$ProjectStakeholderRefDtoCopyWith(_ProjectStakeholderRefDto value, $Res Function(_ProjectStakeholderRefDto) _then) = __$ProjectStakeholderRefDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String accountId, StakeholderRole role, String? primaryContactId, String? note
+ String? accountId, String? accountName, AccountType? accountType, StakeholderRole role, NewStakeholderContact? contact, String? primaryContactId, String? note
 });
 
 
-
+@override $NewStakeholderContactCopyWith<$Res>? get contact;
 
 }
 /// @nodoc
@@ -270,12 +300,302 @@ class __$ProjectStakeholderRefDtoCopyWithImpl<$Res>
 
 /// Create a copy of ProjectStakeholderRefDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? accountId = null,Object? role = null,Object? primaryContactId = freezed,Object? note = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? accountId = freezed,Object? accountName = freezed,Object? accountType = freezed,Object? role = null,Object? contact = freezed,Object? primaryContactId = freezed,Object? note = freezed,}) {
   return _then(_ProjectStakeholderRefDto(
-accountId: null == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
-as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as StakeholderRole,primaryContactId: freezed == primaryContactId ? _self.primaryContactId : primaryContactId // ignore: cast_nullable_to_non_nullable
+accountId: freezed == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
+as String?,accountName: freezed == accountName ? _self.accountName : accountName // ignore: cast_nullable_to_non_nullable
+as String?,accountType: freezed == accountType ? _self.accountType : accountType // ignore: cast_nullable_to_non_nullable
+as AccountType?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as StakeholderRole,contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
+as NewStakeholderContact?,primaryContactId: freezed == primaryContactId ? _self.primaryContactId : primaryContactId // ignore: cast_nullable_to_non_nullable
 as String?,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+/// Create a copy of ProjectStakeholderRefDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$NewStakeholderContactCopyWith<$Res>? get contact {
+    if (_self.contact == null) {
+    return null;
+  }
+
+  return $NewStakeholderContactCopyWith<$Res>(_self.contact!, (value) {
+    return _then(_self.copyWith(contact: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$NewStakeholderContact {
+
+ String get firstName; String get lastName; String? get phone; String? get email; String? get position;
+/// Create a copy of NewStakeholderContact
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NewStakeholderContactCopyWith<NewStakeholderContact> get copyWith => _$NewStakeholderContactCopyWithImpl<NewStakeholderContact>(this as NewStakeholderContact, _$identity);
+
+  /// Serializes this NewStakeholderContact to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NewStakeholderContact&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.position, position) || other.position == position));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,firstName,lastName,phone,email,position);
+
+@override
+String toString() {
+  return 'NewStakeholderContact(firstName: $firstName, lastName: $lastName, phone: $phone, email: $email, position: $position)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NewStakeholderContactCopyWith<$Res>  {
+  factory $NewStakeholderContactCopyWith(NewStakeholderContact value, $Res Function(NewStakeholderContact) _then) = _$NewStakeholderContactCopyWithImpl;
+@useResult
+$Res call({
+ String firstName, String lastName, String? phone, String? email, String? position
+});
+
+
+
+
+}
+/// @nodoc
+class _$NewStakeholderContactCopyWithImpl<$Res>
+    implements $NewStakeholderContactCopyWith<$Res> {
+  _$NewStakeholderContactCopyWithImpl(this._self, this._then);
+
+  final NewStakeholderContact _self;
+  final $Res Function(NewStakeholderContact) _then;
+
+/// Create a copy of NewStakeholderContact
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? firstName = null,Object? lastName = null,Object? phone = freezed,Object? email = freezed,Object? position = freezed,}) {
+  return _then(_self.copyWith(
+firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
+as String,lastName: null == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
+as String,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,position: freezed == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [NewStakeholderContact].
+extension NewStakeholderContactPatterns on NewStakeholderContact {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _NewStakeholderContact value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _NewStakeholderContact() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _NewStakeholderContact value)  $default,){
+final _that = this;
+switch (_that) {
+case _NewStakeholderContact():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _NewStakeholderContact value)?  $default,){
+final _that = this;
+switch (_that) {
+case _NewStakeholderContact() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String firstName,  String lastName,  String? phone,  String? email,  String? position)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _NewStakeholderContact() when $default != null:
+return $default(_that.firstName,_that.lastName,_that.phone,_that.email,_that.position);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String firstName,  String lastName,  String? phone,  String? email,  String? position)  $default,) {final _that = this;
+switch (_that) {
+case _NewStakeholderContact():
+return $default(_that.firstName,_that.lastName,_that.phone,_that.email,_that.position);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String firstName,  String lastName,  String? phone,  String? email,  String? position)?  $default,) {final _that = this;
+switch (_that) {
+case _NewStakeholderContact() when $default != null:
+return $default(_that.firstName,_that.lastName,_that.phone,_that.email,_that.position);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+@JsonSerializable(includeIfNull: false)
+class _NewStakeholderContact implements NewStakeholderContact {
+  const _NewStakeholderContact({required this.firstName, required this.lastName, this.phone, this.email, this.position});
+  factory _NewStakeholderContact.fromJson(Map<String, dynamic> json) => _$NewStakeholderContactFromJson(json);
+
+@override final  String firstName;
+@override final  String lastName;
+@override final  String? phone;
+@override final  String? email;
+@override final  String? position;
+
+/// Create a copy of NewStakeholderContact
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$NewStakeholderContactCopyWith<_NewStakeholderContact> get copyWith => __$NewStakeholderContactCopyWithImpl<_NewStakeholderContact>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$NewStakeholderContactToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NewStakeholderContact&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.position, position) || other.position == position));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,firstName,lastName,phone,email,position);
+
+@override
+String toString() {
+  return 'NewStakeholderContact(firstName: $firstName, lastName: $lastName, phone: $phone, email: $email, position: $position)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$NewStakeholderContactCopyWith<$Res> implements $NewStakeholderContactCopyWith<$Res> {
+  factory _$NewStakeholderContactCopyWith(_NewStakeholderContact value, $Res Function(_NewStakeholderContact) _then) = __$NewStakeholderContactCopyWithImpl;
+@override @useResult
+$Res call({
+ String firstName, String lastName, String? phone, String? email, String? position
+});
+
+
+
+
+}
+/// @nodoc
+class __$NewStakeholderContactCopyWithImpl<$Res>
+    implements _$NewStakeholderContactCopyWith<$Res> {
+  __$NewStakeholderContactCopyWithImpl(this._self, this._then);
+
+  final _NewStakeholderContact _self;
+  final $Res Function(_NewStakeholderContact) _then;
+
+/// Create a copy of NewStakeholderContact
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? firstName = null,Object? lastName = null,Object? phone = freezed,Object? email = freezed,Object? position = freezed,}) {
+  return _then(_NewStakeholderContact(
+firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
+as String,lastName: null == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
+as String,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,position: freezed == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

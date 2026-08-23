@@ -36,8 +36,13 @@ import '../../logic/projects_bloc/projects_event.dart';
 import '../../logic/projects_bloc/projects_state.dart';
 import '../widgets/option_picker_field.dart';
 import '../widgets/photo_upload_grid.dart';
+import '../widgets/stakeholder_slot_field.dart';
 import '../widgets/project_enum_labels.dart';
 
+/// Radius for the pin-time neighbour lookup. Far enough to catch the rest
+/// of a street, inside the endpoint's 1-1200 m bound, and tight enough that
+/// a dense block does not return a list nobody reads.
+const _nearbyRadiusM = 300;
 const _maxPhotos = 10;
 const _defaultCurrency = 'SAR';
 
@@ -84,6 +89,34 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
   double? _longitude;
 
   final List<String> _photoLocalIds = [];
+
+  /// Buildings already registered around the picked pin — shown while the
+  /// rep is still filling the form, so a duplicate is a decision rather
+  /// than a cleanup job.
+  List<NearbyProjectCardView> _nearby = const [];
+  bool _nearbyLoading = false;
+
+  /// The three parties that appear on essentially every building, each
+  /// pinned to a fixed [StakeholderRole].
+  ///
+  /// Fixed slots rather than a free "add stakeholder + pick a role" list:
+  /// the rep never sees or chooses a role, which is what the brief asked
+  /// for, and the role reaches the request because the slot supplies it.
+  ///
+  /// ⚠️ The developer maps to `OWNER`. There is no `REAL_ESTATE_DEVELOPER`
+  /// in `StakeholderRole`, and inventing a wire value would 400 — on these
+  /// projects the developer *is* the owning party, so `OWNER` is the honest
+  /// fit. Worth revisiting if the backend ever adds a distinct value.
+  StakeholderSlotValue? _developer;
+  StakeholderSlotValue? _consultant;
+  StakeholderSlotValue? _contractor;
+
+  /// Slot → role. The single place the mapping lives.
+  List<ProjectStakeholderRefDto> get _stakeholders => [
+    ?_developer?.toDto(StakeholderRole.owner),
+    ?_consultant?.toDto(StakeholderRole.consultantEngineeringOffice),
+    ?_contractor?.toDto(StakeholderRole.mainContractor),
+  ];
   final Map<String, File> _pickedFiles = {};
 
   @override
@@ -113,6 +146,41 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
     setState(() {
       _latitude = picked.lat;
       _longitude = picked.lng;
+    });
+
+    // `GET /projects/nearby` runs **here**, the moment the pin lands — not
+    // after the project is created.
+    //
+    // The point of the question is "am I about to register a building
+    // someone already has?", and after submission that answer arrives too
+    // late to act on: the row exists, and the rep is looking at a duplicate
+    // they now have to get someone to clean up. Asked at pin time it is
+    // still a choice.
+    await _loadNearby(picked.lat, picked.lng);
+  }
+
+  /// Neighbours of the currently-picked pin. Crosses ownership on purpose
+  /// (§5) — a rep needs to see the building next door even when it belongs
+  /// to someone else.
+  Future<void> _loadNearby(double lat, double lng) async {
+    setState(() {
+      _nearbyLoading = true;
+      _nearby = const [];
+    });
+    final result = await getIt<ProjectsRepository>().nearby(
+      lat: lat,
+      lng: lng,
+      radiusM: _nearbyRadiusM,
+    );
+    if (!mounted) return;
+    setState(() {
+      _nearbyLoading = false;
+      // Swallowed on failure: this is advisory context beside a form the rep
+      // is still filling in. An error banner here would read as though the
+      // location itself failed to save, which it did not.
+      _nearby = result is Success<List<NearbyProjectCardView>>
+          ? result.data
+          : const [];
     });
   }
 
@@ -234,6 +302,10 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
       unitCount: unitCount,
       estimatedValue: estimatedValue,
       currency: estimatedValue != null ? _defaultCurrency : null,
+      // Empty slots contribute nothing — `toDto` returns null and the
+      // null-aware spread drops it, so an untouched form sends `[]` rather
+      // than placeholder elements the server would reject.
+      stakeholders: _stakeholders,
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -492,6 +564,37 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
                             longitude: _longitude,
                             onCapture: _pickLocation,
                           ),
+                          if (_nearbyLoading || _nearby.isNotEmpty) ...[
+                            verticalSpace(12.h),
+                            _NearbyStrip(
+                              loading: _nearbyLoading,
+                              projects: _nearby,
+                            ),
+                          ],
+                          verticalSpace(20.h),
+                          _SectionLabel(
+                            context.tr('projects_register_parties'),
+                          ),
+                          // Each slot carries its own role, so the rep names
+                          // a company and never touches a role picker.
+                          StakeholderSlotField(
+                            labelKey: 'stakeholder_slot_developer',
+                            value: _developer,
+                            onChanged: (v) => setState(() => _developer = v),
+                          ),
+                          verticalSpace(12.h),
+                          StakeholderSlotField(
+                            labelKey: 'stakeholder_slot_consultant',
+                            value: _consultant,
+                            onChanged: (v) => setState(() => _consultant = v),
+                          ),
+                          verticalSpace(12.h),
+                          StakeholderSlotField(
+                            labelKey: 'stakeholder_slot_contractor',
+                            value: _contractor,
+                            onChanged: (v) => setState(() => _contractor = v),
+                          ),
+
                           verticalSpace(16.h),
                           _SectionLabel(context.tr('projects_register_photos')),
                           PhotoUploadGrid(
@@ -710,6 +813,165 @@ class _LocationCapture extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Buildings already registered around the picked pin.
+///
+/// Shown **while the form is still open**, because that is the only moment
+/// the information can change what the rep does. `GET /projects/nearby`
+/// crosses ownership deliberately (§5), so a card here may belong to a
+/// colleague — `isYours` is what tells the two apart.
+class _NearbyStrip extends StatelessWidget {
+  final bool loading;
+  final List<NearbyProjectCardView> projects;
+
+  const _NearbyStrip({required this.loading, required this.projects});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    if (loading) {
+      return Row(
+        children: [
+          SizedBox(
+            width: 14.w,
+            height: 14.w,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colors.brand500,
+            ),
+          ),
+          horizontalSpace(8),
+          Text(
+            context.tr('projects_register_nearby_loading'),
+            style: context.textStyles.xsMedium,
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context
+              .tr('projects_register_nearby_title')
+              .replaceAll('{count}', '${projects.length}'),
+          style: context.textStyles.xsSemibold.copyWith(
+            color: colors.statusFollowUp.core,
+          ),
+        ),
+        verticalSpace(2.h),
+        Text(
+          context.tr('projects_register_nearby_subtitle'),
+          style: context.textStyles.xsMedium.copyWith(color: colors.ink400),
+        ),
+        verticalSpace(8.h),
+        SizedBox(
+          height: 128.h,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: projects.length,
+            separatorBuilder: (_, _) => horizontalSpace(8),
+            itemBuilder: (context, index) =>
+                _NearbyCard(project: projects[index]),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NearbyCard extends StatelessWidget {
+  final NearbyProjectCardView project;
+
+  const _NearbyCard({required this.project});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    // §9 — a photo whose URL could not be signed arrives with `url: null`,
+    // so the first *displayable* one is picked rather than `images.first`.
+    final imageUrl = project.images
+        .map((image) => image.url)
+        .where((url) => url != null && url.isNotEmpty)
+        .firstOrNull;
+
+    return Container(
+      width: 150.w,
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(
+          // A colleague's building is the one worth a second look — that is
+          // the duplicate a rep cannot see in their own list.
+          color: project.isYours == true ? colors.Color13 : colors.brand200,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 68.h,
+            width: double.infinity,
+            child: imageUrl == null
+                ? Container(
+                    color: colors.Color10,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.apartment_rounded,
+                      size: 22.sp,
+                      color: colors.ink300,
+                    ),
+                  )
+                : Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (_, child, progress) => progress == null
+                        ? child
+                        : Container(color: colors.Color13),
+                    errorBuilder: (_, _, _) => Container(
+                      color: colors.Color10,
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.apartment_rounded,
+                        size: 22.sp,
+                        color: colors.ink300,
+                      ),
+                    ),
+                  ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(8.w, 6.h, 8.w, 8.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  project.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.xsBold,
+                ),
+                verticalSpace(2.h),
+                Text(
+                  '${project.distanceM.round()} '
+                  '${context.tr('unit_meters_short')}'
+                  '${project.isYours == true ? '' : ' · ${project.owner.firstName}'}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.xsMedium.copyWith(
+                    color: colors.ink400,
+                    fontSize: 10.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

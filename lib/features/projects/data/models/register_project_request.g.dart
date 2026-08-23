@@ -9,8 +9,13 @@ part of 'register_project_request.dart';
 _ProjectStakeholderRefDto _$ProjectStakeholderRefDtoFromJson(
   Map<String, dynamic> json,
 ) => _ProjectStakeholderRefDto(
-  accountId: json['accountId'] as String,
+  accountId: json['accountId'] as String?,
+  accountName: json['accountName'] as String?,
+  accountType: $enumDecodeNullable(_$AccountTypeEnumMap, json['accountType']),
   role: $enumDecode(_$StakeholderRoleEnumMap, json['role']),
+  contact: json['contact'] == null
+      ? null
+      : NewStakeholderContact.fromJson(json['contact'] as Map<String, dynamic>),
   primaryContactId: json['primaryContactId'] as String?,
   note: json['note'] as String?,
 );
@@ -18,10 +23,18 @@ _ProjectStakeholderRefDto _$ProjectStakeholderRefDtoFromJson(
 Map<String, dynamic> _$ProjectStakeholderRefDtoToJson(
   _ProjectStakeholderRefDto instance,
 ) => <String, dynamic>{
-  'accountId': instance.accountId,
+  'accountId': ?instance.accountId,
+  'accountName': ?instance.accountName,
+  'accountType': ?_$AccountTypeEnumMap[instance.accountType],
   'role': _$StakeholderRoleEnumMap[instance.role]!,
-  'primaryContactId': instance.primaryContactId,
-  'note': instance.note,
+  'contact': ?instance.contact,
+  'primaryContactId': ?instance.primaryContactId,
+  'note': ?instance.note,
+};
+
+const _$AccountTypeEnumMap = {
+  AccountType.company: 'COMPANY',
+  AccountType.individual: 'INDIVIDUAL',
 };
 
 const _$StakeholderRoleEnumMap = {
@@ -34,6 +47,26 @@ const _$StakeholderRoleEnumMap = {
   StakeholderRole.electricalEngineer: 'ELECTRICAL_ENGINEER',
   StakeholderRole.siteSupervisor: 'SITE_SUPERVISOR',
   StakeholderRole.other: 'OTHER',
+};
+
+_NewStakeholderContact _$NewStakeholderContactFromJson(
+  Map<String, dynamic> json,
+) => _NewStakeholderContact(
+  firstName: json['firstName'] as String,
+  lastName: json['lastName'] as String,
+  phone: json['phone'] as String?,
+  email: json['email'] as String?,
+  position: json['position'] as String?,
+);
+
+Map<String, dynamic> _$NewStakeholderContactToJson(
+  _NewStakeholderContact instance,
+) => <String, dynamic>{
+  'firstName': instance.firstName,
+  'lastName': instance.lastName,
+  'phone': ?instance.phone,
+  'email': ?instance.email,
+  'position': ?instance.position,
 };
 
 _RegisterProjectRequest _$RegisterProjectRequestFromJson(
