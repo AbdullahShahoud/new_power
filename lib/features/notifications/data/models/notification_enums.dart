@@ -1,27 +1,27 @@
 import 'package:json_annotation/json_annotation.dart';
 
-/// notifications-mobile-integration.md §11.
+/// notifications-client-reference.md §1.2 — **exactly three types**, each
+/// mapping to one toggle on the preferences screen.
 ///
-/// Seven values are declared server-side but **only `SECURITY` (6 events)
-/// and `SYSTEM` (2 events) are ever emitted** — the rest are e-wallet
-/// leftovers with no producer in this backend. They are modelled anyway
-/// because an admin broadcast may carry any of them, but no type-specific
-/// UI is built for them (§7.1).
+/// ⚠️ The earlier contract declared seven. `TRANSACTION`,
+/// `MESSAGE_RECEIVED` and the two `PAYMENT_REQUEST_*` values were e-wallet
+/// leftovers and are **gone**: the doc is explicit that the server now
+/// answers `400 VALIDATION_ERROR` for `GET /notifications?type=TRANSACTION`,
+/// so keeping them would hand a rep a filter chip that breaks the screen.
 enum NotificationType {
+  /// Password changed, 2FA enabled, account suspended / banned /
+  /// reactivated, admin password reset.
   @JsonValue('SECURITY')
   security,
+
+  /// Everything operational: approvals, transfers, outcome settlement,
+  /// territory assignment.
   @JsonValue('SYSTEM')
   system,
-  @JsonValue('TRANSACTION')
-  transaction,
+
+  /// Admin broadcasts only. **Off by default** in preferences.
   @JsonValue('MARKETING')
   marketing,
-  @JsonValue('MESSAGE_RECEIVED')
-  messageReceived,
-  @JsonValue('PAYMENT_REQUEST_RECEIVED')
-  paymentRequestReceived,
-  @JsonValue('PAYMENT_REQUEST_UPDATED')
-  paymentRequestUpdated,
 
   /// Anything the backend adds before this app ships an update.
   @JsonValue(null)
@@ -32,20 +32,18 @@ extension NotificationTypeX on NotificationType {
   String get wireValue => switch (this) {
     NotificationType.security => 'SECURITY',
     NotificationType.system => 'SYSTEM',
-    NotificationType.transaction => 'TRANSACTION',
     NotificationType.marketing => 'MARKETING',
-    NotificationType.messageReceived => 'MESSAGE_RECEIVED',
-    NotificationType.paymentRequestReceived => 'PAYMENT_REQUEST_RECEIVED',
-    NotificationType.paymentRequestUpdated => 'PAYMENT_REQUEST_UPDATED',
     NotificationType.unknown => 'UNKNOWN',
   };
 
   String get labelKey => switch (this) {
     NotificationType.security => 'notifications_type_security',
     NotificationType.system => 'notifications_type_system',
-    _ => 'notifications_type_other',
+    NotificationType.marketing => 'notifications_type_marketing',
+    NotificationType.unknown => 'notifications_type_other',
   };
 }
+
 
 /// §11 `NotificationStatus`.
 ///
@@ -67,7 +65,7 @@ enum NotificationStatus {
 /// The chips on the inbox. Three, because three is the whole live taxonomy
 /// (§1.1 of the UI spec) — a seven-way filter bar would advertise types
 /// nothing emits.
-enum NotificationFilter { all, security, system }
+enum NotificationFilter { all, security, system, marketing }
 
 extension NotificationFilterX on NotificationFilter {
   /// `null` means "send no `type` parameter at all".
@@ -75,11 +73,13 @@ extension NotificationFilterX on NotificationFilter {
     NotificationFilter.all => null,
     NotificationFilter.security => NotificationType.security,
     NotificationFilter.system => NotificationType.system,
+    NotificationFilter.marketing => NotificationType.marketing,
   };
 
   String get labelKey => switch (this) {
     NotificationFilter.all => 'notifications_filter_all',
     NotificationFilter.security => 'notifications_type_security',
     NotificationFilter.system => 'notifications_type_system',
+    NotificationFilter.marketing => 'notifications_type_marketing',
   };
 }

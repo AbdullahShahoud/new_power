@@ -34,9 +34,22 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => InboxBloc(getIt(), getIt<UnreadBadgeCubit>())
-        ..add(const InboxEvent.opened()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => InboxBloc(getIt(), getIt<UnreadBadgeCubit>())
+            ..add(const InboxEvent.opened()),
+        ),
+        // ⚠️ `.value`, never `create:`. The badge is a lazy singleton shared
+        // with the bell on the Home tab, and `BlocProvider(create:)` closes
+        // whatever it builds when its screen pops — which would leave the
+        // bell reading a dead cubit for the rest of the session.
+        //
+        // It has to be provided at all because this screen reads it through
+        // `context` (the app bar's mark-all-read button, the refreshes); the
+        // GetIt registration alone puts nothing in the widget tree.
+        BlocProvider.value(value: getIt<UnreadBadgeCubit>()),
+      ],
       child: const _InboxView(),
     );
   }
@@ -89,13 +102,30 @@ class _InboxViewState extends State<_InboxView> {
       _expandedId = _expandedId == notification.id ? null : notification.id;
     });
 
-    final destination = resolveSubType(notification).destination;
-    if (destination == NotificationDestination.securityPassword) {
-      context.pushNamed(Routes.changePasswordScreen);
+    // Branch on `metadata`, never on the title — titles are server-rendered
+    // in the reader's language, so a string match would break the moment a
+    // rep switches to Arabic.
+    switch (destinationOf(notification)) {
+      case NotificationDestination.project:
+        // The settlement loop: an outcome submitted, confirmed or rejected.
+        // The project is the useful landing place — the outcome lives inside
+        // it and the rep needs the surrounding context either way.
+        final projectId = projectIdOf(notification);
+        if (projectId != null) {
+          context.pushNamed(
+            Routes.projectDetailScreen,
+            arguments: {'projectId': projectId},
+          );
+        }
+      case NotificationDestination.securityPassword:
+        context.pushNamed(Routes.changePasswordScreen);
+      case NotificationDestination.securityTwoFactor:
+      case NotificationDestination.none:
+        // Nowhere to go. `securityTwoFactor` has no screen in this build (a
+        // rep is not 2FA-gated), and most rows describe a state rather than
+        // pointing at one — they expand inline instead.
+        break;
     }
-    // `securityTwoFactor` has no screen in this build — a rep is not
-    // 2FA-gated, so the row stays informational rather than pointing at a
-    // route that does not exist.
   }
 
   void _onArchive(NotificationView notification) {
@@ -352,6 +382,31 @@ class _InboxAppBar extends StatelessWidget {
             child: Text(
               context.tr('notifications_title'),
               style: context.textStyles.baseBold,
+            ),
+          ),
+          PressableScale(
+            onTap: () async {
+              final bloc = context.read<InboxBloc>();
+              final languageChanged = await context.pushNamed(
+                Routes.notificationSettingsScreen,
+              );
+              if (!context.mounted) return;
+              // ⚠️ Mandatory after a language switch. A row is stored as a
+              // template key plus its parameters and rendered on the way out
+              // in the reader's language, so **every** row's text just
+              // changed — including last year's. The ids are stable, which
+              // is exactly why nothing on screen would refresh itself.
+              if (languageChanged == true) {
+                bloc.add(const InboxEvent.refreshed());
+              }
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.w),
+              child: Icon(
+                Icons.tune_rounded,
+                size: 20.sp,
+                color: colors.textColor70,
+              ),
             ),
           ),
           // Enabled only when something is actually unread.

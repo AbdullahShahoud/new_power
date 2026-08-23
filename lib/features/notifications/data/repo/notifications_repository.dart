@@ -125,16 +125,32 @@ class NotificationsRepository {
     }
   }
 
-  /// §6.3 — preferences.
-  ///
-  /// **Read-only.** `UpdatePreferencesDto` and
-  /// `NotificationPreferenceService.updatePreferences()` both exist
-  /// server-side but **no controller route calls them**, so there is no
-  /// update counterpart to write here. Kept because the read works and is
-  /// the one call a future settings screen would need first.
+  /// `GET /notifications/preferences` — upserts with defaults on first call,
+  /// so it never 404s.
   Future<ApiResult<NotificationPreferencesView>> preferences() async {
     try {
       final response = await _apiService.getNotificationPreferences();
+      return ApiResult.success(response.data);
+    } catch (error) {
+      return ApiResult.failure(ApiErrorHandler.handle(error));
+    }
+  }
+
+  /// `PATCH /notifications/preferences` — send only what changed.
+  ///
+  /// ⚠️ A change to `language` **re-renders the rep's entire notification
+  /// history**, not just what arrives next: a row stores a template key plus
+  /// its parameters and is rendered against the reader's current language on
+  /// the way out. So the caller must discard cached notification text and
+  /// re-fetch the inbox afterwards. The ids are stable; only `title` and
+  /// `message` change, and the unread count is unaffected.
+  Future<ApiResult<NotificationPreferencesView>> updatePreferences(
+    UpdateNotificationPreferencesRequest request,
+  ) async {
+    try {
+      final response = await _apiService.updateNotificationPreferences(
+        request,
+      );
       return ApiResult.success(response.data);
     } catch (error) {
       return ApiResult.failure(ApiErrorHandler.handle(error));

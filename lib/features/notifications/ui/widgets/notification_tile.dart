@@ -40,14 +40,12 @@ class NotificationTile extends StatelessWidget {
     final accent = _severityColor(context, severity);
     final unread = notification.isUnread;
 
-    // A broadcast is free text an admin typed at runtime — it can never be
-    // mapped to Arabic and must be shown exactly as written.
-    final title = subType.rendersServerText
-        ? notification.title
-        : context.tr(subType.titleKey);
-    final body = subType.rendersServerText
-        ? notification.message
-        : context.tr(subType.bodyKey);
+    // Server text, always. A row is stored as a template key plus its
+    // parameters and rendered on the way out in the reader's own language,
+    // so this string is already localised — and already carries names,
+    // codes and figures the client never receives.
+    final title = notification.title;
+    final body = notification.message;
 
     final created = notification.createdAt;
     final relative = created == null
@@ -113,7 +111,7 @@ class NotificationTile extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _AutoDirection(
-                                enabled: subType.rendersServerText,
+                                enabled: true,
                                 child: Text(
                                   title,
                                   maxLines: 1,
@@ -123,7 +121,7 @@ class NotificationTile extends StatelessWidget {
                               ),
                               verticalSpace(3.h),
                               _AutoDirection(
-                                enabled: subType.rendersServerText,
+                                enabled: true,
                                 child: AnimatedSize(
                                   duration: const Duration(milliseconds: 220),
                                   curve: Curves.easeOutCubic,
@@ -180,7 +178,7 @@ class NotificationTile extends StatelessWidget {
                         // somewhere. Of the eight events a rep receives,
                         // only password and 2FA have a destination — the
                         // rest describe a state and point nowhere.
-                        if (subType.destination != NotificationDestination.none)
+                        if (destinationOf(notification) != NotificationDestination.none)
                           Padding(
                             padding: EdgeInsets.only(top: 2.h),
                             child: Icon(

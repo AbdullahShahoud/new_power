@@ -93,38 +93,53 @@ extension NotificationSubTypeX on NotificationSubType {
     NotificationSubType.broadcast => NotificationSeverity.neutral,
   };
 
-  /// A broadcast's text is written by an admin at runtime, in whatever
-  /// language they choose — it can never be mapped to Arabic and must be
-  /// rendered verbatim, with its direction auto-detected.
-  bool get rendersServerText => this == NotificationSubType.broadcast;
-
-  String get titleKey => 'notification_${_slug}_title';
-  String get bodyKey => 'notification_${_slug}_body';
-
-  String get _slug => switch (this) {
-    NotificationSubType.accountApproved => 'account_approved',
-    NotificationSubType.passwordChanged => 'password_changed',
-    NotificationSubType.passwordReset => 'password_reset',
-    NotificationSubType.adminPasswordReset => 'admin_password_reset',
-    NotificationSubType.twoFactorEnabled => 'two_factor_enabled',
-    NotificationSubType.accountSuspended => 'account_suspended',
-    NotificationSubType.accountBanned => 'account_banned',
-    NotificationSubType.accountReactivated => 'account_reactivated',
-    NotificationSubType.repPendingApproval => 'rep_pending_approval',
-    NotificationSubType.broadcast => 'broadcast',
-  };
+  /// Every row renders the **server's own** `title`/`message`.
+  ///
+  /// ⚠️ This used to be true only for admin broadcasts, with a client-side
+  /// Arabic map keyed on the sub-type covering everything else. That is now
+  /// wrong. A notification is stored as a template key plus its parameters
+  /// and is rendered on the way out against the reader's `language`
+  /// preference, so the text arrives already localised — and the client
+  /// checklist is explicit: "display title/message verbatim, never
+  /// translate client-side".
+  ///
+  /// A local map would now actively lose information: template parameters
+  /// carry manager names, territory codes and project titles that this app
+  /// never receives, so a mapped string could only ever be the generic
+  /// version of a sentence the server already personalised.
+  bool get rendersServerText => true;
 }
 
-/// §4.3 — where tapping a row goes.
+/// Where tapping a row goes.
 ///
-/// ⚠️ Of the eight events a rep can receive, only the password and 2FA ones
-/// have a real destination. "Account Approved", "Suspended", "Reactivated"
-/// and broadcasts describe a state; they point nowhere. So a chevron is the
-/// exception, not the default, and an unknown sub-type must never show one.
-enum NotificationDestination { none, securityPassword, securityTwoFactor }
+/// ⚠️ Resolved from **`metadata`**, never from `title`. The checklist is
+/// explicit about this, and the reason is now structural: titles are
+/// server-rendered in the reader's language, so any string match would
+/// break the moment a rep switches to Arabic — or the moment the backend
+/// edits a template.
+enum NotificationDestination {
+  none,
+  securityPassword,
+  securityTwoFactor,
 
-extension NotificationDestinationX on NotificationSubType {
-  NotificationDestination get destination => switch (this) {
+  /// `metadata.projectId` — the four-eyes settlement loop. An outcome
+  /// submitted / confirmed / rejected all point at the project; `outcomeId`
+  /// narrows to the row inside it.
+  project,
+}
+
+/// The deep-link target for one notification.
+///
+/// Takes the whole row rather than just the sub-type: the project link is
+/// carried by `metadata`, which the sub-type derivation does not preserve.
+NotificationDestination destinationOf(NotificationView notification) {
+  // A project link wins over anything the sub-type implies — it is the only
+  // destination the server actually hands us an id for.
+  final projectId = notification.metadata?['projectId'];
+  if (projectId is String && projectId.isNotEmpty) {
+    return NotificationDestination.project;
+  }
+  return switch (resolveSubType(notification)) {
     NotificationSubType.passwordChanged ||
     NotificationSubType.passwordReset ||
     NotificationSubType.adminPasswordReset =>
@@ -133,6 +148,12 @@ extension NotificationDestinationX on NotificationSubType {
       NotificationDestination.securityTwoFactor,
     _ => NotificationDestination.none,
   };
+}
+
+/// The project a notification points at, when it points at one.
+String? projectIdOf(NotificationView notification) {
+  final value = notification.metadata?['projectId'];
+  return value is String && value.isNotEmpty ? value : null;
 }
 
 /// §6.1 — which `metadata` keys are worth showing a rep.
