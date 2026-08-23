@@ -24,6 +24,7 @@ import '../../features/auth/data/models/verify_otp_request.dart';
 import '../../features/auth/data/models/verify_otp_response.dart';
 import '../../features/catalog/data/models/catalog_responses.dart';
 import '../../features/notifications/data/models/notification_responses.dart';
+import '../../features/notifications/data/models/notification_view.dart';
 import '../../features/projects/data/models/accounts_list_response.dart';
 import '../../features/projects/data/models/activities_list_response.dart';
 import '../../features/projects/data/models/activity_detail_response.dart';
@@ -508,6 +509,12 @@ abstract class ApiService {
 
   @GET(ApiConstants.notificationPreferences)
   Future<NotificationPreferencesResponse> getNotificationPreferences();
+
+  /// Partial update — only the keys present are changed.
+  @PATCH(ApiConstants.notificationPreferences)
+  Future<NotificationPreferencesResponse> updateNotificationPreferences(
+    @Body() UpdateNotificationPreferencesRequest request,
+  );
 
   /// No body. `id` is a **cuid** taken as a raw string — no `ParseUUIDPipe`
   /// exists on this route, so it must not be validated as a uuid.

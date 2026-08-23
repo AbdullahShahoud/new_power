@@ -337,9 +337,11 @@ as DateTime?,
 /// @nodoc
 mixin _$NotificationPreferencesView {
 
- bool get transactionEnabled; bool get securityEnabled; bool get systemEnabled; bool get marketingEnabled;/// Governs the **push channel only** — the in-app row is written
-/// regardless.
- bool get pushEnabled;
+ bool get securityEnabled; bool get systemEnabled;/// Admin broadcasts. **Off by default**, which is why the settings
+/// screen shows it as genuinely off rather than assuming true.
+ bool get marketingEnabled;/// Narrower than the others: it suppresses the **push only**. The in-app
+/// row is still written, so the inbox stays complete.
+ bool get pushEnabled; NotificationLanguage get language;
 /// Create a copy of NotificationPreferencesView
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -352,16 +354,16 @@ $NotificationPreferencesViewCopyWith<NotificationPreferencesView> get copyWith =
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationPreferencesView&&(identical(other.transactionEnabled, transactionEnabled) || other.transactionEnabled == transactionEnabled)&&(identical(other.securityEnabled, securityEnabled) || other.securityEnabled == securityEnabled)&&(identical(other.systemEnabled, systemEnabled) || other.systemEnabled == systemEnabled)&&(identical(other.marketingEnabled, marketingEnabled) || other.marketingEnabled == marketingEnabled)&&(identical(other.pushEnabled, pushEnabled) || other.pushEnabled == pushEnabled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationPreferencesView&&(identical(other.securityEnabled, securityEnabled) || other.securityEnabled == securityEnabled)&&(identical(other.systemEnabled, systemEnabled) || other.systemEnabled == systemEnabled)&&(identical(other.marketingEnabled, marketingEnabled) || other.marketingEnabled == marketingEnabled)&&(identical(other.pushEnabled, pushEnabled) || other.pushEnabled == pushEnabled)&&(identical(other.language, language) || other.language == language));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,transactionEnabled,securityEnabled,systemEnabled,marketingEnabled,pushEnabled);
+int get hashCode => Object.hash(runtimeType,securityEnabled,systemEnabled,marketingEnabled,pushEnabled,language);
 
 @override
 String toString() {
-  return 'NotificationPreferencesView(transactionEnabled: $transactionEnabled, securityEnabled: $securityEnabled, systemEnabled: $systemEnabled, marketingEnabled: $marketingEnabled, pushEnabled: $pushEnabled)';
+  return 'NotificationPreferencesView(securityEnabled: $securityEnabled, systemEnabled: $systemEnabled, marketingEnabled: $marketingEnabled, pushEnabled: $pushEnabled, language: $language)';
 }
 
 
@@ -372,7 +374,7 @@ abstract mixin class $NotificationPreferencesViewCopyWith<$Res>  {
   factory $NotificationPreferencesViewCopyWith(NotificationPreferencesView value, $Res Function(NotificationPreferencesView) _then) = _$NotificationPreferencesViewCopyWithImpl;
 @useResult
 $Res call({
- bool transactionEnabled, bool securityEnabled, bool systemEnabled, bool marketingEnabled, bool pushEnabled
+ bool securityEnabled, bool systemEnabled, bool marketingEnabled, bool pushEnabled, NotificationLanguage language
 });
 
 
@@ -389,14 +391,14 @@ class _$NotificationPreferencesViewCopyWithImpl<$Res>
 
 /// Create a copy of NotificationPreferencesView
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? transactionEnabled = null,Object? securityEnabled = null,Object? systemEnabled = null,Object? marketingEnabled = null,Object? pushEnabled = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? securityEnabled = null,Object? systemEnabled = null,Object? marketingEnabled = null,Object? pushEnabled = null,Object? language = null,}) {
   return _then(_self.copyWith(
-transactionEnabled: null == transactionEnabled ? _self.transactionEnabled : transactionEnabled // ignore: cast_nullable_to_non_nullable
-as bool,securityEnabled: null == securityEnabled ? _self.securityEnabled : securityEnabled // ignore: cast_nullable_to_non_nullable
+securityEnabled: null == securityEnabled ? _self.securityEnabled : securityEnabled // ignore: cast_nullable_to_non_nullable
 as bool,systemEnabled: null == systemEnabled ? _self.systemEnabled : systemEnabled // ignore: cast_nullable_to_non_nullable
 as bool,marketingEnabled: null == marketingEnabled ? _self.marketingEnabled : marketingEnabled // ignore: cast_nullable_to_non_nullable
 as bool,pushEnabled: null == pushEnabled ? _self.pushEnabled : pushEnabled // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as NotificationLanguage,
   ));
 }
 
@@ -481,10 +483,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool transactionEnabled,  bool securityEnabled,  bool systemEnabled,  bool marketingEnabled,  bool pushEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool securityEnabled,  bool systemEnabled,  bool marketingEnabled,  bool pushEnabled,  NotificationLanguage language)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NotificationPreferencesView() when $default != null:
-return $default(_that.transactionEnabled,_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled);case _:
+return $default(_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled,_that.language);case _:
   return orElse();
 
 }
@@ -502,10 +504,10 @@ return $default(_that.transactionEnabled,_that.securityEnabled,_that.systemEnabl
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool transactionEnabled,  bool securityEnabled,  bool systemEnabled,  bool marketingEnabled,  bool pushEnabled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool securityEnabled,  bool systemEnabled,  bool marketingEnabled,  bool pushEnabled,  NotificationLanguage language)  $default,) {final _that = this;
 switch (_that) {
 case _NotificationPreferencesView():
-return $default(_that.transactionEnabled,_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled);case _:
+return $default(_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled,_that.language);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -522,10 +524,10 @@ return $default(_that.transactionEnabled,_that.securityEnabled,_that.systemEnabl
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool transactionEnabled,  bool securityEnabled,  bool systemEnabled,  bool marketingEnabled,  bool pushEnabled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool securityEnabled,  bool systemEnabled,  bool marketingEnabled,  bool pushEnabled,  NotificationLanguage language)?  $default,) {final _that = this;
 switch (_that) {
 case _NotificationPreferencesView() when $default != null:
-return $default(_that.transactionEnabled,_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled);case _:
+return $default(_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled,_that.language);case _:
   return null;
 
 }
@@ -537,16 +539,18 @@ return $default(_that.transactionEnabled,_that.securityEnabled,_that.systemEnabl
 @JsonSerializable()
 
 class _NotificationPreferencesView implements NotificationPreferencesView {
-  const _NotificationPreferencesView({this.transactionEnabled = true, this.securityEnabled = true, this.systemEnabled = true, this.marketingEnabled = false, this.pushEnabled = true});
+  const _NotificationPreferencesView({this.securityEnabled = true, this.systemEnabled = true, this.marketingEnabled = false, this.pushEnabled = true, this.language = NotificationLanguage.en});
   factory _NotificationPreferencesView.fromJson(Map<String, dynamic> json) => _$NotificationPreferencesViewFromJson(json);
 
-@override@JsonKey() final  bool transactionEnabled;
 @override@JsonKey() final  bool securityEnabled;
 @override@JsonKey() final  bool systemEnabled;
+/// Admin broadcasts. **Off by default**, which is why the settings
+/// screen shows it as genuinely off rather than assuming true.
 @override@JsonKey() final  bool marketingEnabled;
-/// Governs the **push channel only** — the in-app row is written
-/// regardless.
+/// Narrower than the others: it suppresses the **push only**. The in-app
+/// row is still written, so the inbox stays complete.
 @override@JsonKey() final  bool pushEnabled;
+@override@JsonKey() final  NotificationLanguage language;
 
 /// Create a copy of NotificationPreferencesView
 /// with the given fields replaced by the non-null parameter values.
@@ -561,16 +565,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationPreferencesView&&(identical(other.transactionEnabled, transactionEnabled) || other.transactionEnabled == transactionEnabled)&&(identical(other.securityEnabled, securityEnabled) || other.securityEnabled == securityEnabled)&&(identical(other.systemEnabled, systemEnabled) || other.systemEnabled == systemEnabled)&&(identical(other.marketingEnabled, marketingEnabled) || other.marketingEnabled == marketingEnabled)&&(identical(other.pushEnabled, pushEnabled) || other.pushEnabled == pushEnabled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationPreferencesView&&(identical(other.securityEnabled, securityEnabled) || other.securityEnabled == securityEnabled)&&(identical(other.systemEnabled, systemEnabled) || other.systemEnabled == systemEnabled)&&(identical(other.marketingEnabled, marketingEnabled) || other.marketingEnabled == marketingEnabled)&&(identical(other.pushEnabled, pushEnabled) || other.pushEnabled == pushEnabled)&&(identical(other.language, language) || other.language == language));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,transactionEnabled,securityEnabled,systemEnabled,marketingEnabled,pushEnabled);
+int get hashCode => Object.hash(runtimeType,securityEnabled,systemEnabled,marketingEnabled,pushEnabled,language);
 
 @override
 String toString() {
-  return 'NotificationPreferencesView(transactionEnabled: $transactionEnabled, securityEnabled: $securityEnabled, systemEnabled: $systemEnabled, marketingEnabled: $marketingEnabled, pushEnabled: $pushEnabled)';
+  return 'NotificationPreferencesView(securityEnabled: $securityEnabled, systemEnabled: $systemEnabled, marketingEnabled: $marketingEnabled, pushEnabled: $pushEnabled, language: $language)';
 }
 
 
@@ -581,7 +585,7 @@ abstract mixin class _$NotificationPreferencesViewCopyWith<$Res> implements $Not
   factory _$NotificationPreferencesViewCopyWith(_NotificationPreferencesView value, $Res Function(_NotificationPreferencesView) _then) = __$NotificationPreferencesViewCopyWithImpl;
 @override @useResult
 $Res call({
- bool transactionEnabled, bool securityEnabled, bool systemEnabled, bool marketingEnabled, bool pushEnabled
+ bool securityEnabled, bool systemEnabled, bool marketingEnabled, bool pushEnabled, NotificationLanguage language
 });
 
 
@@ -598,14 +602,289 @@ class __$NotificationPreferencesViewCopyWithImpl<$Res>
 
 /// Create a copy of NotificationPreferencesView
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? transactionEnabled = null,Object? securityEnabled = null,Object? systemEnabled = null,Object? marketingEnabled = null,Object? pushEnabled = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? securityEnabled = null,Object? systemEnabled = null,Object? marketingEnabled = null,Object? pushEnabled = null,Object? language = null,}) {
   return _then(_NotificationPreferencesView(
-transactionEnabled: null == transactionEnabled ? _self.transactionEnabled : transactionEnabled // ignore: cast_nullable_to_non_nullable
-as bool,securityEnabled: null == securityEnabled ? _self.securityEnabled : securityEnabled // ignore: cast_nullable_to_non_nullable
+securityEnabled: null == securityEnabled ? _self.securityEnabled : securityEnabled // ignore: cast_nullable_to_non_nullable
 as bool,systemEnabled: null == systemEnabled ? _self.systemEnabled : systemEnabled // ignore: cast_nullable_to_non_nullable
 as bool,marketingEnabled: null == marketingEnabled ? _self.marketingEnabled : marketingEnabled // ignore: cast_nullable_to_non_nullable
 as bool,pushEnabled: null == pushEnabled ? _self.pushEnabled : pushEnabled // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as NotificationLanguage,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$UpdateNotificationPreferencesRequest {
+
+ bool? get securityEnabled; bool? get systemEnabled; bool? get marketingEnabled; bool? get pushEnabled; NotificationLanguage? get language;
+/// Create a copy of UpdateNotificationPreferencesRequest
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UpdateNotificationPreferencesRequestCopyWith<UpdateNotificationPreferencesRequest> get copyWith => _$UpdateNotificationPreferencesRequestCopyWithImpl<UpdateNotificationPreferencesRequest>(this as UpdateNotificationPreferencesRequest, _$identity);
+
+  /// Serializes this UpdateNotificationPreferencesRequest to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateNotificationPreferencesRequest&&(identical(other.securityEnabled, securityEnabled) || other.securityEnabled == securityEnabled)&&(identical(other.systemEnabled, systemEnabled) || other.systemEnabled == systemEnabled)&&(identical(other.marketingEnabled, marketingEnabled) || other.marketingEnabled == marketingEnabled)&&(identical(other.pushEnabled, pushEnabled) || other.pushEnabled == pushEnabled)&&(identical(other.language, language) || other.language == language));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,securityEnabled,systemEnabled,marketingEnabled,pushEnabled,language);
+
+@override
+String toString() {
+  return 'UpdateNotificationPreferencesRequest(securityEnabled: $securityEnabled, systemEnabled: $systemEnabled, marketingEnabled: $marketingEnabled, pushEnabled: $pushEnabled, language: $language)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UpdateNotificationPreferencesRequestCopyWith<$Res>  {
+  factory $UpdateNotificationPreferencesRequestCopyWith(UpdateNotificationPreferencesRequest value, $Res Function(UpdateNotificationPreferencesRequest) _then) = _$UpdateNotificationPreferencesRequestCopyWithImpl;
+@useResult
+$Res call({
+ bool? securityEnabled, bool? systemEnabled, bool? marketingEnabled, bool? pushEnabled, NotificationLanguage? language
+});
+
+
+
+
+}
+/// @nodoc
+class _$UpdateNotificationPreferencesRequestCopyWithImpl<$Res>
+    implements $UpdateNotificationPreferencesRequestCopyWith<$Res> {
+  _$UpdateNotificationPreferencesRequestCopyWithImpl(this._self, this._then);
+
+  final UpdateNotificationPreferencesRequest _self;
+  final $Res Function(UpdateNotificationPreferencesRequest) _then;
+
+/// Create a copy of UpdateNotificationPreferencesRequest
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? securityEnabled = freezed,Object? systemEnabled = freezed,Object? marketingEnabled = freezed,Object? pushEnabled = freezed,Object? language = freezed,}) {
+  return _then(_self.copyWith(
+securityEnabled: freezed == securityEnabled ? _self.securityEnabled : securityEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,systemEnabled: freezed == systemEnabled ? _self.systemEnabled : systemEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,marketingEnabled: freezed == marketingEnabled ? _self.marketingEnabled : marketingEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,pushEnabled: freezed == pushEnabled ? _self.pushEnabled : pushEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,language: freezed == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as NotificationLanguage?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [UpdateNotificationPreferencesRequest].
+extension UpdateNotificationPreferencesRequestPatterns on UpdateNotificationPreferencesRequest {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _UpdateNotificationPreferencesRequest value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _UpdateNotificationPreferencesRequest() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _UpdateNotificationPreferencesRequest value)  $default,){
+final _that = this;
+switch (_that) {
+case _UpdateNotificationPreferencesRequest():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _UpdateNotificationPreferencesRequest value)?  $default,){
+final _that = this;
+switch (_that) {
+case _UpdateNotificationPreferencesRequest() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool? securityEnabled,  bool? systemEnabled,  bool? marketingEnabled,  bool? pushEnabled,  NotificationLanguage? language)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _UpdateNotificationPreferencesRequest() when $default != null:
+return $default(_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled,_that.language);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool? securityEnabled,  bool? systemEnabled,  bool? marketingEnabled,  bool? pushEnabled,  NotificationLanguage? language)  $default,) {final _that = this;
+switch (_that) {
+case _UpdateNotificationPreferencesRequest():
+return $default(_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled,_that.language);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool? securityEnabled,  bool? systemEnabled,  bool? marketingEnabled,  bool? pushEnabled,  NotificationLanguage? language)?  $default,) {final _that = this;
+switch (_that) {
+case _UpdateNotificationPreferencesRequest() when $default != null:
+return $default(_that.securityEnabled,_that.systemEnabled,_that.marketingEnabled,_that.pushEnabled,_that.language);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+@JsonSerializable(includeIfNull: false)
+class _UpdateNotificationPreferencesRequest implements UpdateNotificationPreferencesRequest {
+  const _UpdateNotificationPreferencesRequest({this.securityEnabled, this.systemEnabled, this.marketingEnabled, this.pushEnabled, this.language});
+  factory _UpdateNotificationPreferencesRequest.fromJson(Map<String, dynamic> json) => _$UpdateNotificationPreferencesRequestFromJson(json);
+
+@override final  bool? securityEnabled;
+@override final  bool? systemEnabled;
+@override final  bool? marketingEnabled;
+@override final  bool? pushEnabled;
+@override final  NotificationLanguage? language;
+
+/// Create a copy of UpdateNotificationPreferencesRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UpdateNotificationPreferencesRequestCopyWith<_UpdateNotificationPreferencesRequest> get copyWith => __$UpdateNotificationPreferencesRequestCopyWithImpl<_UpdateNotificationPreferencesRequest>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UpdateNotificationPreferencesRequestToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateNotificationPreferencesRequest&&(identical(other.securityEnabled, securityEnabled) || other.securityEnabled == securityEnabled)&&(identical(other.systemEnabled, systemEnabled) || other.systemEnabled == systemEnabled)&&(identical(other.marketingEnabled, marketingEnabled) || other.marketingEnabled == marketingEnabled)&&(identical(other.pushEnabled, pushEnabled) || other.pushEnabled == pushEnabled)&&(identical(other.language, language) || other.language == language));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,securityEnabled,systemEnabled,marketingEnabled,pushEnabled,language);
+
+@override
+String toString() {
+  return 'UpdateNotificationPreferencesRequest(securityEnabled: $securityEnabled, systemEnabled: $systemEnabled, marketingEnabled: $marketingEnabled, pushEnabled: $pushEnabled, language: $language)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UpdateNotificationPreferencesRequestCopyWith<$Res> implements $UpdateNotificationPreferencesRequestCopyWith<$Res> {
+  factory _$UpdateNotificationPreferencesRequestCopyWith(_UpdateNotificationPreferencesRequest value, $Res Function(_UpdateNotificationPreferencesRequest) _then) = __$UpdateNotificationPreferencesRequestCopyWithImpl;
+@override @useResult
+$Res call({
+ bool? securityEnabled, bool? systemEnabled, bool? marketingEnabled, bool? pushEnabled, NotificationLanguage? language
+});
+
+
+
+
+}
+/// @nodoc
+class __$UpdateNotificationPreferencesRequestCopyWithImpl<$Res>
+    implements _$UpdateNotificationPreferencesRequestCopyWith<$Res> {
+  __$UpdateNotificationPreferencesRequestCopyWithImpl(this._self, this._then);
+
+  final _UpdateNotificationPreferencesRequest _self;
+  final $Res Function(_UpdateNotificationPreferencesRequest) _then;
+
+/// Create a copy of UpdateNotificationPreferencesRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? securityEnabled = freezed,Object? systemEnabled = freezed,Object? marketingEnabled = freezed,Object? pushEnabled = freezed,Object? language = freezed,}) {
+  return _then(_UpdateNotificationPreferencesRequest(
+securityEnabled: freezed == securityEnabled ? _self.securityEnabled : securityEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,systemEnabled: freezed == systemEnabled ? _self.systemEnabled : systemEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,marketingEnabled: freezed == marketingEnabled ? _self.marketingEnabled : marketingEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,pushEnabled: freezed == pushEnabled ? _self.pushEnabled : pushEnabled // ignore: cast_nullable_to_non_nullable
+as bool?,language: freezed == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as NotificationLanguage?,
   ));
 }
 

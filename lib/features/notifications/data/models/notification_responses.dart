@@ -84,21 +84,6 @@ abstract class NotificationActionResponse with _$NotificationActionResponse {
       _$NotificationActionResponseFromJson(json);
 }
 
-@freezed
-abstract class NotificationPreferencesResponse
-    with _$NotificationPreferencesResponse {
-  const factory NotificationPreferencesResponse({
-    bool? success,
-    String? message,
-    required NotificationPreferencesView data,
-    ApiResponseMeta? meta,
-  }) = _NotificationPreferencesResponse;
-
-  factory NotificationPreferencesResponse.fromJson(
-    Map<String, dynamic> json,
-  ) => _$NotificationPreferencesResponseFromJson(json);
-}
-
 /// §6.7 / §6.8 — `{ registered: true }` / `{ removed: true }`. Modelled as
 /// one shape because the caller only needs "it worked".
 @freezed
@@ -128,3 +113,18 @@ abstract class RegisterFcmTokenRequest with _$RegisterFcmTokenRequest {
 /// Client-side mirror of the server's `@Matches` rule, so a malformed token
 /// is caught before it costs a request against the 30/60s budget.
 final RegExp kFcmTokenPattern = RegExp(r'^[A-Za-z0-9_:\-]+$');
+
+@freezed
+abstract class NotificationPreferencesResponse
+    with _$NotificationPreferencesResponse {
+  const factory NotificationPreferencesResponse({
+    bool? success,
+    String? message,
+    required NotificationPreferencesView data,
+    ApiResponseMeta? meta,
+  }) = _NotificationPreferencesResponse;
+
+  factory NotificationPreferencesResponse.fromJson(
+    Map<String, dynamic> json,
+  ) => _$NotificationPreferencesResponseFromJson(json);
+}

@@ -75,11 +75,7 @@ Map<String, dynamic> _$NotificationViewToJson(_NotificationView instance) =>
 const _$NotificationTypeEnumMap = {
   NotificationType.security: 'SECURITY',
   NotificationType.system: 'SYSTEM',
-  NotificationType.transaction: 'TRANSACTION',
   NotificationType.marketing: 'MARKETING',
-  NotificationType.messageReceived: 'MESSAGE_RECEIVED',
-  NotificationType.paymentRequestReceived: 'PAYMENT_REQUEST_RECEIVED',
-  NotificationType.paymentRequestUpdated: 'PAYMENT_REQUEST_UPDATED',
   NotificationType.unknown: null,
 };
 
@@ -103,19 +99,49 @@ Json? _$JsonConverterToJson<Json, Value>(
 _NotificationPreferencesView _$NotificationPreferencesViewFromJson(
   Map<String, dynamic> json,
 ) => _NotificationPreferencesView(
-  transactionEnabled: json['transactionEnabled'] as bool? ?? true,
   securityEnabled: json['securityEnabled'] as bool? ?? true,
   systemEnabled: json['systemEnabled'] as bool? ?? true,
   marketingEnabled: json['marketingEnabled'] as bool? ?? false,
   pushEnabled: json['pushEnabled'] as bool? ?? true,
+  language:
+      $enumDecodeNullable(_$NotificationLanguageEnumMap, json['language']) ??
+      NotificationLanguage.en,
 );
 
 Map<String, dynamic> _$NotificationPreferencesViewToJson(
   _NotificationPreferencesView instance,
 ) => <String, dynamic>{
-  'transactionEnabled': instance.transactionEnabled,
   'securityEnabled': instance.securityEnabled,
   'systemEnabled': instance.systemEnabled,
   'marketingEnabled': instance.marketingEnabled,
   'pushEnabled': instance.pushEnabled,
+  'language': _$NotificationLanguageEnumMap[instance.language]!,
+};
+
+const _$NotificationLanguageEnumMap = {
+  NotificationLanguage.en: 'EN',
+  NotificationLanguage.ar: 'AR',
+};
+
+_UpdateNotificationPreferencesRequest
+_$UpdateNotificationPreferencesRequestFromJson(Map<String, dynamic> json) =>
+    _UpdateNotificationPreferencesRequest(
+      securityEnabled: json['securityEnabled'] as bool?,
+      systemEnabled: json['systemEnabled'] as bool?,
+      marketingEnabled: json['marketingEnabled'] as bool?,
+      pushEnabled: json['pushEnabled'] as bool?,
+      language: $enumDecodeNullable(
+        _$NotificationLanguageEnumMap,
+        json['language'],
+      ),
+    );
+
+Map<String, dynamic> _$UpdateNotificationPreferencesRequestToJson(
+  _UpdateNotificationPreferencesRequest instance,
+) => <String, dynamic>{
+  'securityEnabled': ?instance.securityEnabled,
+  'systemEnabled': ?instance.systemEnabled,
+  'marketingEnabled': ?instance.marketingEnabled,
+  'pushEnabled': ?instance.pushEnabled,
+  'language': ?_$NotificationLanguageEnumMap[instance.language],
 };

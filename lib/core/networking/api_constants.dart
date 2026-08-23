@@ -141,6 +141,9 @@ class ApiConstants {
   static const String notifications = "/notifications";
   static const String notificationUnreadCount =
       "/notifications/unread-count";
+
+  /// Read **and** write. The earlier contract had no update route at all;
+  /// this one governs the four mute switches and the notification language.
   static const String notificationPreferences = "/notifications/preferences";
   static const String notificationRead = "/notifications/{id}/read";
   static const String notificationReadAll = "/notifications/read-all";

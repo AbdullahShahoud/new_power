@@ -1532,320 +1532,6 @@ $ApiResponseMetaCopyWith<$Res>? get meta {
 
 
 /// @nodoc
-mixin _$NotificationPreferencesResponse {
-
- bool? get success; String? get message; NotificationPreferencesView get data; ApiResponseMeta? get meta;
-/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$NotificationPreferencesResponseCopyWith<NotificationPreferencesResponse> get copyWith => _$NotificationPreferencesResponseCopyWithImpl<NotificationPreferencesResponse>(this as NotificationPreferencesResponse, _$identity);
-
-  /// Serializes this NotificationPreferencesResponse to a JSON map.
-  Map<String, dynamic> toJson();
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationPreferencesResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data)&&(identical(other.meta, meta) || other.meta == meta));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,success,message,data,meta);
-
-@override
-String toString() {
-  return 'NotificationPreferencesResponse(success: $success, message: $message, data: $data, meta: $meta)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $NotificationPreferencesResponseCopyWith<$Res>  {
-  factory $NotificationPreferencesResponseCopyWith(NotificationPreferencesResponse value, $Res Function(NotificationPreferencesResponse) _then) = _$NotificationPreferencesResponseCopyWithImpl;
-@useResult
-$Res call({
- bool? success, String? message, NotificationPreferencesView data, ApiResponseMeta? meta
-});
-
-
-$NotificationPreferencesViewCopyWith<$Res> get data;$ApiResponseMetaCopyWith<$Res>? get meta;
-
-}
-/// @nodoc
-class _$NotificationPreferencesResponseCopyWithImpl<$Res>
-    implements $NotificationPreferencesResponseCopyWith<$Res> {
-  _$NotificationPreferencesResponseCopyWithImpl(this._self, this._then);
-
-  final NotificationPreferencesResponse _self;
-  final $Res Function(NotificationPreferencesResponse) _then;
-
-/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? success = freezed,Object? message = freezed,Object? data = null,Object? meta = freezed,}) {
-  return _then(_self.copyWith(
-success: freezed == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
-as bool?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String?,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as NotificationPreferencesView,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
-as ApiResponseMeta?,
-  ));
-}
-/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$NotificationPreferencesViewCopyWith<$Res> get data {
-  
-  return $NotificationPreferencesViewCopyWith<$Res>(_self.data, (value) {
-    return _then(_self.copyWith(data: value));
-  });
-}/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ApiResponseMetaCopyWith<$Res>? get meta {
-    if (_self.meta == null) {
-    return null;
-  }
-
-  return $ApiResponseMetaCopyWith<$Res>(_self.meta!, (value) {
-    return _then(_self.copyWith(meta: value));
-  });
-}
-}
-
-
-/// Adds pattern-matching-related methods to [NotificationPreferencesResponse].
-extension NotificationPreferencesResponsePatterns on NotificationPreferencesResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _NotificationPreferencesResponse value)?  $default,{required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _NotificationPreferencesResponse() when $default != null:
-return $default(_that);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _NotificationPreferencesResponse value)  $default,){
-final _that = this;
-switch (_that) {
-case _NotificationPreferencesResponse():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _NotificationPreferencesResponse value)?  $default,){
-final _that = this;
-switch (_that) {
-case _NotificationPreferencesResponse() when $default != null:
-return $default(_that);case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool? success,  String? message,  NotificationPreferencesView data,  ApiResponseMeta? meta)?  $default,{required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _NotificationPreferencesResponse() when $default != null:
-return $default(_that.success,_that.message,_that.data,_that.meta);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool? success,  String? message,  NotificationPreferencesView data,  ApiResponseMeta? meta)  $default,) {final _that = this;
-switch (_that) {
-case _NotificationPreferencesResponse():
-return $default(_that.success,_that.message,_that.data,_that.meta);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool? success,  String? message,  NotificationPreferencesView data,  ApiResponseMeta? meta)?  $default,) {final _that = this;
-switch (_that) {
-case _NotificationPreferencesResponse() when $default != null:
-return $default(_that.success,_that.message,_that.data,_that.meta);case _:
-  return null;
-
-}
-}
-
-}
-
-/// @nodoc
-@JsonSerializable()
-
-class _NotificationPreferencesResponse implements NotificationPreferencesResponse {
-  const _NotificationPreferencesResponse({this.success, this.message, required this.data, this.meta});
-  factory _NotificationPreferencesResponse.fromJson(Map<String, dynamic> json) => _$NotificationPreferencesResponseFromJson(json);
-
-@override final  bool? success;
-@override final  String? message;
-@override final  NotificationPreferencesView data;
-@override final  ApiResponseMeta? meta;
-
-/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$NotificationPreferencesResponseCopyWith<_NotificationPreferencesResponse> get copyWith => __$NotificationPreferencesResponseCopyWithImpl<_NotificationPreferencesResponse>(this, _$identity);
-
-@override
-Map<String, dynamic> toJson() {
-  return _$NotificationPreferencesResponseToJson(this, );
-}
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationPreferencesResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data)&&(identical(other.meta, meta) || other.meta == meta));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,success,message,data,meta);
-
-@override
-String toString() {
-  return 'NotificationPreferencesResponse(success: $success, message: $message, data: $data, meta: $meta)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$NotificationPreferencesResponseCopyWith<$Res> implements $NotificationPreferencesResponseCopyWith<$Res> {
-  factory _$NotificationPreferencesResponseCopyWith(_NotificationPreferencesResponse value, $Res Function(_NotificationPreferencesResponse) _then) = __$NotificationPreferencesResponseCopyWithImpl;
-@override @useResult
-$Res call({
- bool? success, String? message, NotificationPreferencesView data, ApiResponseMeta? meta
-});
-
-
-@override $NotificationPreferencesViewCopyWith<$Res> get data;@override $ApiResponseMetaCopyWith<$Res>? get meta;
-
-}
-/// @nodoc
-class __$NotificationPreferencesResponseCopyWithImpl<$Res>
-    implements _$NotificationPreferencesResponseCopyWith<$Res> {
-  __$NotificationPreferencesResponseCopyWithImpl(this._self, this._then);
-
-  final _NotificationPreferencesResponse _self;
-  final $Res Function(_NotificationPreferencesResponse) _then;
-
-/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? success = freezed,Object? message = freezed,Object? data = null,Object? meta = freezed,}) {
-  return _then(_NotificationPreferencesResponse(
-success: freezed == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
-as bool?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String?,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as NotificationPreferencesView,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
-as ApiResponseMeta?,
-  ));
-}
-
-/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$NotificationPreferencesViewCopyWith<$Res> get data {
-  
-  return $NotificationPreferencesViewCopyWith<$Res>(_self.data, (value) {
-    return _then(_self.copyWith(data: value));
-  });
-}/// Create a copy of NotificationPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ApiResponseMetaCopyWith<$Res>? get meta {
-    if (_self.meta == null) {
-    return null;
-  }
-
-  return $ApiResponseMetaCopyWith<$Res>(_self.meta!, (value) {
-    return _then(_self.copyWith(meta: value));
-  });
-}
-}
-
-
-/// @nodoc
 mixin _$FcmTokenResponse {
 
  bool? get success; String? get message; ApiResponseMeta? get meta;
@@ -2398,6 +2084,320 @@ as String,
 }
 
 
+}
+
+
+/// @nodoc
+mixin _$NotificationPreferencesResponse {
+
+ bool? get success; String? get message; NotificationPreferencesView get data; ApiResponseMeta? get meta;
+/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NotificationPreferencesResponseCopyWith<NotificationPreferencesResponse> get copyWith => _$NotificationPreferencesResponseCopyWithImpl<NotificationPreferencesResponse>(this as NotificationPreferencesResponse, _$identity);
+
+  /// Serializes this NotificationPreferencesResponse to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationPreferencesResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data)&&(identical(other.meta, meta) || other.meta == meta));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data,meta);
+
+@override
+String toString() {
+  return 'NotificationPreferencesResponse(success: $success, message: $message, data: $data, meta: $meta)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NotificationPreferencesResponseCopyWith<$Res>  {
+  factory $NotificationPreferencesResponseCopyWith(NotificationPreferencesResponse value, $Res Function(NotificationPreferencesResponse) _then) = _$NotificationPreferencesResponseCopyWithImpl;
+@useResult
+$Res call({
+ bool? success, String? message, NotificationPreferencesView data, ApiResponseMeta? meta
+});
+
+
+$NotificationPreferencesViewCopyWith<$Res> get data;$ApiResponseMetaCopyWith<$Res>? get meta;
+
+}
+/// @nodoc
+class _$NotificationPreferencesResponseCopyWithImpl<$Res>
+    implements $NotificationPreferencesResponseCopyWith<$Res> {
+  _$NotificationPreferencesResponseCopyWithImpl(this._self, this._then);
+
+  final NotificationPreferencesResponse _self;
+  final $Res Function(NotificationPreferencesResponse) _then;
+
+/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? success = freezed,Object? message = freezed,Object? data = null,Object? meta = freezed,}) {
+  return _then(_self.copyWith(
+success: freezed == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as NotificationPreferencesView,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as ApiResponseMeta?,
+  ));
+}
+/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$NotificationPreferencesViewCopyWith<$Res> get data {
+  
+  return $NotificationPreferencesViewCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ApiResponseMetaCopyWith<$Res>? get meta {
+    if (_self.meta == null) {
+    return null;
+  }
+
+  return $ApiResponseMetaCopyWith<$Res>(_self.meta!, (value) {
+    return _then(_self.copyWith(meta: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [NotificationPreferencesResponse].
+extension NotificationPreferencesResponsePatterns on NotificationPreferencesResponse {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _NotificationPreferencesResponse value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _NotificationPreferencesResponse() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _NotificationPreferencesResponse value)  $default,){
+final _that = this;
+switch (_that) {
+case _NotificationPreferencesResponse():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _NotificationPreferencesResponse value)?  $default,){
+final _that = this;
+switch (_that) {
+case _NotificationPreferencesResponse() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool? success,  String? message,  NotificationPreferencesView data,  ApiResponseMeta? meta)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _NotificationPreferencesResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data,_that.meta);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool? success,  String? message,  NotificationPreferencesView data,  ApiResponseMeta? meta)  $default,) {final _that = this;
+switch (_that) {
+case _NotificationPreferencesResponse():
+return $default(_that.success,_that.message,_that.data,_that.meta);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool? success,  String? message,  NotificationPreferencesView data,  ApiResponseMeta? meta)?  $default,) {final _that = this;
+switch (_that) {
+case _NotificationPreferencesResponse() when $default != null:
+return $default(_that.success,_that.message,_that.data,_that.meta);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _NotificationPreferencesResponse implements NotificationPreferencesResponse {
+  const _NotificationPreferencesResponse({this.success, this.message, required this.data, this.meta});
+  factory _NotificationPreferencesResponse.fromJson(Map<String, dynamic> json) => _$NotificationPreferencesResponseFromJson(json);
+
+@override final  bool? success;
+@override final  String? message;
+@override final  NotificationPreferencesView data;
+@override final  ApiResponseMeta? meta;
+
+/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$NotificationPreferencesResponseCopyWith<_NotificationPreferencesResponse> get copyWith => __$NotificationPreferencesResponseCopyWithImpl<_NotificationPreferencesResponse>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$NotificationPreferencesResponseToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationPreferencesResponse&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.data, data) || other.data == data)&&(identical(other.meta, meta) || other.meta == meta));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,success,message,data,meta);
+
+@override
+String toString() {
+  return 'NotificationPreferencesResponse(success: $success, message: $message, data: $data, meta: $meta)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$NotificationPreferencesResponseCopyWith<$Res> implements $NotificationPreferencesResponseCopyWith<$Res> {
+  factory _$NotificationPreferencesResponseCopyWith(_NotificationPreferencesResponse value, $Res Function(_NotificationPreferencesResponse) _then) = __$NotificationPreferencesResponseCopyWithImpl;
+@override @useResult
+$Res call({
+ bool? success, String? message, NotificationPreferencesView data, ApiResponseMeta? meta
+});
+
+
+@override $NotificationPreferencesViewCopyWith<$Res> get data;@override $ApiResponseMetaCopyWith<$Res>? get meta;
+
+}
+/// @nodoc
+class __$NotificationPreferencesResponseCopyWithImpl<$Res>
+    implements _$NotificationPreferencesResponseCopyWith<$Res> {
+  __$NotificationPreferencesResponseCopyWithImpl(this._self, this._then);
+
+  final _NotificationPreferencesResponse _self;
+  final $Res Function(_NotificationPreferencesResponse) _then;
+
+/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? success = freezed,Object? message = freezed,Object? data = null,Object? meta = freezed,}) {
+  return _then(_NotificationPreferencesResponse(
+success: freezed == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as NotificationPreferencesView,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as ApiResponseMeta?,
+  ));
+}
+
+/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$NotificationPreferencesViewCopyWith<$Res> get data {
+  
+  return $NotificationPreferencesViewCopyWith<$Res>(_self.data, (value) {
+    return _then(_self.copyWith(data: value));
+  });
+}/// Create a copy of NotificationPreferencesResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ApiResponseMetaCopyWith<$Res>? get meta {
+    if (_self.meta == null) {
+    return null;
+  }
+
+  return $ApiResponseMetaCopyWith<$Res>(_self.meta!, (value) {
+    return _then(_self.copyWith(meta: value));
+  });
+}
 }
 
 // dart format on

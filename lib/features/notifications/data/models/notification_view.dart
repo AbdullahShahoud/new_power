@@ -57,26 +57,72 @@ extension NotificationViewX on NotificationView {
   bool get isUnread => status == NotificationStatus.unread;
 }
 
-/// §10 `NotificationPreferences` — **read-only**. There is no
-/// `PATCH`/`PUT /notifications/preferences` anywhere in the backend: the
-/// DTO and the service method exist but no controller route calls them.
+/// The language a rep's notifications are rendered in.
 ///
-/// Modelled because `GET` works and the shape is confirmed, but no settings
-/// screen is built on it — see the feature's README note.
+/// ⚠️ This is **not** the app's UI language. It governs notification text
+/// only — not API errors, not email, not the catalogue (which ships both
+/// languages on every response and is switched client-side).
+enum NotificationLanguage {
+  @JsonValue('EN')
+  en,
+  @JsonValue('AR')
+  ar,
+}
+
+extension NotificationLanguageX on NotificationLanguage {
+  /// The server accepts either case (`"ar"` and `"AR"` both work); upper
+  /// case matches what it returns, so a round-trip compares equal.
+  String get wireValue => this == NotificationLanguage.ar ? 'AR' : 'EN';
+
+  String get labelKey => this == NotificationLanguage.ar
+      ? 'notifications_language_ar'
+      : 'notifications_language_en';
+}
+
+/// `GET`/`PATCH /notifications/preferences`.
+///
+/// Four mute switches and a language. `transactionEnabled` is **gone** — the
+/// type it governed no longer exists.
 @freezed
 abstract class NotificationPreferencesView
     with _$NotificationPreferencesView {
   const factory NotificationPreferencesView({
-    @Default(true) bool transactionEnabled,
     @Default(true) bool securityEnabled,
     @Default(true) bool systemEnabled,
+
+    /// Admin broadcasts. **Off by default**, which is why the settings
+    /// screen shows it as genuinely off rather than assuming true.
     @Default(false) bool marketingEnabled,
 
-    /// Governs the **push channel only** — the in-app row is written
-    /// regardless.
+    /// Narrower than the others: it suppresses the **push only**. The in-app
+    /// row is still written, so the inbox stays complete.
     @Default(true) bool pushEnabled,
+    @Default(NotificationLanguage.en) NotificationLanguage language,
   }) = _NotificationPreferencesView;
 
   factory NotificationPreferencesView.fromJson(Map<String, dynamic> json) =>
       _$NotificationPreferencesViewFromJson(json);
+}
+
+/// `PATCH /notifications/preferences` — **every field optional**, send only
+/// what changed. A language switch is a one-key body.
+///
+/// `includeIfNull: false` is what makes that true on the wire: without it
+/// every untouched switch would be sent as `null` and the partial update
+/// would stop being partial.
+@freezed
+abstract class UpdateNotificationPreferencesRequest
+    with _$UpdateNotificationPreferencesRequest {
+  @JsonSerializable(includeIfNull: false)
+  const factory UpdateNotificationPreferencesRequest({
+    bool? securityEnabled,
+    bool? systemEnabled,
+    bool? marketingEnabled,
+    bool? pushEnabled,
+    NotificationLanguage? language,
+  }) = _UpdateNotificationPreferencesRequest;
+
+  factory UpdateNotificationPreferencesRequest.fromJson(
+    Map<String, dynamic> json,
+  ) => _$UpdateNotificationPreferencesRequestFromJson(json);
 }

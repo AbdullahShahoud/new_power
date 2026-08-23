@@ -102,28 +102,6 @@ Map<String, dynamic> _$NotificationActionResponseToJson(
   'meta': instance.meta,
 };
 
-_NotificationPreferencesResponse _$NotificationPreferencesResponseFromJson(
-  Map<String, dynamic> json,
-) => _NotificationPreferencesResponse(
-  success: json['success'] as bool?,
-  message: json['message'] as String?,
-  data: NotificationPreferencesView.fromJson(
-    json['data'] as Map<String, dynamic>,
-  ),
-  meta: json['meta'] == null
-      ? null
-      : ApiResponseMeta.fromJson(json['meta'] as Map<String, dynamic>),
-);
-
-Map<String, dynamic> _$NotificationPreferencesResponseToJson(
-  _NotificationPreferencesResponse instance,
-) => <String, dynamic>{
-  'success': instance.success,
-  'message': instance.message,
-  'data': instance.data,
-  'meta': instance.meta,
-};
-
 _FcmTokenResponse _$FcmTokenResponseFromJson(Map<String, dynamic> json) =>
     _FcmTokenResponse(
       success: json['success'] as bool?,
@@ -147,3 +125,25 @@ _RegisterFcmTokenRequest _$RegisterFcmTokenRequestFromJson(
 Map<String, dynamic> _$RegisterFcmTokenRequestToJson(
   _RegisterFcmTokenRequest instance,
 ) => <String, dynamic>{'fcmToken': instance.fcmToken};
+
+_NotificationPreferencesResponse _$NotificationPreferencesResponseFromJson(
+  Map<String, dynamic> json,
+) => _NotificationPreferencesResponse(
+  success: json['success'] as bool?,
+  message: json['message'] as String?,
+  data: NotificationPreferencesView.fromJson(
+    json['data'] as Map<String, dynamic>,
+  ),
+  meta: json['meta'] == null
+      ? null
+      : ApiResponseMeta.fromJson(json['meta'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$NotificationPreferencesResponseToJson(
+  _NotificationPreferencesResponse instance,
+) => <String, dynamic>{
+  'success': instance.success,
+  'message': instance.message,
+  'data': instance.data,
+  'meta': instance.meta,
+};
