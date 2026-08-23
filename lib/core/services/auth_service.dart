@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/data/models/logout_request.dart';
 import '../di/dependency_injection.dart';
+import '../../features/notifications/data/repo/push_service.dart';
 import '../helpers/secure_storage_helper.dart';
 import '../networking/api_service.dart';
 import '../networking/dio_factory.dart';
@@ -187,6 +188,21 @@ class AuthService {
   /// regardless of the server call's outcome, and reset DI so every Cubit's
   /// in-memory state is cleared too.
   Future<void> logout() async {
+    // ⚠️ Order matters: `DELETE /device/fcm-token` needs a **valid access
+    // token**, so it has to run before `/auth/logout` revokes the session.
+    // Skipping it leaves the device receiving pushes for an account that is
+    // no longer signed in — the token stays bound server-side until Firebase
+    // happens to report it as stale.
+    //
+    // Best-effort like the logout call itself: a failure here must never
+    // strand the user in a signed-in state they asked to leave.
+    try {
+      await getIt<PushService>().dispose();
+    } catch (_) {
+      // Push was never available, or the call failed. Logging out is still
+      // the priority.
+    }
+
     try {
       final refreshToken = await getRefreshToken();
       await _apiService.logout(LogoutRequest(refreshToken: refreshToken));

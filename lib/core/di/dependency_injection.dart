@@ -7,6 +7,7 @@ import '../../features/catalog/logic/product_detail_bloc/product_detail_bloc.dar
 import '../../features/catalog/logic/products_bloc/products_bloc.dart';
 import '../../features/catalog/logic/search_bloc/search_bloc.dart';
 import '../../features/notifications/data/repo/notifications_repository.dart';
+import '../../features/notifications/data/repo/push_service.dart';
 import '../../features/notifications/logic/badge_cubit/unread_badge_cubit.dart';
 import '../../features/auth/logic/email_verification_cubit/email_verification_cubit.dart';
 import '../../features/auth/logic/forgot_password_cubit/forgot_password_cubit.dart';
@@ -31,6 +32,7 @@ import '../localization/currency_manager.dart';
 import '../localization/language_manager.dart';
 import '../networking/api_service.dart';
 import '../networking/dio_factory.dart';
+import '../routing/navigation_key.dart';
 import '../services/auth_service.dart';
 import '../theming/theme_notifier.dart';
 
@@ -181,6 +183,17 @@ Future<void> setupGetIt() async {
   );
   getIt.registerLazySingleton<UnreadBadgeCubit>(
     () => UnreadBadgeCubit(getIt<NotificationsRepository>()),
+  );
+  // Holds the FCM token lifecycle and the tap routing. A singleton because
+  // it owns stream subscriptions that must outlive any one screen, and
+  // because `dispose()` on logout has to reach the same instance that
+  // registered the token.
+  getIt.registerLazySingleton<PushService>(
+    () => PushService(
+      getIt<NotificationsRepository>(),
+      getIt<UnreadBadgeCubit>(),
+      navigatorKey,
+    ),
   );
 
   // ========================== User self-service ==========================

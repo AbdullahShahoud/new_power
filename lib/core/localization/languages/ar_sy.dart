@@ -934,6 +934,7 @@ final Map<String, String> arSY = {
   'catalog_available': 'متوفر',
   'catalog_unavailable': 'غير متوفر',
   'catalog_datasheet': 'ورقة البيانات',
+  'catalog_datasheet_opening': 'جارٍ الفتح…',
   'catalog_datasheet_failed': 'تعذّر فتح ورقة البيانات',
   'catalog_discontinued_notice': 'هذا المنتج موقوف ويُعرض للاطلاع فقط.',
   'catalog_browse_categories': 'تصفّح الفئات',
@@ -949,11 +950,9 @@ final Map<String, String> arSY = {
   'catalog_filters_has_datasheet': 'يحتوي ورقة بيانات',
   'catalog_filters_available_only': 'المتوفر فقط',
   'catalog_filters_unavailable_only': 'غير المتوفر فقط',
-  'catalog_filters_truncated':
-      'تُعرض القيم الأكثر شيوعًا فقط. ابحث في الأعلى للوصول إلى غيرها.',
   'catalog_filters_show_more': 'عرض المزيد',
+  'catalog_filters_show_less': 'عرض أقل',
   'catalog_filter_dropped': 'أحد الفلاتر لم يعد متاحًا وتمت إزالته.',
-
   // Sort
   'catalog_sort_relevance': 'الأكثر صلة',
   'catalog_sort_name': 'الاسم',
@@ -992,8 +991,7 @@ final Map<String, String> arSY = {
   'notifications_undo': 'تراجع',
   'notifications_show_all': 'عرض الكل',
   'notifications_empty_title': 'لا توجد إشعارات',
-  'notifications_empty_subtitle':
-      'ستصلك هنا تنبيهات الأمان وتحديثات حسابك.',
+  'notifications_empty_subtitle': 'ستصلك هنا تنبيهات الأمان وتحديثات حسابك.',
   'notifications_empty_filtered_title': 'لا توجد إشعارات في هذا التصنيف',
   'notifications_group_today': 'اليوم',
   'notifications_group_yesterday': 'أمس',
@@ -1005,37 +1003,8 @@ final Map<String, String> arSY = {
   // نصوص الإشعارات. مفتاحها النوع الفرعي المشتقّ لا عنوان الخادم: العنوان
   // قالب إنجليزي ثابت يتغيّر كلما عدّل الباك إند نصًا، والمطابقة عليه تنكسر
   // بصمت. ولا توجد خانات أسماء — الـ API يرسل معرّفات uuid لا أسماء.
-  'notification_account_approved_title': 'تمت الموافقة على حسابك',
-  'notification_account_approved_body':
-      'أهلاً بك! وافق مديرك على حسابك، يمكنك تسجيل الدخول الآن.',
-  'notification_password_changed_title': 'تم تغيير كلمة المرور',
-  'notification_password_changed_body':
-      'تم تغيير كلمة مرور حسابك. إن لم تكن أنت، تواصل مع الدعم فوراً.',
-  'notification_password_reset_title': 'تم تغيير كلمة المرور',
-  'notification_password_reset_body':
-      'تمت إعادة تعيين كلمة مرورك بنجاح.',
-  'notification_admin_password_reset_title': 'تمت إعادة تعيين كلمة المرور',
-  'notification_admin_password_reset_body':
-      'أُعيد تعيين كلمة مرورك. راجع بريدك للحصول على كلمة مرور مؤقتة ثم غيّرها.',
-  'notification_two_factor_enabled_title': 'تم تفعيل التحقق بخطوتين',
-  'notification_two_factor_enabled_body':
-      'أصبح حسابك محمياً بالتحقق بخطوتين.',
-  'notification_account_suspended_title': 'تم تعليق الحساب',
-  'notification_account_suspended_body':
-      'تم تعليق حسابك. افتح التطبيق للتفاصيل أو تواصل مع مديرك.',
-  'notification_account_banned_title': 'تم تقييد الحساب نهائياً',
-  'notification_account_banned_body':
-      'تم تقييد حسابك بشكل دائم. تواصل مع الدعم.',
-  'notification_account_reactivated_title': 'تمت إعادة تفعيل الحساب',
-  'notification_account_reactivated_body': 'حسابك نشط مجدداً. أهلاً بعودتك!',
-  'notification_rep_pending_approval_title': 'مندوب جديد بانتظار الموافقة',
-  'notification_rep_pending_approval_body':
-      'سجّل مندوب باستخدام رمزك وينتظر موافقتك.',
   // لا يُعرض أبدًا — البث الإداري يظهر بنص الخادم كما هو.
-  'notification_broadcast_title': '',
-  'notification_broadcast_body': '',
-  'notification_meta_logged_out_others':
-      'تم تسجيل الخروج من أجهزتك الأخرى',
+  'notification_meta_logged_out_others': 'تم تسجيل الخروج من أجهزتك الأخرى',
 
   // الوقت النسبي. العربية تحتاج أربع صيغ نحوية لكل وحدة: مفرد ومثنى وجمع
   // قلة (٣-١٠) وجمع كثرة (١١+). صيغة واحدة تكون خاطئة في أغلب الأعداد.
@@ -1052,4 +1021,32 @@ final Map<String, String> arSY = {
   'time_day_two': 'منذ يومين',
   'time_day_few': 'منذ {count} أيام',
   'time_day_many': 'منذ {count} يوماً',
+  // التسجيل — الأطراف والمباني المجاورة
+  'projects_register_parties': 'الأطراف',
+  'stakeholder_slot_developer': 'المطوّر العقاري / المالك',
+  'stakeholder_slot_consultant': 'المكتب الاستشاري',
+  'stakeholder_slot_contractor': 'شركة المقاولات',
+  'add_stakeholder_pick_hint': 'ابحث أو أضف',
+  'add_stakeholder_search_hint': 'ابحث باسم الشركة أو الشخص',
+  'add_stakeholder_create_named': 'إضافة «{name}» كجديد',
+  'add_stakeholder_contact_optional': 'الشخص الذي تتعامل معه (اختياري)',
+  'projects_register_nearby_loading': 'جارٍ التحقق من المباني المجاورة…',
+  'projects_register_nearby_title': '{count} مبانٍ مسجّلة بالجوار',
+  'projects_register_nearby_subtitle':
+      'تأكّد أن أيًّا منها ليس المبنى نفسه قبل التسجيل.',
+  // إعدادات الإشعارات
+  'notifications_type_marketing': 'إعلانات',
+  'notification_settings_title': 'إعدادات الإشعارات',
+  'notification_settings_language': 'لغة الإشعارات',
+  'notification_settings_language_note':
+      'يغيّر لغة جميع إشعاراتك، بما فيها القديمة.',
+  'notification_settings_types': 'ما الذي يصلك',
+  'notification_settings_mute_note':
+      'التصنيف المكتوم لا يُسجَّل أصلًا — وإعادة تفعيله لا تُرجع ما فاتك.',
+  'notification_settings_push': 'الإشعارات الفورية',
+  'notification_settings_push_enabled': 'الإشعارات الفورية',
+  'notification_settings_push_note':
+      'إيقافها يكتم الإشعار الفوري فقط، وتبقى الإشعارات في صندوق الوارد.',
+  'notifications_language_en': 'English',
+  'notifications_language_ar': 'العربية',
 };

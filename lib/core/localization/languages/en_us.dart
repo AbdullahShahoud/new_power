@@ -935,6 +935,7 @@ final Map<String, String> enUS = {
   'catalog_available': 'Available',
   'catalog_unavailable': 'Unavailable',
   'catalog_datasheet': 'Datasheet',
+  'catalog_datasheet_opening': 'Opening…',
   'catalog_datasheet_failed': 'Could not open the datasheet',
   'catalog_discontinued_notice':
       'This product has been discontinued and is shown for reference.',
@@ -951,12 +952,9 @@ final Map<String, String> enUS = {
   'catalog_filters_has_datasheet': 'Has a datasheet',
   'catalog_filters_available_only': 'Available only',
   'catalog_filters_unavailable_only': 'Unavailable only',
-  'catalog_filters_truncated':
-      'Only the most common values are listed. Search above to find others.',
   'catalog_filters_show_more': 'Show more',
-  'catalog_filter_dropped':
-      'A filter is no longer available and was removed.',
-
+  'catalog_filters_show_less': 'Show less',
+  'catalog_filter_dropped': 'A filter is no longer available and was removed.',
   // Sort
   'catalog_sort_relevance': 'Relevance',
   'catalog_sort_name': 'Name',
@@ -1010,38 +1008,7 @@ final Map<String, String> enUS = {
   // server's title: the title is a hard-coded English template that changes
   // whenever the backend edits a string, and matching on it breaks silently.
   // No name slots — the API sends raw uuids, never names.
-  'notification_account_approved_title': 'Your account has been approved',
-  'notification_account_approved_body':
-      'Welcome aboard! Your manager approved your account — you can sign in now.',
-  'notification_password_changed_title': 'Password changed',
-  'notification_password_changed_body':
-      'Your account password was changed. If this wasn\'t you, contact support immediately.',
-  'notification_password_reset_title': 'Password changed',
-  'notification_password_reset_body':
-      'Your password was reset successfully.',
-  'notification_admin_password_reset_title': 'Password reset',
-  'notification_admin_password_reset_body':
-      'Your password was reset. Check your email for a temporary password, then change it.',
-  'notification_two_factor_enabled_title':
-      'Two-factor authentication enabled',
-  'notification_two_factor_enabled_body':
-      'Your account is now protected by two-factor authentication.',
-  'notification_account_suspended_title': 'Account suspended',
-  'notification_account_suspended_body':
-      'Your account has been suspended. Open the app for details or contact your manager.',
-  'notification_account_banned_title': 'Account permanently restricted',
-  'notification_account_banned_body':
-      'Your account has been permanently restricted. Contact support.',
-  'notification_account_reactivated_title': 'Account reactivated',
-  'notification_account_reactivated_body':
-      'Your account is active again. Welcome back!',
-  'notification_rep_pending_approval_title':
-      'New representative awaiting approval',
-  'notification_rep_pending_approval_body':
-      'A representative registered with your code and is waiting for your approval.',
   // Never rendered — a broadcast shows the server's own text verbatim.
-  'notification_broadcast_title': '',
-  'notification_broadcast_body': '',
   'notification_meta_logged_out_others':
       'You were signed out of your other devices',
 
@@ -1060,4 +1027,32 @@ final Map<String, String> enUS = {
   'time_day_two': '{count} days ago',
   'time_day_few': '{count} days ago',
   'time_day_many': '{count} days ago',
+  // Registration — parties and neighbours
+  'projects_register_parties': 'Parties',
+  'stakeholder_slot_developer': 'Developer / owner',
+  'stakeholder_slot_consultant': 'Consulting office',
+  'stakeholder_slot_contractor': 'Main contractor',
+  'add_stakeholder_pick_hint': 'Search or add',
+  'add_stakeholder_search_hint': 'Search by company or person name',
+  'add_stakeholder_create_named': 'Add “{name}” as new',
+  'add_stakeholder_contact_optional': 'Contact person (optional)',
+  'projects_register_nearby_loading': 'Checking nearby buildings…',
+  'projects_register_nearby_title': '{count} buildings already nearby',
+  'projects_register_nearby_subtitle':
+      'Check none of these is the same building before you register.',
+  // Notification settings
+  'notifications_type_marketing': 'Announcements',
+  'notification_settings_title': 'Notification settings',
+  'notification_settings_language': 'Notification language',
+  'notification_settings_language_note':
+      'Changes the language of all your notifications, including older ones.',
+  'notification_settings_types': 'What you receive',
+  'notification_settings_mute_note':
+      'A muted category is never recorded — turning it back on does not bring back what you missed.',
+  'notification_settings_push': 'Push',
+  'notification_settings_push_enabled': 'Push notifications',
+  'notification_settings_push_note':
+      'Turning this off silences push only. Notifications still appear in your inbox.',
+  'notifications_language_en': 'English',
+  'notifications_language_ar': 'العربية',
 };

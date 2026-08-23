@@ -7,6 +7,7 @@ import '../../features/auth/ui/screens/login_screen.dart';
 import '../../features/auth/ui/screens/register_screen.dart';
 import '../../features/auth/ui/screens/reset_password_screen.dart';
 import '../../features/home/ui/main_screen.dart';
+import '../../features/notifications/ui/screens/notification_settings_screen.dart';
 import '../../features/notifications/ui/screens/notifications_screen.dart';
 import '../../features/onboarding/ui/onboarding_screen.dart';
 import '../../features/projects/data/models/enums.dart';
@@ -69,6 +70,8 @@ class AppRouter {
         return _fadeRoute(const MainScreen(), settings);
       case Routes.notificationsScreen:
         return _slideRoute(const NotificationsScreen(), settings);
+      case Routes.notificationSettingsScreen:
+        return _slideRoute(const NotificationSettingsScreen(), settings);
       // ========================== Account settings ========================
       case Routes.changePasswordScreen:
         return _slideRoute(const ChangePasswordScreen(), settings);

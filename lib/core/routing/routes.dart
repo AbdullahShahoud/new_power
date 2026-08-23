@@ -19,6 +19,7 @@ class Routes {
 
   // Pushed from the Home tab's notification bell (not a bottom-bar tab).
   static const String notificationsScreen = '/notifications';
+  static const String notificationSettingsScreen = '/notifications/settings';
 
   // User self-service (users.md `/users/me/*`), reached from Profile.
   static const String changePasswordScreen = '/profile/change-password';
