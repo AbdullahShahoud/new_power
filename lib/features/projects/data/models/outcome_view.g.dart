@@ -38,6 +38,13 @@ _OutcomeView _$OutcomeViewFromJson(Map<String, dynamic> json) => _OutcomeView(
   narrative: json['narrative'] as String?,
   currency: json['currency'] as String?,
   notes: json['notes'] as String?,
+  attachments:
+      (json['attachments'] as List<dynamic>?)
+          ?.map(
+            (e) => ActivityAttachmentView.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const <ActivityAttachmentView>[],
   submittedAt: const UtcDateTimeConverter().fromJson(
     json['submittedAt'] as String,
   ),
@@ -92,6 +99,7 @@ Map<String, dynamic> _$OutcomeViewToJson(_OutcomeView instance) =>
       'narrative': instance.narrative,
       'currency': instance.currency,
       'notes': instance.notes,
+      'attachments': instance.attachments,
       'submittedAt': const UtcDateTimeConverter().toJson(instance.submittedAt),
       'submittedBy': instance.submittedBy,
       'submittedByUser': instance.submittedByUser,

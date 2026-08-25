@@ -3,6 +3,7 @@ import '../../../../core/networking/utc_date_time_converter.dart';
 import 'activity_view.dart';
 import 'actor_view.dart';
 import 'enums.dart';
+import 'outcome_view.dart';
 import 'project_image_view.dart';
 
 part 'project_detail_view.freezed.dart';
@@ -119,6 +120,17 @@ abstract class ProjectDetailView with _$ProjectDetailView {
     @Default(<ActivityView>[]) List<ActivityView> activities,
     @Default(<StakeholderRefView>[]) List<StakeholderRefView> stakeholders,
     DecisionMakerRefView? decisionMaker,
+
+    /// The outcome already submitted on this project and still awaiting a
+    /// manager's decision (`status: "PENDING"`), or `null` when there is
+    /// none.
+    ///
+    /// Load-bearing for the UI, not decoration: while this is present the
+    /// rep must not be able to submit another won/lost claim. The server
+    /// refuses a second one anyway (`OUTCOME_ALREADY_OPEN`), but a rep who
+    /// only learns that after filling the whole form has been made to do
+    /// the work twice — and cannot see what the first claim said.
+    OutcomeView? pendingOutcome,
   }) = _ProjectDetailView;
 
   factory ProjectDetailView.fromJson(Map<String, dynamic> json) =>
@@ -144,4 +156,15 @@ extension ProjectDetailViewX on ProjectDetailView {
   /// stage is what every other branch on this screen already reads.)
   bool get isClosed =>
       stage == ProjectStage.won || stage == ProjectStage.lost;
+
+  /// A claim is already filed and waiting on a manager, so a new one must
+  /// not be offered.
+  ///
+  /// The status is re-checked rather than trusting the field's name: the
+  /// contract says this slot only ever carries a `PENDING` outcome, but if
+  /// a confirmed or rejected one ever arrived here, silently locking the
+  /// rep out of ever submitting again would be the worse failure.
+  bool get hasPendingOutcome =>
+      pendingOutcome != null &&
+      pendingOutcome!.status == OutcomeStatus.pending;
 }
