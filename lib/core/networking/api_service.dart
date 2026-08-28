@@ -24,6 +24,7 @@ import '../../features/auth/data/models/verify_otp_request.dart';
 import '../../features/auth/data/models/verify_otp_response.dart';
 import '../../features/catalog/data/models/catalog_responses.dart';
 import '../../features/notifications/data/models/notification_responses.dart';
+import '../../features/targets/data/models/attainment_view.dart';
 import '../../features/notifications/data/models/notification_view.dart';
 import '../../features/projects/data/models/accounts_list_response.dart';
 import '../../features/projects/data/models/activities_list_response.dart';
@@ -468,9 +469,7 @@ abstract class ApiService {
   });
 
   @GET(ApiConstants.categoryById)
-  Future<CategoryDetailResponse> getCategory(
-    @Path('idOrSlug') String idOrSlug,
-  );
+  Future<CategoryDetailResponse> getCategory(@Path('idOrSlug') String idOrSlug);
 
   /// `@Queries` rather than named `@Query` parameters because the `attr`
   /// map is flattened into `attr[CODE]` keys that cannot be declared
@@ -530,9 +529,7 @@ abstract class ApiService {
   /// why it maps to [NotificationActionResponse] rather than a data-bearing
   /// envelope.
   @DELETE(ApiConstants.notificationById)
-  Future<NotificationActionResponse> archiveNotification(
-    @Path('id') String id,
-  );
+  Future<NotificationActionResponse> archiveNotification(@Path('id') String id);
 
   @PUT(ApiConstants.deviceFcmToken)
   Future<FcmTokenResponse> registerFcmToken(

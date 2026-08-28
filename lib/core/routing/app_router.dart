@@ -35,6 +35,7 @@ import '../../features/projects/ui/screens/register_account_screen.dart';
 import '../../features/projects/ui/screens/register_project_screen.dart';
 import '../../features/projects/ui/screens/replace_stakeholder_link_screen.dart';
 import '../../features/projects/ui/screens/submit_outcome_screen.dart';
+import '../../features/targets/ui/screens/year_targets_screen.dart';
 import '../../features/user/ui/screens/change_password_screen.dart';
 import '../../features/user/ui/screens/change_username_screen.dart';
 import '../widget/startup_error_screen.dart';
@@ -104,8 +105,8 @@ class AppRouter {
         return _slideRoute(
           LogActivityScreen(
             projectId: args['projectId'] as String,
-            stakeholders:
-                args['stakeholders'] as List<StakeholderRefView>,
+            stakeholders: args['stakeholders'] as List<StakeholderRefView>,
+            currentStage: args['currentStage'] as ProjectStage,
           ),
           settings,
         );
@@ -165,8 +166,7 @@ class AppRouter {
         final args = settings.arguments as Map?;
         return _slideRoute(
           AccountPickerScreen(
-            classification:
-                args?['classification'] as AccountClassification?,
+            classification: args?['classification'] as AccountClassification?,
           ),
           settings,
         );
