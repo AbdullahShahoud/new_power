@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -60,20 +59,19 @@ class DioFactory {
     ApiConstants.refreshToken,
   ];
 
-  // ─── Replay attack protection (kept as a stub, unchanged) ────────────────
-  static String _generateNonce() {
-    final random = Random.secure();
-    final values = List<int>.generate(16, (i) => random.nextInt(256));
-    return values.map((x) => x.toRadixString(16).padLeft(2, '0')).join();
-  }
-
-  static Future<void> _addReplayProtectionHeaders(
-    RequestOptions options,
-  ) async {
-    // options.headers['X-Request-Nonce'] = _generateNonce();
-    // options.headers['X-Request-Timestamp'] = await _getTimestamp();
-  }
-
+  // ─── Replay-attack protection: removed ───────────────────────────────────
+  //
+  // There used to be a `_generateNonce()` and an
+  // `_addReplayProtectionHeaders()` here. Both bodies were commented out, so
+  // the latter was an async no-op `await`ed on every single request through
+  // both Dio instances, and the former was unreachable.
+  //
+  // Replay protection is not a client-side feature: a nonce and timestamp
+  // only mean anything if the server tracks and rejects reuse. This API
+  // documents no such contract (auth.md defines no X-Request-Nonce or
+  // X-Request-Timestamp), so there was nothing on the other end to honour
+  // them. If it is added server-side later, reinstate it as a proper
+  // interceptor rather than a hook threaded through two call sites.
   static void _ensureRefreshDioInitialized() {
     if (_refreshDio == null) {
       _refreshDio = Dio();
@@ -87,14 +85,10 @@ class DioFactory {
           'Content-Type': 'application/json',
         };
 
-      _refreshDio?.interceptors.add(
-        InterceptorsWrapper(
-          onRequest: (options, handler) async {
-            await _addReplayProtectionHeaders(options);
-            return handler.next(options);
-          },
-        ),
-      );
+      // No interceptor: the refresh instance deliberately carries no
+      // Authorization header (auth.md), and X-Device-Id is attached per-call
+      // in refreshTokenUnified(). The wrapper that used to sit here existed
+      // only to call the replay-protection no-op removed above.
     }
   }
 
@@ -231,6 +225,20 @@ class DioFactory {
   }
 
   /// Retry every queued offline request now that the internet is back.
+  /// ⚠️ Unreferenced **on purpose, and this is the bug that keeps
+  /// `FeatureFlags.offlineSyncEnabled` pinned to `false`.**
+  ///
+  /// `_enqueueOfflineRequest` parks a failed GET's handler on the promise
+  /// that this method drains the queue when connectivity returns. Nothing
+  /// calls it: the `Connectivity().onConnectivityChanged` subscription that
+  /// would have belongs in this class and does not exist here. `main.dart`'s
+  /// listener drives `OfflineSyncBloc`, which is the *activity* queue — a
+  /// different queue entirely.
+  ///
+  /// Kept rather than deleted because it is the half of the feature that
+  /// already works; re-enabling means wiring a connectivity listener to it,
+  /// not rewriting it. See the note on `FeatureFlags.offlineSyncEnabled`.
+  // ignore: unused_element
   static Future<void> _retryOfflineQueue() async {
     final requests = List<_OfflineRequest>.from(_offlineQueue);
     _offlineQueue.clear();
@@ -481,7 +489,6 @@ class DioFactory {
           }
         }
 
-        await _addReplayProtectionHeaders(options);
         return handler.next(options);
       },
       onError: (DioException error, handler) async {
@@ -763,14 +770,29 @@ class DioFactory {
         .whenComplete(() => _changePasswordRouteOpen = false);
   }
 
-  /// Log security events for audit trail (token reuse, offline queue rejection, etc.)
+  /// Log security events for audit trail (token reuse, refresh rate limiting,
+  /// consumed upload streams, etc).
   ///
-  /// Always logs — not gated by kDebugMode. Security events must be visible
-  /// in production device logs (captured by crash reporters).
-  /// TODO: send to a real security-monitoring backend instead of print().
+  /// ⚠️ Uses [debugPrint], which is a **no-op in release builds** — this
+  /// replaced a bare `print()` that always ran.
+  ///
+  /// The old comment argued that "security events must be visible in
+  /// production device logs". On Android that reasoning does not hold: since
+  /// API 16 any app holding READ_LOGS is gone, but `adb logcat` on a
+  /// developer-enabled device, and every crash-reporting SDK that scrapes
+  /// the log buffer, still see it. What was being written there is the API
+  /// path plus a failure reason — a map of the auth surface and its error
+  /// modes, handed to anyone with USB access to the device, in exchange for
+  /// diagnostics nobody on the team was actually reading.
+  ///
+  /// The events are worth keeping; they just need a destination that is not
+  /// the device log. Once Crashlytics is wired (finding S2), route this to
+  /// `FirebaseCrashlytics.instance.recordError(..., fatal: false)` — that
+  /// gives a searchable, server-side audit trail with none of the local
+  /// exposure. Until then, debug builds keep the visibility they had and
+  /// release builds leak nothing.
   static void _logSecurityEvent(String event, String endpoint, String details) {
-    // ignore: avoid_print — security events must always reach device logs.
-    print('[SECURITY] event=$event endpoint=$endpoint details=$details');
+    debugPrint('[SECURITY] event=$event endpoint=$endpoint details=$details');
   }
 }
 
