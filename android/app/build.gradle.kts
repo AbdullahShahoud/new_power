@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -6,8 +8,22 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// Release signing credentials, kept out of version control.
+//
+// Loaded defensively rather than with a hard `require`: a contributor who
+// has cloned the repo but has no keystore must still be able to run
+// `flutter build apk --release` for testing. When the file is missing the
+// release build falls back to the debug key and prints why — noisy on
+// purpose, because a debug-signed AAB is rejected by Play and the failure
+// otherwise only shows up at upload time.
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val hasReleaseSigning = keystoreProperties.getProperty("storeFile") != null
+
 android {
-    namespace = "com.example.new_power"
+    namespace = "com.newpower.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -30,8 +46,15 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.new_power"
+        // ⚠️ Permanent. Google Play binds a listing to its applicationId on
+        // first publish and it can never be changed afterwards — a different
+        // ID is a different app, with no upgrade path for installed users.
+        //
+        // Must stay in step with:
+        //   - `package_name` in android/app/google-services.json
+        //   - the Android app registered in the newpower-bgx Firebase project
+        //   - the Android restriction on the Maps API key
+        applicationId = "com.newpower.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -40,11 +63,29 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                logger.warn(
+                    "\n⚠️  android/key.properties not found — signing the RELEASE build with " +
+                    "the DEBUG key.\n    This artifact is fine for local testing and will be " +
+                    "REJECTED by Google Play.\n"
+                )
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

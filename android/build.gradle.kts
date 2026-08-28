@@ -39,6 +39,33 @@ subprojects {
         }
 }
 
+// The core-library-desugaring runtime, pinned for *every* subproject.
+//
+// The block above only rewrites the `classpath` configuration — the AGP the
+// plugin builds itself with. It does not touch the plugin's own dependency
+// declarations, which is why it did not cover this: `flutter_local_notifications`
+// 18.0.1 declares `com.android.tools:desugar_jdk_libs:1.2.2` for its own
+// module, and Google no longer serves an artifact at that coordinate. The
+// symptom is release-only, because `generateReleaseLintModel` is the task
+// that resolves it — debug builds never ask.
+//
+// 2.1.4 is what the app module already uses and what is already in the local
+// Gradle cache. It is a strict superset of 1.2.2's desugaring, so forcing it
+// changes nothing at runtime beyond back-porting more of java.time.
+val desugarVersion = "2.1.4"
+
+subprojects {
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "com.android.tools" &&
+                requested.name.startsWith("desugar_jdk_libs")
+            ) {
+                useVersion(desugarVersion)
+            }
+        }
+    }
+}
+
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")

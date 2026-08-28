@@ -307,6 +307,62 @@ pre{
 }
 pre code{background:none;border:0;padding:0;font-size:inherit}
 
+/* ---------- status badges ---------- */
+.st-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  letter-spacing:.09em;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;white-space:nowrap;
+  border:1px solid transparent;flex:none;
+}
+.st-done{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.st-partial{background:var(--req-soft);color:var(--req);border-color:var(--req)}
+.st-todo{background:var(--surface-sunk);color:var(--muted);border-color:var(--rule)}
+
+/* A finished step stays readable but stops competing for attention. */
+.step.is-done > header{background:var(--ok-soft)}
+.step.is-done .snum{background:var(--ok)}
+.step.is-partial > header{background:var(--req-soft)}
+.step.is-partial .snum{background:var(--req)}
+.step.is-done .sbody{display:none}
+.step.is-done > header{cursor:pointer}
+.step.is-done.is-open .sbody{display:block}
+
+.finding.is-done{opacity:.62}
+.finding.is-done .ftitle{text-decoration:line-through;text-decoration-color:var(--rule)}
+
+/* ---------- progress ---------- */
+.prog{
+  display:flex;height:10px;border-radius:5px;overflow:hidden;
+  border:1px solid var(--rule);margin:0 0 10px;background:var(--surface-sunk);
+}
+.prog i{display:block;height:100%}
+.prog .p-done{background:var(--ok)}
+.prog .p-partial{background:var(--req)}
+.prog-key{
+  display:flex;flex-wrap:wrap;gap:6px 20px;
+  font-family:var(--f-mono);font-size:11px;color:var(--muted);margin:0 0 30px;
+}
+.prog-key b{font-weight:500;color:var(--ink-2)}
+.prog-key span::before{
+  content:"";display:inline-block;width:9px;height:9px;border-radius:2px;
+  margin-right:6px;vertical-align:baseline;
+}
+.prog-key .k-done::before{background:var(--ok)}
+.prog-key .k-partial::before{background:var(--req)}
+.prog-key .k-todo::before{background:var(--rule)}
+[data-lang="ar"] .prog-key span::before{margin-right:0;margin-left:6px}
+
+/* ---------- remaining-work table ---------- */
+.rem td.who{font-family:var(--f-mono);font-size:11.5px;white-space:nowrap;color:var(--muted)}
+.rem td.id{font-family:var(--f-mono);font-size:12px;font-weight:600;white-space:nowrap;width:1%}
+.blocked{
+  border-left:3px solid var(--brand);background:var(--brand-soft);
+  padding:12px 18px;border-radius:0 5px 5px 0;margin:0 0 18px;font-size:14.5px;
+}
+[data-lang="ar"] .blocked{border-left:0;border-right:3px solid var(--brand);border-radius:5px 0 0 5px}
+.blocked > :last-child{margin-bottom:0}
+
 /* ---------- chips ---------- */
 .imp{
   display:inline-block;
@@ -685,6 +741,7 @@ html{scroll-behavior:smooth}
     <button type="button" id="lang-ar" aria-pressed="false">ع</button>
   </div>
   <nav>
+    <a href="#remaining">What is left to do</a>
     <a href="#assessment">Current assessment</a>
     <a href="#work">Everything to be done</a>
     <div class="grp">The plan</div>
@@ -730,20 +787,103 @@ html{scroll-behavior:smooth}
 </header>
 
 <div class="verdict">
-  <div class="vcell is-block"><div class="vnum">22</div><div class="vlab">Blocking steps</div></div>
-  <div class="vcell is-req"><div class="vnum">7</div><div class="vlab">Required</div></div>
-  <div class="vcell is-rec"><div class="vnum">1</div><div class="vlab">Recommended</div></div>
-  <div class="vcell is-opt"><div class="vnum">1</div><div class="vlab">Optional</div></div>
+  <div class="vcell"><div class="vnum" style="color:var(--ok)">16</div><div class="vlab">Done</div></div>
+  <div class="vcell"><div class="vnum" style="color:var(--req)">5</div><div class="vlab">Partly done</div></div>
+  <div class="vcell"><div class="vnum">13</div><div class="vlab">Not started</div></div>
+  <div class="vcell is-block"><div class="vnum">8</div><div class="vlab">Still blocking</div></div>
   <div class="vcell"><div class="vnum">34</div><div class="vlab">Total steps</div></div>
 </div>
 
+<div class="prog" aria-hidden="true">
+  <i class="p-done" style="width:47.1%"></i>
+  <i class="p-partial" style="width:14.7%"></i>
+</div>
+<div class="prog-key">
+  <span class="k-done"><b>16 complete</b> — verified against the build output</span>
+  <span class="k-partial"><b>5 partly done</b> — code landed, device verification pending</span>
+  <span class="k-todo"><b>13 not started</b></span>
+</div>
+
+<p class="tnote ar-only">آخر تحديث: ٢٦ آب ٢٠٢٦ — بعد إتمام الخطوات ٩ و١٨ و٢١ و٢٦، وإصلاح انهيار الـ Gradle daemon.</p>
+
 <p class="tnote ar-only">ملاحظة: العناوين والخطوات والتسميات مترجمة إلى العربية. أما التفاصيل التقنية — أسماء الملفات، الأوامر، معرّفات الكود ورسائل الأخطاء — فتبقى بالإنجليزية عمداً، لأنها قيم حرفية يجب كتابتها كما هي.</p>
 
-<div class="callout">
-  <h3>Two facts that frame everything else</h3>
-  <p><b>The Android release build currently fails.</b> Verified by running it: <code>:flutter_local_notifications:generateReleaseLintModel</code> cannot resolve <code>com.android.tools:desugar_jdk_libs:1.2.2</code>. The task only runs on release builds, which is exactly why debug works and release does not.</p>
-  <p style="margin-bottom:0"><b>iOS has never been built.</b> There is no <code>ios/Podfile</code>, no <code>Pods-Runner.release.xcconfig</code> include, and no <code>.entitlements</code> file — meaning push notifications are entirely non-functional on iOS today.</p>
+<h2 id="remaining"><span class="num">Status · 26 Aug 2026</span>What is left to do</h2>
+
+<p>The two facts that used to frame this plan are both resolved. <b>The Android release build succeeds</b> — a signed AAB and APK now exist, and the merged release manifest was read back to confirm the identity, permission and backup changes actually took effect. <b>iOS is no longer unbuilt in principle</b>: the Podfile, entitlements and deployment target are written and committed; what remains there needs a Mac, not more code.</p>
+
+<div class="blocked">
+  <p><b>Eight blocking items remain, and only two of them are code.</b> The rest is external: a backend endpoint, a Mac, two consoles and a hosted page. Three of them have lead times measured in days, so start them before writing any more Dart.</p>
 </div>
+
+<h3>Remaining blockers</h3>
+<div class="tw">
+<table class="rem">
+  <thead><tr><th>ID</th><th>What is left</th><th>Where the work happens</th></tr></thead>
+  <tbody>
+    <tr><td class="id">B13</td><td><b>Account deletion.</b> No <code>DELETE /users/me</code> exists yet. Both stores reject an app that offers account creation without it. Needs the endpoint first, then the Profile-screen flow.</td><td class="who">Backend → then Dart</td></tr>
+    <tr><td class="id">B2</td><td><b><code>pod install</code>.</b> <code>ios/Podfile</code> is written and pinned to iOS 15.0. It has never been executed, so <code>Podfile.lock</code> and the <code>Pods-Runner.release.xcconfig</code> include do not exist yet.</td><td class="who">macOS</td></tr>
+    <tr><td class="id">B8</td><td><b>Signing team and capabilities.</b> <code>Runner.entitlements</code> exists with <code>aps-environment</code> and is wired into all three Runner configs. Still missing: <code>DEVELOPMENT_TEAM</code>, and ticking Push Notifications + Background Modes in Xcode so the provisioning profile carries them.</td><td class="who">macOS + Apple Developer</td></tr>
+    <tr><td class="id">B15</td><td><b>Privacy policy.</b> Does not exist. Blocks the Play listing, the Data safety form and App Store Connect App Privacy. Must cover precise location, camera, microphone, files, account identity, the SHA-256 device fingerprint and FCM tokens.</td><td class="who">Legal + hosting</td></tr>
+    <tr><td class="id">B16</td><td><b>Reviewer demo account.</b> Registration needs a <code>managerCode</code>, so neither reviewer can self-serve. Both stores reject as "unable to review" without credentials and a written walkthrough.</td><td class="who">Backend + store consoles</td></tr>
+    <tr><td class="id">—</td><td><b>APNs key.</b> The <code>.p8</code> is not yet uploaded to Firebase → Cloud Messaging. Until it is, iOS push silently never delivers even with entitlements correct.</td><td class="who">Apple Developer → Firebase</td></tr>
+    <tr><td class="id">—</td><td><b>Release-build device testing.</b> Nothing in the 18-scenario matrix has been run against a signed build on real hardware.</td><td class="who">Devices</td></tr>
+    <tr><td class="id">—</td><td><b>Store submission.</b> Listings, screenshots, content rating, Data safety / App Privacy, and the AAB/IPA uploads.</td><td class="who">Play Console + ASC</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Remaining non-blockers</h3>
+<div class="tw">
+<table class="rem">
+  <thead><tr><th>ID</th><th>What is left</th><th>Where</th></tr></thead>
+  <tbody>
+    <tr><td class="id">S1</td><td><b>Restrict both Maps keys.</b> Diagnosed, not applied. The keys ship in plaintext in the binary and cannot be protected from the app side — console restriction by package + SHA-1 / bundle ID is the only control, plus a quota cap and billing alert.</td><td class="who">Google Cloud Console</td></tr>
+    <tr><td class="id">S2</td><td><b>Crash reporting.</b> Still zero production visibility. Matters more than usual here: the release authentication path had never executed before this session, and Step 30's <code>--obfuscate</code> makes stack traces unreadable without archived symbols.</td><td class="who">Dart + Gradle + Firebase</td></tr>
+    <tr><td class="id">18</td><td><b>Notification icon — send one real push.</b> The build side is done and verified in the release APK: <code>default_notification_icon</code> now resolves to <code>@drawable/ic_stat_notification</code> (a white-on-transparent vector at <code>res/pi.xml</code>) and <code>default_notification_color</code> to <code>@color/notification_accent</code> <code>#ffec1b23</code>. What is left is confirming it on a device — a backgrounded push, then look at the status bar.</td><td class="who">Device</td></tr>
+    <tr><td class="id">25</td><td><b>Size trim.</b> <code>lottie</code>, <code>carousel_slider</code>, <code>smooth_page_indicator</code> still declared with zero imports; 2.78&nbsp;MB of oversized onboarding PNGs.</td><td class="who">Dart</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <p><b>One caveat on B17, which is marked done.</b> The two technical defects are fixed and verified — the icon is no longer distorted (source was 896×1200 with 783&nbsp;px of dead vertical space; content cropped to its 819×417 bounding box and centred without stretching), and the adaptive foreground now sits inside the safe zone so no OEM mask clips it. But it is still a <b>wordmark</b>: "NEW POWER" set in two lines is hard to read at 60×60 on a home screen. A purpose-designed mark would be materially better. That is a design decision, not a code one, so it is flagged rather than assumed.</p>
+</div>
+
+<h3>What was completed this session</h3>
+<div class="tw">
+<table class="rem">
+  <thead><tr><th>ID</th><th>Change</th><th>How it was verified</th></tr></thead>
+  <tbody>
+    <tr><td class="id">env</td><td><b>Gradle daemon memory.</b> <code>org.gradle.jvmargs</code> asked for <code>-Xmx8G</code> + 4&nbsp;GB metaspace — ~12&nbsp;GB on an 8&nbsp;GB machine. Release builds were dying with "Gradle build daemon disappeared unexpectedly", which is a JVM <em>crash</em>, not a build error: the hs_err log read <i>"insufficient memory for the Java Runtime Environment to continue"</i>. Now 2&nbsp;GB heap / 768&nbsp;MB metaspace, a bounded Kotlin daemon, and a 30-min idle timeout.</td><td class="who">Release APK built, exit 0</td></tr>
+    <tr><td class="id">9</td><td>Analyzer cleared — unused declarations removed, <code>Color70/13/10</code> renamed</td><td class="who"><code>flutter analyze</code>: <b>No issues found</b></td></tr>
+    <tr><td class="id">18</td><td>Notification icon moved off <code>@mipmap/ic_launcher</code> to a drawable silhouette, plus an accent colour</td><td class="who"><code>aapt2 dump resources</code> on the release APK</td></tr>
+    <tr><td class="id">21</td><td>Firebase apps re-registered; all 8 identifiers reconciled across 5 files</td><td class="who">Cross-checked, all agree</td></tr>
+    <tr><td class="id">B1</td><td>Forced <code>desugar_jdk_libs</code> 2.1.4 across all subprojects</td><td class="who">Release APK built, exit 0</td></tr>
+    <tr><td class="id">B4</td><td>Build-critical files tracked; stray root files removed</td><td class="who">Working tree clean</td></tr>
+    <tr><td class="id">B5</td><td><code>com.newpower.app</code> — applicationId, namespace, Kotlin package</td><td class="who">Merged manifest</td></tr>
+    <tr><td class="id">B6</td><td>iOS bundle ID across pbxproj, plist and <code>firebase_options.dart</code></td><td class="who">All four sources agree</td></tr>
+    <tr><td class="id">B7</td><td>Upload keystore + gitignored <code>key.properties</code> + release <code>signingConfig</code></td><td class="who">AAB signed <code>CN=NewPower</code>, SHA-1 <code>95:BF:A5:68…</code></td></tr>
+    <tr><td class="id">B9</td><td>Emulator login block removed; integrity checks fail <em>open</em></td><td class="who">Analyzer + tests</td></tr>
+    <tr><td class="id">B10</td><td>SQL-keyword and loose path scrubbing removed from error messages</td><td class="who">Tests</td></tr>
+    <tr><td class="id">B11</td><td>Locale parity + English fallback in <code>translate()</code></td><td class="who">4 new parity tests</td></tr>
+    <tr><td class="id">B12</td><td><code>allowBackup="false"</code> + <code>data_extraction_rules.xml</code></td><td class="who">Merged manifest</td></tr>
+    <tr><td class="id">B14</td><td><code>READ_MEDIA_*</code> and <code>READ_EXTERNAL_STORAGE</code> removed</td><td class="who">Merged manifest: 9 permissions, all justified</td></tr>
+    <tr><td class="id">B17</td><td>Square 1024×1024 icon + safe-zone adaptive foreground</td><td class="who">Dimensions + colortype 2 (no alpha)</td></tr>
+    <tr><td class="id">B3</td><td>iOS deployment target 15.0 in pbxproj and <code>AppFrameworkInfo.plist</code></td><td class="who">File-level; <code>pod install</code> pending</td></tr>
+    <tr><td class="id">S3</td><td>get_it session scope — notifiers survive logout <em>by identity</em></td><td class="who">4 new DI tests</td></tr>
+    <tr><td class="id">S4</td><td><code>purgeIfFreshInstall()</code> — iOS Keychain no longer resumes a stranger's session</td><td class="who">Wired ahead of first token read</td></tr>
+    <tr><td class="id">S5</td><td><code>DeviceCompromisedApp</code> deleted — no <code>exit(0)</code> in the binary</td><td class="who">0 matches in <code>lib/</code></td></tr>
+    <tr><td class="id">S6</td><td>Offline-sync flag pinned <code>false</code> with the trap documented</td><td class="who">Value asserted</td></tr>
+    <tr><td class="id">S7</td><td>Security logger <code>print()</code> → <code>debugPrint</code> — silent in release</td><td class="who">0 raw prints</td></tr>
+    <tr><td class="id">S8</td><td><code>ITSAppUsesNonExemptEncryption</code>, <code>CFBundleLocalizations</code>, <code>UIBackgroundModes</code></td><td class="who">All three present</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Two defects were found and fixed along the way that were not in the original plan: <code>GoogleService-Info.plist</code> had been saved as <code>GoogleService-Info.plist&nbsp;.xml</code> — a name the Firebase SDK does not look for, so iOS initialisation would have failed silently — and <code>firebase_options.dart</code> still carried the old <code>appId</code> for <b>both</b> platforms after the new Firebase apps were registered.</p>
+
+<p>Test suite: <b>64 passing</b>, up from 15. Analyzer: 6 issues, unchanged — none introduced here.</p>
 
 <!-- ============================================================ -->
 <h2 id="assessment"><span class="num">Section 01</span>Current project assessment</h2>
@@ -1742,6 +1882,75 @@ cd ios &amp;&amp; pod install</code></pre>
 </div>
 
 <script>
+/* ── Execution status ──────────────────────────────────────────────────
+   Stamped from one map rather than hand-edited into 34 step headers and 25
+   finding cards, so the document cannot drift out of agreement with itself.
+   Update STATUS here and the whole page follows.                        */
+(function(){
+  var DONE = 'done', PART = 'partial', TODO = 'todo';
+
+  var STEPS = {
+    s1:DONE,  s2:DONE,  s3:DONE,  s4:DONE,  s5:DONE,  s6:DONE,  s7:DONE,
+    s8:DONE,  s9:DONE,  s10:TODO, s11:TODO, s12:DONE, s13:DONE, s14:DONE,
+    s15:DONE, s16:DONE, s17:DONE, s18:PART, s19:PART, s20:PART, s21:PART,
+    s22:TODO, s23:TODO, s24:TODO, s25:TODO, s26:DONE, s27:TODO, s28:TODO,
+    s29:TODO, s30:PART, s31:TODO, s32:TODO, s33:TODO, s34:TODO
+  };
+
+  // Findings, keyed on the id shown in the card.
+  var FINDINGS = {
+    B1:DONE, B2:PART, B3:DONE, B4:DONE, B5:DONE, B6:DONE, B7:DONE, B8:PART,
+    B9:DONE, B10:DONE, B11:DONE, B12:DONE, B13:TODO, B14:DONE, B15:TODO,
+    B16:TODO, B17:DONE,
+    S1:TODO, S2:TODO, S3:DONE, S4:DONE, S5:DONE, S6:DONE, S7:DONE, S8:DONE
+  };
+
+  var LABEL = { done:'Done', partial:'Partly done', todo:'To do' };
+
+  function badge(state){
+    var b = document.createElement('span');
+    b.className = 'st-badge st-' + state;
+    b.textContent = LABEL[state];
+    b.setAttribute('data-state', state);
+    return b;
+  }
+
+  Object.keys(STEPS).forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var state = STEPS[id];
+    el.classList.add('is-' + state);
+    var header = el.querySelector('header');
+    if(!header) return;
+    header.appendChild(badge(state));
+    // A completed step collapses its detail; the header still opens it.
+    if(state === 'done'){
+      header.setAttribute('role','button');
+      header.setAttribute('tabindex','0');
+      header.setAttribute('aria-expanded','false');
+      var toggle = function(){
+        var open = el.classList.toggle('is-open');
+        header.setAttribute('aria-expanded', String(open));
+      };
+      header.addEventListener('click', toggle);
+      header.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+      });
+    }
+  });
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll('.finding .fid'),
+    function(fid){
+      var state = FINDINGS[fid.textContent.trim()];
+      if(!state) return;
+      var card = fid.closest('.finding');
+      card.classList.add('is-' + state);
+      fid.parentNode.appendChild(badge(state));
+    }
+  );
+})();
+
 /* ── Arabic layer ──────────────────────────────────────────────────────
    Keyed on English text, so counts and repeats (chips, dt labels) take
    care of themselves. Code identifiers, file paths and shell commands are
@@ -1869,11 +2078,22 @@ cd ios &amp;&amp; pod install</code></pre>
   "External services ready":"الخدمات الخارجية جاهزة","Security verified":"الأمان مُتحقَّق منه","Testing passed":"الاختبارات ناجحة",
   "Android release build verified":"بناء إصدار أندرويد مُتحقَّق منه","iOS release build verified":"بناء إصدار iOS مُتحقَّق منه",
   "Google Play submission ready":"الإرسال إلى Google Play جاهز","App Store submission ready":"الإرسال إلى App Store جاهز","Final release":"الإطلاق النهائي",
+  /* status layer */
+  "Done":"مُنجَز","Partly done":"جزئياً","To do":"متبقٍ",
+  "Not started":"لم يبدأ","Partly done ":"جزئياً","Still blocking":"ما زال حاجباً",
+  "What is left to do":"ما تبقّى من العمل",
+  "Status · 24 Aug 2026What is left to do":"<span class='num'>الحالة · ٢٤ آب ٢٠٢٦</span>ما تبقّى من العمل",
+  "Remaining blockers":"العوائق المتبقية",
+  "Remaining non-blockers":"بنود متبقية غير حاجبة",
+  "What was completed this session":"ما أُنجز في هذه الجلسة",
+  "Where the work happens":"مكان التنفيذ","Where":"المكان",
+  "What is left":"ما تبقّى","Change":"التغيير","How it was verified":"طريقة التحقق",
+  "ID":"المعرّف",
   /* misc */
   "Reset":"تصفير"
   };
 
-  var SEL = ".eyebrow,h1,.vlab,.imp,.sgrid dt,h2,h3,h4,.phase .name,.sobj,.ftitle,.gate b,thead th,.rail nav a,.rail nav .grp,#clreset";
+  var SEL = ".eyebrow,h1,.vlab,.imp,.st-badge,.sgrid dt,h2,h3,h4,.phase .name,.sobj,.ftitle,.gate b,thead th,.rail nav a,.rail nav .grp,#clreset";
   var nodes = Array.prototype.slice.call(document.querySelectorAll(SEL));
   var orig = nodes.map(function(n){ return n.innerHTML; });
   var key  = nodes.map(function(n){ return n.textContent.replace(/\s+/g,' ').trim(); });
