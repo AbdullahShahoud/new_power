@@ -51,7 +51,12 @@ abstract class AccountView with _$AccountView {
   const factory AccountView({
     required String id,
     required String name,
-    required AccountType type,
+    // Falls back rather than throwing — see AccountType.unknown. One row the
+    // client cannot read must not fail the whole page.
+    // ignore: invalid_annotation_target
+    @JsonKey(unknownEnumValue: AccountType.unknown)
+    @Default(AccountType.unknown)
+    AccountType type,
     String? registrationNumber,
     String? phone,
     String? email,

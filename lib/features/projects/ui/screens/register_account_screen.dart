@@ -11,6 +11,7 @@ import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/app_button.dart';
 import '../../../../core/widget/app_header.dart';
 import '../../../../core/widget/app_text_field.dart';
+import '../../../../core/widget/phone_text_field.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/register_account_request.dart';
 import '../../logic/accounts_bloc/accounts_bloc.dart';
@@ -48,6 +49,10 @@ class _RegisterAccountViewState extends State<_RegisterAccountView> {
   final _nameController = TextEditingController();
   final _registrationNumberController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  /// The dial code lives in the picker's state, so the full number is read
+  /// through this key — never off `_phoneController`.
+  final _phoneFieldKey = GlobalKey<PhoneTextFieldState>();
   final _emailController = TextEditingController();
   final _cityController = TextEditingController();
   final _addressController = TextEditingController();
@@ -82,7 +87,13 @@ class _RegisterAccountViewState extends State<_RegisterAccountView> {
       name: _nameController.text.trim(),
       type: _type,
       registrationNumber: _textOrNull(_registrationNumberController),
-      phone: _textOrNull(_phoneController),
+      // Assembled with its dial code — see PhoneTextField. Reading the
+      // controller alone would post a local number with no country on it.
+      phone: _phoneController.text.trim().isEmpty
+          ? null
+          : (_phoneFieldKey.currentState?.fullPhoneNumber ??
+                    _phoneController.text)
+                .trim(),
       email: _textOrNull(_emailController),
       city: _textOrNull(_cityController),
       addressLine: _textOrNull(_addressController),
@@ -140,7 +151,7 @@ class _RegisterAccountViewState extends State<_RegisterAccountView> {
                           OptionPickerField<AccountType>(
                             hintText: context.tr('register_account_type_hint'),
                             value: _type,
-                            options: AccountType.values,
+                            options: AccountTypeWire.selectable,
                             labelOf: (v) => context.tr(v.labelKey),
                             onChanged: (v) => setState(() => _type = v),
                           ),
@@ -152,10 +163,10 @@ class _RegisterAccountViewState extends State<_RegisterAccountView> {
                           ),
                           verticalSpace(16.h),
                           _Label(context.tr('register_account_phone'), optional: true),
-                          AppTextField(
-                            hintText: context.tr('register_account_phone_hint'),
+                          PhoneTextField(
+                            key: _phoneFieldKey,
                             controller: _phoneController,
-                            keyboardType: TextInputType.phone,
+                            hintText: context.tr('register_account_phone_hint'),
                           ),
                           verticalSpace(16.h),
                           _Label(context.tr('register_account_email'), optional: true),

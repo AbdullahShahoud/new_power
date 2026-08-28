@@ -15,6 +15,11 @@ void main() {
   ) async {
     SharedPreferences.setMockInitialValues({});
     await CacheHelper.init();
+    // Mirrors main(): the app-lifetime notifiers (ThemeNotifier,
+    // LanguageManager, CurrencyManager) live in the base scope and are
+    // registered separately from the session scope, so that logging out can
+    // drop the session without swapping the notifiers MyApp is listening to.
+    await setupCoreSingletons();
     await setupGetIt();
 
     // Match a real phone aspect ratio — the default 800x600 test surface

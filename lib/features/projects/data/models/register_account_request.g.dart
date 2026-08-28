@@ -56,7 +56,7 @@ Map<String, dynamic> _$RegisterAccountRequestToJson(
   _RegisterAccountRequest instance,
 ) => <String, dynamic>{
   'name': instance.name,
-  'type': _$AccountTypeEnumMap[instance.type]!,
+  'type': ?_$AccountTypeEnumMap[instance.type],
   'registrationNumber': ?instance.registrationNumber,
   'phone': ?instance.phone,
   'email': ?instance.email,
@@ -70,6 +70,7 @@ Map<String, dynamic> _$RegisterAccountRequestToJson(
 const _$AccountTypeEnumMap = {
   AccountType.company: 'COMPANY',
   AccountType.individual: 'INDIVIDUAL',
+  AccountType.unknown: null,
 };
 
 const _$AccountClassificationEnumMap = {

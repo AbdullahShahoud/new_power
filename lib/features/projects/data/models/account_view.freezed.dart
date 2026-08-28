@@ -299,7 +299,9 @@ as String?,
 /// @nodoc
 mixin _$AccountView {
 
- String get id; String get name; AccountType get type; String? get registrationNumber; String? get phone; String? get email; String? get city; String? get addressLine; String? get notes; bool get isVerified; DateTime? get verifiedAt; String? get verifiedBy; ActorView? get verifiedByUser; int? get contactCount; int? get activeLinkCount; DateTime? get createdAt; DateTime? get updatedAt; DateTime? get archivedAt; String? get mergedIntoId; DateTime? get mergedAt; List<AccountClassificationView> get classifications;
+ String get id; String get name;// Falls back rather than throwing — see AccountType.unknown. One row the
+// client cannot read must not fail the whole page.
+@JsonKey(unknownEnumValue: AccountType.unknown) AccountType get type; String? get registrationNumber; String? get phone; String? get email; String? get city; String? get addressLine; String? get notes; bool get isVerified; DateTime? get verifiedAt; String? get verifiedBy; ActorView? get verifiedByUser; int? get contactCount; int? get activeLinkCount; DateTime? get createdAt; DateTime? get updatedAt; DateTime? get archivedAt; String? get mergedIntoId; DateTime? get mergedAt; List<AccountClassificationView> get classifications;
 /// Create a copy of AccountView
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -332,7 +334,7 @@ abstract mixin class $AccountViewCopyWith<$Res>  {
   factory $AccountViewCopyWith(AccountView value, $Res Function(AccountView) _then) = _$AccountViewCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, AccountType type, String? registrationNumber, String? phone, String? email, String? city, String? addressLine, String? notes, bool isVerified, DateTime? verifiedAt, String? verifiedBy, ActorView? verifiedByUser, int? contactCount, int? activeLinkCount, DateTime? createdAt, DateTime? updatedAt, DateTime? archivedAt, String? mergedIntoId, DateTime? mergedAt, List<AccountClassificationView> classifications
+ String id, String name,@JsonKey(unknownEnumValue: AccountType.unknown) AccountType type, String? registrationNumber, String? phone, String? email, String? city, String? addressLine, String? notes, bool isVerified, DateTime? verifiedAt, String? verifiedBy, ActorView? verifiedByUser, int? contactCount, int? activeLinkCount, DateTime? createdAt, DateTime? updatedAt, DateTime? archivedAt, String? mergedIntoId, DateTime? mergedAt, List<AccountClassificationView> classifications
 });
 
 
@@ -469,7 +471,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  AccountType type,  String? registrationNumber,  String? phone,  String? email,  String? city,  String? addressLine,  String? notes,  bool isVerified,  DateTime? verifiedAt,  String? verifiedBy,  ActorView? verifiedByUser,  int? contactCount,  int? activeLinkCount,  DateTime? createdAt,  DateTime? updatedAt,  DateTime? archivedAt,  String? mergedIntoId,  DateTime? mergedAt,  List<AccountClassificationView> classifications)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(unknownEnumValue: AccountType.unknown)  AccountType type,  String? registrationNumber,  String? phone,  String? email,  String? city,  String? addressLine,  String? notes,  bool isVerified,  DateTime? verifiedAt,  String? verifiedBy,  ActorView? verifiedByUser,  int? contactCount,  int? activeLinkCount,  DateTime? createdAt,  DateTime? updatedAt,  DateTime? archivedAt,  String? mergedIntoId,  DateTime? mergedAt,  List<AccountClassificationView> classifications)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AccountView() when $default != null:
 return $default(_that.id,_that.name,_that.type,_that.registrationNumber,_that.phone,_that.email,_that.city,_that.addressLine,_that.notes,_that.isVerified,_that.verifiedAt,_that.verifiedBy,_that.verifiedByUser,_that.contactCount,_that.activeLinkCount,_that.createdAt,_that.updatedAt,_that.archivedAt,_that.mergedIntoId,_that.mergedAt,_that.classifications);case _:
@@ -490,7 +492,7 @@ return $default(_that.id,_that.name,_that.type,_that.registrationNumber,_that.ph
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  AccountType type,  String? registrationNumber,  String? phone,  String? email,  String? city,  String? addressLine,  String? notes,  bool isVerified,  DateTime? verifiedAt,  String? verifiedBy,  ActorView? verifiedByUser,  int? contactCount,  int? activeLinkCount,  DateTime? createdAt,  DateTime? updatedAt,  DateTime? archivedAt,  String? mergedIntoId,  DateTime? mergedAt,  List<AccountClassificationView> classifications)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(unknownEnumValue: AccountType.unknown)  AccountType type,  String? registrationNumber,  String? phone,  String? email,  String? city,  String? addressLine,  String? notes,  bool isVerified,  DateTime? verifiedAt,  String? verifiedBy,  ActorView? verifiedByUser,  int? contactCount,  int? activeLinkCount,  DateTime? createdAt,  DateTime? updatedAt,  DateTime? archivedAt,  String? mergedIntoId,  DateTime? mergedAt,  List<AccountClassificationView> classifications)  $default,) {final _that = this;
 switch (_that) {
 case _AccountView():
 return $default(_that.id,_that.name,_that.type,_that.registrationNumber,_that.phone,_that.email,_that.city,_that.addressLine,_that.notes,_that.isVerified,_that.verifiedAt,_that.verifiedBy,_that.verifiedByUser,_that.contactCount,_that.activeLinkCount,_that.createdAt,_that.updatedAt,_that.archivedAt,_that.mergedIntoId,_that.mergedAt,_that.classifications);case _:
@@ -510,7 +512,7 @@ return $default(_that.id,_that.name,_that.type,_that.registrationNumber,_that.ph
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  AccountType type,  String? registrationNumber,  String? phone,  String? email,  String? city,  String? addressLine,  String? notes,  bool isVerified,  DateTime? verifiedAt,  String? verifiedBy,  ActorView? verifiedByUser,  int? contactCount,  int? activeLinkCount,  DateTime? createdAt,  DateTime? updatedAt,  DateTime? archivedAt,  String? mergedIntoId,  DateTime? mergedAt,  List<AccountClassificationView> classifications)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(unknownEnumValue: AccountType.unknown)  AccountType type,  String? registrationNumber,  String? phone,  String? email,  String? city,  String? addressLine,  String? notes,  bool isVerified,  DateTime? verifiedAt,  String? verifiedBy,  ActorView? verifiedByUser,  int? contactCount,  int? activeLinkCount,  DateTime? createdAt,  DateTime? updatedAt,  DateTime? archivedAt,  String? mergedIntoId,  DateTime? mergedAt,  List<AccountClassificationView> classifications)?  $default,) {final _that = this;
 switch (_that) {
 case _AccountView() when $default != null:
 return $default(_that.id,_that.name,_that.type,_that.registrationNumber,_that.phone,_that.email,_that.city,_that.addressLine,_that.notes,_that.isVerified,_that.verifiedAt,_that.verifiedBy,_that.verifiedByUser,_that.contactCount,_that.activeLinkCount,_that.createdAt,_that.updatedAt,_that.archivedAt,_that.mergedIntoId,_that.mergedAt,_that.classifications);case _:
@@ -525,12 +527,14 @@ return $default(_that.id,_that.name,_that.type,_that.registrationNumber,_that.ph
 
 @JsonSerializable(converters: [UtcDateTimeConverter()])
 class _AccountView implements AccountView {
-  const _AccountView({required this.id, required this.name, required this.type, this.registrationNumber, this.phone, this.email, this.city, this.addressLine, this.notes, required this.isVerified, this.verifiedAt, this.verifiedBy, this.verifiedByUser, this.contactCount, this.activeLinkCount, this.createdAt, this.updatedAt, this.archivedAt, this.mergedIntoId, this.mergedAt, final  List<AccountClassificationView> classifications = const <AccountClassificationView>[]}): _classifications = classifications;
+  const _AccountView({required this.id, required this.name, @JsonKey(unknownEnumValue: AccountType.unknown) this.type = AccountType.unknown, this.registrationNumber, this.phone, this.email, this.city, this.addressLine, this.notes, required this.isVerified, this.verifiedAt, this.verifiedBy, this.verifiedByUser, this.contactCount, this.activeLinkCount, this.createdAt, this.updatedAt, this.archivedAt, this.mergedIntoId, this.mergedAt, final  List<AccountClassificationView> classifications = const <AccountClassificationView>[]}): _classifications = classifications;
   factory _AccountView.fromJson(Map<String, dynamic> json) => _$AccountViewFromJson(json);
 
 @override final  String id;
 @override final  String name;
-@override final  AccountType type;
+// Falls back rather than throwing — see AccountType.unknown. One row the
+// client cannot read must not fail the whole page.
+@override@JsonKey(unknownEnumValue: AccountType.unknown) final  AccountType type;
 @override final  String? registrationNumber;
 @override final  String? phone;
 @override final  String? email;
@@ -589,7 +593,7 @@ abstract mixin class _$AccountViewCopyWith<$Res> implements $AccountViewCopyWith
   factory _$AccountViewCopyWith(_AccountView value, $Res Function(_AccountView) _then) = __$AccountViewCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, AccountType type, String? registrationNumber, String? phone, String? email, String? city, String? addressLine, String? notes, bool isVerified, DateTime? verifiedAt, String? verifiedBy, ActorView? verifiedByUser, int? contactCount, int? activeLinkCount, DateTime? createdAt, DateTime? updatedAt, DateTime? archivedAt, String? mergedIntoId, DateTime? mergedAt, List<AccountClassificationView> classifications
+ String id, String name,@JsonKey(unknownEnumValue: AccountType.unknown) AccountType type, String? registrationNumber, String? phone, String? email, String? city, String? addressLine, String? notes, bool isVerified, DateTime? verifiedAt, String? verifiedBy, ActorView? verifiedByUser, int? contactCount, int? activeLinkCount, DateTime? createdAt, DateTime? updatedAt, DateTime? archivedAt, String? mergedIntoId, DateTime? mergedAt, List<AccountClassificationView> classifications
 });
 
 

@@ -35,6 +35,7 @@ Map<String, dynamic> _$ProjectStakeholderRefDtoToJson(
 const _$AccountTypeEnumMap = {
   AccountType.company: 'COMPANY',
   AccountType.individual: 'INDIVIDUAL',
+  AccountType.unknown: null,
 };
 
 const _$StakeholderRoleEnumMap = {

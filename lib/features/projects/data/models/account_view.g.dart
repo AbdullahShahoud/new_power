@@ -72,7 +72,13 @@ Json? _$JsonConverterToJson<Json, Value>(
 _AccountView _$AccountViewFromJson(Map<String, dynamic> json) => _AccountView(
   id: json['id'] as String,
   name: json['name'] as String,
-  type: $enumDecode(_$AccountTypeEnumMap, json['type']),
+  type:
+      $enumDecodeNullable(
+        _$AccountTypeEnumMap,
+        json['type'],
+        unknownValue: AccountType.unknown,
+      ) ??
+      AccountType.unknown,
   registrationNumber: json['registrationNumber'] as String?,
   phone: json['phone'] as String?,
   email: json['email'] as String?,
@@ -121,7 +127,7 @@ Map<String, dynamic> _$AccountViewToJson(_AccountView instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'type': _$AccountTypeEnumMap[instance.type]!,
+      'type': _$AccountTypeEnumMap[instance.type],
       'registrationNumber': instance.registrationNumber,
       'phone': instance.phone,
       'email': instance.email,
@@ -160,4 +166,5 @@ Map<String, dynamic> _$AccountViewToJson(_AccountView instance) =>
 const _$AccountTypeEnumMap = {
   AccountType.company: 'COMPANY',
   AccountType.individual: 'INDIVIDUAL',
+  AccountType.unknown: null,
 };
