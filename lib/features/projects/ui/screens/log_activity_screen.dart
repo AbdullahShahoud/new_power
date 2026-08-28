@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,6 +20,7 @@ import '../../data/models/activity_location_dto.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/log_activity_request.dart';
 import '../../data/models/project_detail_view.dart';
+import '../../data/models/stakeholder_link_view.dart';
 import '../../data/models/sync_activity_item.dart';
 import '../../data/models/uploaded_file_dto.dart';
 import '../../logic/activities_bloc/activities_bloc.dart';
@@ -31,6 +31,9 @@ import '../../logic/file_upload_bloc/file_upload_event.dart';
 import '../../logic/file_upload_bloc/file_upload_state.dart';
 import '../../logic/offline_sync_bloc/offline_sync_bloc.dart';
 import '../../logic/offline_sync_bloc/offline_sync_event.dart';
+import '../../logic/stakeholders_bloc/stakeholders_bloc.dart';
+import '../../logic/stakeholders_bloc/stakeholders_event.dart';
+import '../../logic/stakeholders_bloc/stakeholders_state.dart';
 import '../widgets/option_picker_field.dart';
 import '../widgets/attachment_picker.dart';
 import '../widgets/pending_attachment.dart';
@@ -38,19 +41,40 @@ import '../widgets/project_enum_labels.dart';
 
 const _maxAttachments = 10;
 
+/// What this screen hands back to the caller when it closes.
+///
+/// Both fields are follow-ups the caller performs with the `ProjectsBloc`
+/// it already owns — this screen deliberately doesn't hold a copy of that
+/// Bloc just to fire two one-shot events, and the caller is the side that
+/// knows the project's current `version` for the optimistic-concurrency
+/// check anyway.
+typedef LogActivityResult = ({
+  /// `"SET_DORMANT"` when the server suggests parking the project, else
+  /// `null`.
+  String? suggestion,
+
+  /// The funnel stage the rep set on the way out, or `null` if they left it
+  /// alone. Always `null` on a communication — the stage question is asked
+  /// on visits only.
+  ProjectStage? stage,
+});
+
 /// Workflow 4 (§10) — "one form, a kind toggle; only four things differ."
-/// Pops with the log-submission's `suggestion` string (`"SET_DORMANT"` or
-/// `null`) so the caller (`project_detail_screen.dart`) can offer "park
-/// this project" using the `ProjectsBloc` instance it already owns —
-/// this screen doesn't need its own copy of that Bloc for one follow-up.
 class LogActivityScreen extends StatelessWidget {
   final String projectId;
   final List<StakeholderRefView> stakeholders;
+
+  /// The project's funnel stage as the detail screen last read it. Shown on
+  /// a visit and editable there — a visit is exactly the moment a rep learns
+  /// the deal moved, and making them back out to the project screen to say
+  /// so is how a funnel goes stale.
+  final ProjectStage currentStage;
 
   const LogActivityScreen({
     super.key,
     required this.projectId,
     required this.stakeholders,
+    required this.currentStage,
   });
 
   @override
@@ -59,8 +83,16 @@ class LogActivityScreen extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => getIt<ActivitiesBloc>()),
         BlocProvider(create: (_) => getIt<FileUploadBloc>()),
+        // Only used to re-read the roster after the rep adds someone from
+        // here — the add itself happens on `AddStakeholderLinkScreen`, which
+        // owns its own Bloc.
+        BlocProvider(create: (_) => getIt<StakeholdersBloc>()),
       ],
-      child: _LogActivityView(projectId: projectId, stakeholders: stakeholders),
+      child: _LogActivityView(
+        projectId: projectId,
+        stakeholders: stakeholders,
+        currentStage: currentStage,
+      ),
     );
   }
 }
@@ -68,8 +100,13 @@ class LogActivityScreen extends StatelessWidget {
 class _LogActivityView extends StatefulWidget {
   final String projectId;
   final List<StakeholderRefView> stakeholders;
+  final ProjectStage currentStage;
 
-  const _LogActivityView({required this.projectId, required this.stakeholders});
+  const _LogActivityView({
+    required this.projectId,
+    required this.stakeholders,
+    required this.currentStage,
+  });
 
   @override
   State<_LogActivityView> createState() => _LogActivityViewState();
@@ -104,7 +141,16 @@ class _LogActivityViewState extends State<_LogActivityView> {
   /// (§10 Workflow 5).
   SyncActivityItem? _lastAttemptedItem;
 
-  List<PrimaryContactRefView> get _availableContacts => widget.stakeholders
+  /// The funnel stage as it will be left when this screen closes. Seeded
+  /// from the project and only sent back to the caller if the rep moved it.
+  late ProjectStage _stage = widget.currentStage;
+
+  /// The people the rep can say they met.
+  ///
+  /// Held in state rather than derived from `widget.stakeholders` because a
+  /// rep can add a stakeholder from this screen — the roster they arrived
+  /// with is a starting point, not a fixed list.
+  late List<PrimaryContactRefView> _availableContacts = widget.stakeholders
       .map((s) => s.primaryContact)
       .whereType<PrimaryContactRefView>()
       .toList();
@@ -124,6 +170,10 @@ class _LogActivityViewState extends State<_LogActivityView> {
         _constructionPhaseObserved = null;
         _latitude = null;
         _longitude = null;
+        // The stage question is a visit question — a phone call is not
+        // where a rep judges that the deal moved. Reset rather than keep a
+        // pending edit the form no longer shows.
+        _stage = widget.currentStage;
         // COMMUNICATION is exactly one person — drop extras if the rep
         // switched from VISIT with several already selected.
         if (_selectedPersonIds.length > 1) {
@@ -147,6 +197,65 @@ class _LogActivityViewState extends State<_LogActivityView> {
       } else {
         _selectedPersonIds.add(contactId);
       }
+    });
+  }
+
+  /// Adds a stakeholder to the project without leaving the activity.
+  ///
+  /// The roster a rep arrives with is whoever was linked before today, and a
+  /// visit routinely introduces someone new — the site engineer, a second
+  /// contractor. Without this the rep has to abandon a half-filled form,
+  /// walk back to the project screen, add the link, and start over; in
+  /// practice they instead pick the nearest wrong name, which quietly
+  /// corrupts who-was-met on the record.
+  ///
+  /// `AddStakeholderLinkScreen` pops `true` on success but doesn't return
+  /// the link it created, so the roster is re-read rather than patched
+  /// locally — that also picks up anything a colleague added meanwhile.
+  Future<void> _addStakeholder() async {
+    final added = await context.pushNamed(
+      Routes.addStakeholderLinkScreen,
+      arguments: {'projectId': widget.projectId},
+    );
+    if (added != true || !mounted) return;
+    context.read<StakeholdersBloc>().add(
+      StakeholdersEvent.linksListRequested(projectId: widget.projectId),
+    );
+  }
+
+  /// Folds a re-read roster into the picker.
+  ///
+  /// `GET /projects/{id}/stakeholders` answers with `StakeholderLinkView`,
+  /// whose nested contact uses `id`; the embedded roster on the project
+  /// detail uses `PrimaryContactRefView` with `contactId`. They are
+  /// genuinely different response shapes (see `stakeholder_link_view.dart`),
+  /// so the fresh one is mapped onto the shape this screen already renders
+  /// instead of teaching the picker to hold both.
+  ///
+  /// Closed links are dropped: you cannot have met someone on behalf of a
+  /// company that is no longer on the project.
+  void _applyRefreshedRoster(List<StakeholderLinkView> links) {
+    final contacts = <String, PrimaryContactRefView>{};
+    for (final link in links) {
+      if (!link.isActive) continue;
+      final contact = link.primaryContact;
+      if (contact == null) continue;
+      contacts[contact.id] = PrimaryContactRefView(
+        contactId: contact.id,
+        accountId: contact.accountId,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        position: contact.position,
+        phone: contact.phone,
+        email: contact.email,
+      );
+    }
+    if (contacts.isEmpty) return;
+    setState(() {
+      _availableContacts = contacts.values.toList();
+      // A selection whose contact vanished from the refreshed roster would
+      // otherwise be submitted as a `personsMet` id the server rejects.
+      _selectedPersonIds.removeWhere((id) => !contacts.containsKey(id));
     });
   }
 
@@ -357,196 +466,293 @@ class _LogActivityViewState extends State<_LogActivityView> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return BlocListener<ActivitiesBloc, ActivitiesState>(
-      listenWhen: (previous, current) =>
-          previous.mutationStatus != current.mutationStatus,
-      listener: (context, state) {
-        switch (state.mutationStatus) {
-          case ActivityMutationStatus.success:
-            context.pop(state.lastLogSuggestion);
-          case ActivityMutationStatus.offline:
-            // Suspended — see `FeatureFlags.offlineSyncEnabled`. With the
-            // queue off, a connectivity failure has to be reported as a
-            // plain failure and the form left intact so the rep can retry;
-            // popping with a "saved" message would be a lie, since nothing
-            // would be holding the activity.
-            if (!FeatureFlags.offlineSyncEnabled) {
-              _showSnack(context.tr('error_no_internet'));
+    return MultiBlocListener(
+      listeners: [
+        // Roster re-read after the rep added someone — see
+        // `_applyRefreshedRoster` for why the shapes differ.
+        BlocListener<StakeholdersBloc, StakeholdersState>(
+          listenWhen: (previous, current) =>
+              previous.linksStatus != current.linksStatus,
+          listener: (context, state) {
+            if (state.linksStatus == StakeholderLinksFeedStatus.loaded) {
+              _applyRefreshedRoster(state.links);
+            }
+          },
+        ),
+      ],
+      child: BlocListener<ActivitiesBloc, ActivitiesState>(
+        listenWhen: (previous, current) =>
+            previous.mutationStatus != current.mutationStatus,
+        listener: (context, state) {
+          switch (state.mutationStatus) {
+            case ActivityMutationStatus.success:
+              // `stage` only when the rep actually moved it — an unchanged
+              // value would have the caller fire a no-op `PUT .../stage`,
+              // which still writes a stage-history entry.
+              context.pop((
+                suggestion: state.lastLogSuggestion,
+                stage: _stage == widget.currentStage ? null : _stage,
+              ));
+            case ActivityMutationStatus.offline:
+              // Suspended — see `FeatureFlags.offlineSyncEnabled`. With the
+              // queue off, a connectivity failure has to be reported as a
+              // plain failure and the form left intact so the rep can retry;
+              // popping with a "saved" message would be a lie, since nothing
+              // would be holding the activity.
+              if (!FeatureFlags.offlineSyncEnabled) {
+                _showSnack(context.tr('error_no_internet'));
+                break;
+              }
+              final item = _lastAttemptedItem;
+              if (item != null) {
+                getIt<OfflineSyncBloc>().add(
+                  OfflineSyncEvent.activityQueued(item: item),
+                );
+              }
+              _showSnack(context.tr('log_activity_saved_offline'));
+              context.pop();
+            case ActivityMutationStatus.inProgress:
+            case ActivityMutationStatus.idle:
               break;
-            }
-            final item = _lastAttemptedItem;
-            if (item != null) {
-              getIt<OfflineSyncBloc>().add(
-                OfflineSyncEvent.activityQueued(item: item),
+            default:
+              _showSnack(
+                state.mutationErrorMessage ?? context.tr('error_unexpected'),
               );
-            }
-            _showSnack(context.tr('log_activity_saved_offline'));
-            context.pop();
-          case ActivityMutationStatus.inProgress:
-          case ActivityMutationStatus.idle:
-            break;
-          default:
-            _showSnack(
-              state.mutationErrorMessage ?? context.tr('error_unexpected'),
-            );
-        }
-      },
-      child: Scaffold(
-        backgroundColor: colors.page,
-        body: SafeArea(
-          child: Column(
-            children: [
-              AppHeader(title: context.tr('log_activity_title')),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => FocusScope.of(context).unfocus(),
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _KindToggle(kind: _kind, onChanged: _onKindChanged),
-                          verticalSpace(16.h),
-                          if (_kind == ActivityKind.communication) ...[
-                            _Label(context.tr('log_activity_channel')),
-                            OptionPickerField<ActivityChannel>(
-                              hintText: context.tr('log_activity_channel_hint'),
-                              value: _channel,
-                              options: ActivityChannel.values,
-                              labelOf: (v) => context.tr(v.labelKey),
-                              onChanged: (v) => setState(() => _channel = v),
-                            ),
+          }
+        },
+        child: Scaffold(
+          backgroundColor: colors.page,
+          body: SafeArea(
+            child: Column(
+              children: [
+                AppHeader(title: context.tr('log_activity_title')),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _KindToggle(kind: _kind, onChanged: _onKindChanged),
                             verticalSpace(16.h),
-                          ],
-                          _Label(context.tr('log_activity_purpose')),
-                          OptionPickerField<ActivityPurpose>(
-                            hintText: context.tr('log_activity_purpose_hint'),
-                            value: _purpose,
-                            options: ActivityPurpose.values,
-                            labelOf: (v) => context.tr(v.labelKey),
-                            onChanged: (v) => setState(() => _purpose = v),
-                          ),
-                          verticalSpace(16.h),
-                          _Label(context.tr('log_activity_outcome')),
-                          OptionPickerField<ActivityOutcome>(
-                            hintText: context.tr('log_activity_outcome_hint'),
-                            value: _outcome,
-                            options: ActivityOutcome.values,
-                            labelOf: (v) => context.tr(v.labelKey),
-                            onChanged: (v) => setState(() => _outcome = v),
-                          ),
-                          if (_outcome ==
-                              ActivityOutcome.tooEarlyRevisitLater) ...[
-                            verticalSpace(16.h),
-                            _Label(context.tr('log_activity_next_action')),
-                            _DateTimeField(
-                              value: _nextActionAt,
-                              hintText: context.tr(
-                                'log_activity_next_action_hint',
+                            if (_kind == ActivityKind.communication) ...[
+                              _Label(context.tr('log_activity_channel')),
+                              OptionPickerField<ActivityChannel>(
+                                hintText: context.tr(
+                                  'log_activity_channel_hint',
+                                ),
+                                value: _channel,
+                                options: ActivityChannel.values,
+                                labelOf: (v) => context.tr(v.labelKey),
+                                onChanged: (v) => setState(() => _channel = v),
                               ),
-                              onTap: _pickNextActionAt,
+                              verticalSpace(16.h),
+                            ],
+                            _Label(context.tr('log_activity_purpose')),
+                            OptionPickerField<ActivityPurpose>(
+                              hintText: context.tr('log_activity_purpose_hint'),
+                              value: _purpose,
+                              options: ActivityPurpose.values,
+                              labelOf: (v) => context.tr(v.labelKey),
+                              onChanged: (v) => setState(() => _purpose = v),
                             ),
-                          ],
-                          verticalSpace(16.h),
-                          _Label(context.tr('log_activity_occurred_at')),
-                          _DateTimeField(
-                            value: _occurredAt,
-                            hintText: context.tr(
-                              'log_activity_occurred_at_hint',
-                            ),
-                            onTap: _pickOccurredAt,
-                          ),
-                          verticalSpace(16.h),
-                          _Label(context.tr('log_activity_notes')),
-                          AppTextField(
-                            hintText: context.tr('log_activity_notes_hint'),
-                            controller: _notesController,
-                            maxLines: 5,
-                            validator: (value) {
-                              final trimmed = value?.trim() ?? '';
-                              if (trimmed.length < 20 ||
-                                  trimmed.length > 4000) {
-                                return context.tr('log_activity_notes_error');
-                              }
-                              return null;
-                            },
-                          ),
-                          verticalSpace(16.h),
-                          _Label(
-                            context.tr(
-                              _kind == ActivityKind.communication
-                                  ? 'log_activity_person_communication'
-                                  : 'log_activity_persons_visit',
-                            ),
-                          ),
-                          _PersonsMetPicker(
-                            contacts: _availableContacts,
-                            selectedIds: _selectedPersonIds,
-                            onToggle: _togglePerson,
-                          ),
-                          if (_kind == ActivityKind.visit) ...[
                             verticalSpace(16.h),
-                            _Label(
-                              context.tr('log_activity_location'),
-                              optional: true,
+                            _Label(context.tr('log_activity_outcome')),
+                            OptionPickerField<ActivityOutcome>(
+                              hintText: context.tr('log_activity_outcome_hint'),
+                              value: _outcome,
+                              options: ActivityOutcome.values,
+                              labelOf: (v) => context.tr(v.labelKey),
+                              onChanged: (v) => setState(() => _outcome = v),
                             ),
-                            _LocationChip(
-                              latitude: _latitude,
-                              longitude: _longitude,
-                              onCapture: _pickLocation,
+                            if (_outcome ==
+                                ActivityOutcome.tooEarlyRevisitLater) ...[
+                              verticalSpace(16.h),
+                              _Label(context.tr('log_activity_next_action')),
+                              _DateTimeField(
+                                value: _nextActionAt,
+                                hintText: context.tr(
+                                  'log_activity_next_action_hint',
+                                ),
+                                onTap: _pickNextActionAt,
+                              ),
+                            ],
+                            verticalSpace(16.h),
+                            _Label(context.tr('log_activity_occurred_at')),
+                            _DateTimeField(
+                              value: _occurredAt,
+                              hintText: context.tr(
+                                'log_activity_occurred_at_hint',
+                              ),
+                              onTap: _pickOccurredAt,
+                            ),
+                            verticalSpace(16.h),
+                            _Label(context.tr('log_activity_notes')),
+                            AppTextField(
+                              hintText: context.tr('log_activity_notes_hint'),
+                              controller: _notesController,
+                              maxLines: 5,
+                              validator: (value) {
+                                final trimmed = value?.trim() ?? '';
+                                if (trimmed.length < 20 ||
+                                    trimmed.length > 4000) {
+                                  return context.tr('log_activity_notes_error');
+                                }
+                                return null;
+                              },
                             ),
                             verticalSpace(16.h),
                             _Label(
                               context.tr(
-                                'log_activity_construction_phase_observed',
+                                _kind == ActivityKind.communication
+                                    ? 'log_activity_person_communication'
+                                    : 'log_activity_persons_visit',
                               ),
+                            ),
+                            _PersonsMetPicker(
+                              contacts: _availableContacts,
+                              selectedIds: _selectedPersonIds,
+                              onToggle: _togglePerson,
+                            ),
+                            verticalSpace(8.h),
+                            _AddStakeholderButton(onTap: _addStakeholder),
+                            if (_kind == ActivityKind.visit) ...[
+                              verticalSpace(16.h),
+                              // Prefilled from the project, not blank: the
+                              // common case is that the visit confirmed the
+                              // stage rather than moved it, and an empty
+                              // picker would make "no change" cost a tap.
+                              _Label(context.tr('log_activity_stage')),
+                              OptionPickerField<ProjectStage>(
+                                hintText: context.tr(
+                                  'projects_register_stage_hint',
+                                ),
+                                value: _stage,
+                                options: openProjectStages,
+                                labelOf: (v) => context.tr(v.labelKey),
+                                onChanged: (v) => setState(() => _stage = v),
+                              ),
+                              if (_stage != widget.currentStage) ...[
+                                verticalSpace(6.h),
+                                Text(
+                                  context
+                                      .tr('log_activity_stage_will_change')
+                                      .replaceAll(
+                                        '{from}',
+                                        context.tr(
+                                          widget.currentStage.labelKey,
+                                        ),
+                                      )
+                                      .replaceAll(
+                                        '{to}',
+                                        context.tr(_stage.labelKey),
+                                      ),
+                                  style: context.textStyles.xsMedium.copyWith(
+                                    color: colors.brand600,
+                                  ),
+                                ),
+                              ],
+                              verticalSpace(16.h),
+                              _Label(
+                                context.tr('log_activity_location'),
+                                optional: true,
+                              ),
+                              _LocationChip(
+                                latitude: _latitude,
+                                longitude: _longitude,
+                                onCapture: _pickLocation,
+                              ),
+                              verticalSpace(16.h),
+                              _Label(
+                                context.tr(
+                                  'log_activity_construction_phase_observed',
+                                ),
+                                optional: true,
+                              ),
+                              OptionPickerField<ConstructionPhase>(
+                                hintText: context.tr(
+                                  'log_activity_construction_phase_hint',
+                                ),
+                                value: _constructionPhaseObserved,
+                                options: ConstructionPhase.values,
+                                labelOf: (v) => context.tr(v.labelKey),
+                                onChanged: (v) => setState(
+                                  () => _constructionPhaseObserved = v,
+                                ),
+                              ),
+                            ],
+                            verticalSpace(16.h),
+                            _Label(
+                              context.tr('log_activity_attachments'),
                               optional: true,
                             ),
-                            OptionPickerField<ConstructionPhase>(
-                              hintText: context.tr(
-                                'log_activity_construction_phase_hint',
-                              ),
-                              value: _constructionPhaseObserved,
-                              options: ConstructionPhase.values,
-                              labelOf: (v) => context.tr(v.labelKey),
-                              onChanged: (v) => setState(
-                                () => _constructionPhaseObserved = v,
-                              ),
+                            AttachmentPicker(
+                              attachments: _attachments,
+                              maxAttachments: _maxAttachments,
+                              onAdded: _onAttachmentsAdded,
+                              onRemove: _removeAttachment,
+                            ),
+                            verticalSpace(24.h),
+                            BlocBuilder<ActivitiesBloc, ActivitiesState>(
+                              builder: (context, state) {
+                                return AppButton(
+                                  text: context.tr('log_activity_submit'),
+                                  isLoading:
+                                      state.mutationStatus ==
+                                      ActivityMutationStatus.inProgress,
+                                  onPressed: _submit,
+                                );
+                              },
                             ),
                           ],
-                          verticalSpace(16.h),
-                          _Label(
-                            context.tr('log_activity_attachments'),
-                            optional: true,
-                          ),
-                          AttachmentPicker(
-                            attachments: _attachments,
-                            maxAttachments: _maxAttachments,
-                            onAdded: _onAttachmentsAdded,
-                            onRemove: _removeAttachment,
-                          ),
-                          verticalSpace(24.h),
-                          BlocBuilder<ActivitiesBloc, ActivitiesState>(
-                            builder: (context, state) {
-                              return AppButton(
-                                text: context.tr('log_activity_submit'),
-                                isLoading:
-                                    state.mutationStatus ==
-                                    ActivityMutationStatus.inProgress,
-                                onPressed: _submit,
-                              );
-                            },
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Adds a stakeholder to the project from inside the activity form.
+///
+/// Deliberately a quiet inline action rather than a filled button — it sits
+/// under a list the rep will usually just pick from, and competing with the
+/// form's real submit button for attention would be wrong.
+class _AddStakeholderButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _AddStakeholderButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return PressableScale(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 6.h),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_add_alt_1_rounded,
+              size: 16.sp,
+              color: colors.brand600,
+            ),
+            horizontalSpace(6),
+            Text(
+              context.tr('log_activity_add_stakeholder'),
+              style: context.textStyles.smBold.copyWith(color: colors.brand600),
+            ),
+          ],
         ),
       ),
     );

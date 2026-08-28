@@ -19,7 +19,7 @@ import '../../logic/stakeholder_mutation_status.dart';
 import '../../logic/stakeholders_bloc/stakeholders_bloc.dart';
 import '../../logic/stakeholders_bloc/stakeholders_event.dart';
 import '../../logic/stakeholders_bloc/stakeholders_state.dart';
-import '../../../auth/ui/widgets/phone_text_field.dart';
+import '../../../../core/widget/phone_text_field.dart';
 import '../widgets/option_picker_field.dart';
 import '../widgets/project_enum_labels.dart';
 
@@ -350,7 +350,7 @@ class _AccountTypeToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (final option in AccountType.values)
+          for (final option in AccountTypeWire.selectable)
             Expanded(
               child: PressableScale(
                 onTap: () => onChanged(option),

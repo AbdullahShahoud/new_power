@@ -192,6 +192,11 @@ extension AccountTypeLabel on AccountType {
   String get labelKey => switch (this) {
     AccountType.company => 'account_type_company',
     AccountType.individual => 'account_type_individual',
+    // Reached only for a row whose type this build cannot read. Renders as
+    // "Company" rather than an empty chip: the overwhelming majority of the
+    // directory is companies, and a blank label would read as a bug in a
+    // row that is otherwise perfectly usable.
+    AccountType.unknown => 'account_type_company',
   };
 }
 

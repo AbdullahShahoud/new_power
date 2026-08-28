@@ -121,7 +121,10 @@ void main() {
           accountName: 'شركة',
           accountType: AccountType.company,
           role: StakeholderRole.mainContractor,
-          contact: NewStakeholderContact(firstName: 'أ', lastName: 'ب'),
+          contact: NewStakeholderContact(
+            firstName: 'أحمد',
+            lastName: 'السيد',
+          ),
         ),
         ProjectStakeholderRefDto(
           accountName: 'رامي حداد',
@@ -131,7 +134,10 @@ void main() {
         ProjectStakeholderRefDto(
           accountId: 'acc-1',
           role: StakeholderRole.consultantEngineeringOffice,
-          contact: NewStakeholderContact(firstName: 'س', lastName: 'خ'),
+          contact: NewStakeholderContact(
+            firstName: 'سامر',
+            lastName: 'خليل',
+          ),
         ),
         ProjectStakeholderRefDto(
           accountId: 'acc-1',
@@ -142,6 +148,166 @@ void main() {
       for (final shape in shapes) {
         expect(shape.validate, returnsNormally);
       }
+    });
+
+    test('rejects pointing at a contact and describing one at once', () {
+      expect(
+        () => const ProjectStakeholderRefDto(
+          accountId: 'acc-1',
+          role: StakeholderRole.owner,
+          primaryContactId: 'contact-1',
+          contact: NewStakeholderContact(
+            firstName: 'رامي',
+            lastName: 'حداد',
+          ),
+        ).validate(),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects accountType without an accountName', () {
+      // Next to an accountId it is a claim about a record this request does
+      // not own.
+      expect(
+        () => const ProjectStakeholderRefDto(
+          accountId: 'acc-1',
+          accountType: AccountType.company,
+          role: StakeholderRole.owner,
+        ).validate(),
+        throwsArgumentError,
+      );
+    });
+
+    test('holds accountName to 2-200 characters', () {
+      for (final name in ['ا', '']) {
+        expect(
+          () => ProjectStakeholderRefDto(
+            accountName: name,
+            role: StakeholderRole.mainContractor,
+          ).validate(),
+          throwsArgumentError,
+          reason: 'name=`$name`',
+        );
+      }
+      expect(
+        () => ProjectStakeholderRefDto(
+          accountName: 'ا' * 201,
+          role: StakeholderRole.mainContractor,
+        ).validate(),
+        throwsArgumentError,
+      );
+    });
+  });
+
+  // The inlined person goes through the same creation path as the standalone
+  // contact endpoints, so a value this form accepts but `POST /accounts/{id}
+  // /contacts` refuses costs the rep the entire registration.
+  group('inline contact validation', () {
+    ProjectStakeholderRefDto withContact(NewStakeholderContact contact) =>
+        ProjectStakeholderRefDto(
+          accountName: 'شركة الأمل للمقاولات',
+          accountType: AccountType.company,
+          role: StakeholderRole.mainContractor,
+          contact: contact,
+        );
+
+    test('rejects a name shorter than two characters', () {
+      expect(
+        () => withContact(
+          const NewStakeholderContact(firstName: 'أ', lastName: 'السيد'),
+        ).validate(),
+        throwsArgumentError,
+      );
+      expect(
+        () => withContact(
+          const NewStakeholderContact(firstName: 'أحمد', lastName: 'ب'),
+        ).validate(),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects a name longer than eighty characters', () {
+      expect(
+        () => withContact(
+          NewStakeholderContact(firstName: 'ا' * 81, lastName: 'السيد'),
+        ).validate(),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects Arabic-Indic digits in the phone', () {
+      // stakeholders.md: refused rather than transliterated.
+      expect(
+        () => withContact(
+          const NewStakeholderContact(
+            firstName: 'أحمد',
+            lastName: 'السيد',
+            phone: '٠٩٩١٢٣٤٥٦٧',
+          ),
+        ).validate(),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects a phone over thirty characters', () {
+      expect(
+        () => withContact(
+          NewStakeholderContact(
+            firstName: 'أحمد',
+            lastName: 'السيد',
+            phone: '0' * 31,
+          ),
+        ).validate(),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects a phone carrying no digits, or a misplaced plus', () {
+      for (final phone in ['abc', '+', '099+123']) {
+        expect(
+          () => withContact(
+            NewStakeholderContact(
+              firstName: 'أحمد',
+              lastName: 'السيد',
+              phone: phone,
+            ),
+          ).validate(),
+          throwsArgumentError,
+          reason: 'phone=`$phone`',
+        );
+      }
+    });
+
+    test('accepts the shapes a rep actually types', () {
+      for (final phone in [
+        '0991234567',
+        '+963991234567',
+        '099 123 4567',
+        '099-123-4567',
+      ]) {
+        expect(
+          withContact(
+            NewStakeholderContact(
+              firstName: 'أحمد',
+              lastName: 'السيد',
+              phone: phone,
+            ),
+          ).validate,
+          returnsNormally,
+          reason: 'phone=`$phone`',
+        );
+      }
+    });
+
+    test('a missing phone is still allowed at the model level', () {
+      // The *contractor slot* requires one, but that is a form rule — the
+      // wire contract keeps `phone` optional, and other slots rely on it.
+      expect(
+        withContact(
+          const NewStakeholderContact(firstName: 'أحمد', lastName: 'السيد'),
+        ).validate,
+        returnsNormally,
+      );
     });
   });
 }
