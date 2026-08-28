@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- Tint the system applies behind the status-bar notification
+         silhouette. brand500 from AppColors (lib/core/theming/app_colors.dart)
+         — kept in step with it by hand, since Android resources cannot read
+         Dart constants. -->
+    <color name="notification_accent">#EC1B23</color>
 </resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Push Notifications capability.
+
+	     Without this key the APNs registration in PushService silently never
+	     completes: FirebaseMessaging.getToken() returns null on a real
+	     device, _registerToken() returns early, and the whole notifications
+	     feature ships dead on iOS while looking fine in the simulator.
+
+	     `development` is correct for debug builds and TestFlight-from-Xcode;
+	     Xcode rewrites it to `production` when exporting for the App Store,
+	     so this value does not need to be changed by hand before release.
+
+	     Xcode normally writes this file when you tick "Push Notifications"
+	     in Signing & Capabilities. It is checked in here so the requirement
+	     is version-controlled rather than living only in one machine's
+	     Xcode state. -->
+	<key>aps-environment</key>
+	<string>development</string>
+</dict>
+</plist>

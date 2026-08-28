@@ -55,5 +55,41 @@
 		<string>NewPower needs access to your photo library to attach existing photos to a project.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>NewPower uses your microphone to record voice notes on a visit or call.</string>
+
+		<!-- Export compliance. NewPower uses only HTTPS/TLS and the platform
+		     keychain — both are exempt under category 5, part 2 of the US
+		     Export Administration Regulations, and neither is proprietary
+		     cryptography.
+
+		     Declaring it here rather than in App Store Connect is what stops
+		     every single TestFlight and App Store upload from stalling on the
+		     "Does your app use encryption?" question before it can be
+		     distributed. -->
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
+
+		<!-- Languages the app actually ships, so the App Store listing shows
+		     both instead of inferring English alone from
+		     CFBundleDevelopmentRegion. Matches
+		     AppLocalizations.supportedLocales. -->
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>en</string>
+			<string>ar</string>
+		</array>
+
+		<!-- Lets firebaseBackgroundHandler run for a data message while the
+		     app is backgrounded or terminated. Without it iOS delivers only
+		     the tray notification and the handler never fires, so the badge
+		     and inbox stay stale until the next resume.
+
+		     Xcode writes this when you tick Background Modes → Remote
+		     notifications; it is checked in so the requirement is
+		     version-controlled rather than living in one machine's Xcode
+		     state. -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
 	</dict>
 </plist>

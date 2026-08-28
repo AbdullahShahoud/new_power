@@ -1,0 +1,26 @@
+<!--
+  Status-bar icon for notifications.
+
+  Must be a **drawable** and a white-on-transparent silhouette:
+
+  - flutter_local_notifications resolves an icon name with
+    `getIdentifier(name, "drawable", package)`, so anything living only in
+    `mipmap/` (like `ic_launcher`) resolves to 0 — and Android silently
+    drops a notification whose small icon is invalid. That is why no tray
+    notification appeared at all.
+  - Since API 21 the system masks the small icon to a single colour and
+    ignores the source colours, so a full-colour launcher icon renders as a
+    featureless grey blob even when it does resolve.
+
+  A vector rather than a set of PNGs: one file covers every density.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFF">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,22c1.1,0 2,-0.9 2,-2h-4c0,1.1 0.9,2 2,2zM18,16v-5c0,-3.07 -1.64,-5.64 -4.5,-6.32L13.5,4c0,-0.83 -0.67,-1.5 -1.5,-1.5s-1.5,0.67 -1.5,1.5v0.68C7.63,5.36 6,7.92 6,11v5l-2,2v1h16v-1l-2,-2z" />
+</vector>
