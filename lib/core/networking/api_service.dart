@@ -22,6 +22,7 @@ import '../../features/auth/data/models/reset_password_response.dart';
 import '../../features/auth/data/models/user_response.dart';
 import '../../features/auth/data/models/verify_otp_request.dart';
 import '../../features/auth/data/models/verify_otp_response.dart';
+import '../../features/attainment/data/models/attainment_responses.dart';
 import '../../features/catalog/data/models/catalog_responses.dart';
 import '../../features/notifications/data/models/notification_responses.dart';
 import '../../features/notifications/data/models/notification_view.dart';
@@ -493,6 +494,21 @@ abstract class ApiService {
 
   @GET(ApiConstants.productById)
   Future<ProductDetailResponse> getProduct(@Path('idOrSlug') String idOrSlug);
+
+  // ========================== Attainment ==========================
+
+  /// attainment-me.md §1. Both parameters are optional: `period` defaults
+  /// server-side to the quarter containing today (UTC), `metric` to
+  /// `SALES_VALUE`.
+  ///
+  /// ⚠️ Nothing else may be sent — an unknown query key is a
+  /// `400 VALIDATION_ERROR`, not an ignored parameter. `period` is
+  /// `YYYY-Qn` / `YYYY-MM` / `YYYY` only, never a free date range.
+  @GET(ApiConstants.attainmentMe)
+  Future<MyAttainmentResponse> getMyAttainment({
+    @Query('period') String? period,
+    @Query('metric') String? metric,
+  });
 
   // ======================== Notifications ========================
 

@@ -4,20 +4,28 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/helpers/extensions.dart';
-import '../../../../core/helpers/spacing.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theming/app_colors.dart';
 import '../../../../core/theming/app_radius.dart';
-import '../../../../core/theming/app_shadows.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/app_logo.dart';
+import '../../../../core/widget/pressable_scale.dart';
+import '../../../attainment/ui/widgets/my_attainment_body.dart';
 import '../../../notifications/logic/badge_cubit/unread_badge_cubit.dart';
 
-/// Home tab — dashboard landing spot. A real dashboard (pipeline, KPIs,
-/// today's visits) belongs to subsystem 04 (Project & Funnel), which isn't
-/// built yet (see stakeholders.md), so this is a clean on-brand placeholder
-/// rather than a fake data screen.
+/// Home tab — the rep's own attainment (`GET /attainment/me`).
+///
+/// This *is* the Home tab, not a card on it: the first thing a rep needs on
+/// opening the app is where they stand against their target, and there is
+/// no other dashboard to compete with it — pipeline and today's visits
+/// belong to subsystem 04 (Project & Funnel), which isn't built yet (see
+/// stakeholders.md).
+///
+/// Because it is a tab root and not a pushed route there is **no back
+/// button**: the bottom bar is the way out, and it stays visible. The
+/// screen keeps the Home chrome that already existed — the logo and the
+/// notification bell, which is still the only way into the inbox.
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
 
@@ -28,12 +36,11 @@ class HomeDashboardScreen extends StatelessWidget {
       backgroundColor: colors.page,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 4.h),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   AppLogo(height: 28.h),
@@ -48,38 +55,37 @@ class HomeDashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              verticalSpace(24.h),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                  boxShadow: AppShadows.card,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.insights_rounded,
-                      color: colors.brand500,
-                      size: 28.sp,
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 4.h, 12.w, 8.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.tr('attainment_title'),
+                      style: context.textStyles.lgBold,
                     ),
-                    verticalSpace(12.h),
-                    Text(
-                      context.tr('home_dashboard_placeholder_title'),
-                      style: context.textStyles.baseBold,
+                  ),
+                  // The pace rule, the status thresholds and why a quarter
+                  // can arrive as two rows — the screen has to be able to
+                  // explain itself.
+                  PressableScale(
+                    onTap: () => showAttainmentHelp(context),
+                    child: SizedBox(
+                      width: 36.w,
+                      height: 36.w,
+                      child: Icon(
+                        Icons.info_outline_rounded,
+                        size: 20.sp,
+                        color: colors.textColor70,
+                      ),
                     ),
-                    verticalSpace(6.h),
-                    Text(
-                      context.tr('home_dashboard_placeholder_subtitle'),
-                      style: context.textStyles.smRegular,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            const Expanded(child: MyAttainmentBody()),
+          ],
         ),
       ),
     );

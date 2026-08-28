@@ -133,6 +133,18 @@ class ApiConstants {
 
   static const String productById = "/products/{idOrSlug}";
 
+  // ========================== Attainment ==========================
+  // attainment-me.md. ⚠️ `REPRESENTATIVE` **only** — an exact `@Roles(...)`
+  // match, not a rank floor, so every other role gets a 403 here and reads
+  // the same numbers through `GET /attainment` instead. That team route and
+  // the manager drill-down are deliberately absent: this client has no role
+  // above REPRESENTATIVE to serve.
+  //
+  // Two optional query keys and no others — the global ValidationPipe runs
+  // with `forbidNonWhitelisted`, so an unknown key is a 400. There is no
+  // `page`/`limit` to send: `targets` is a complete list.
+  static const String attainmentMe = "/attainment/me";
+
   // ======================== Notifications ========================
   // notifications-mobile-integration.md §2.1. The controller carries no
   // @MinRole and no @Roles, and RolesGuard lets every authenticated role

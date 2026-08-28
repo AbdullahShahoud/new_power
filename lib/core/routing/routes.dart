@@ -17,6 +17,10 @@ class Routes {
   // Home — tabbed shell (Home, Projects, Products, Profile)
   static const String homeScreen = '/home';
 
+  // ⚠️ There is no `/attainment` route: `GET /attainment/me` **is** the Home
+  // tab (`HomeDashboardScreen`), not a screen pushed above it, so it is
+  // reached by selecting the tab rather than by name.
+
   // Pushed from the Home tab's notification bell (not a bottom-bar tab).
   static const String notificationsScreen = '/notifications';
   static const String notificationSettingsScreen = '/notifications/settings';

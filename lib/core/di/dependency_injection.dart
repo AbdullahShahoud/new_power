@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 
+import '../../features/attainment/data/repo/attainment_repository.dart';
+import '../../features/attainment/logic/attainment_cubit/attainment_cubit.dart';
 import '../../features/auth/data/repo/auth_repository.dart';
 import '../../features/catalog/data/repo/catalog_repository.dart';
 import '../../features/catalog/logic/categories_bloc/categories_bloc.dart';
@@ -168,6 +170,23 @@ Future<void> setupGetIt() async {
   );
   getIt.registerFactory<SearchBloc>(
     () => SearchBloc(getIt<CatalogRepository>()),
+  );
+
+  // ============================ Attainment ===============================
+  // attainment-me.md. One read-only endpoint over the appDio-backed
+  // ApiService, like every other feature module.
+  //
+  // The Cubit is a **factory**, and two live at once by design: the Home
+  // card's and the full screen's. Sharing one would leak the screen's
+  // period/metric selection back onto Home, which is always meant to read
+  // the current quarter — and a `BlocProvider(create:)` closes whatever it
+  // builds when its screen pops, which would leave the Home card holding a
+  // dead cubit for the rest of the session.
+  getIt.registerLazySingleton<AttainmentRepository>(
+    () => AttainmentRepository(getIt<ApiService>()),
+  );
+  getIt.registerFactory<AttainmentCubit>(
+    () => AttainmentCubit(getIt<AttainmentRepository>()),
   );
 
   // ========================== Notifications ==============================
