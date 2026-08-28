@@ -412,6 +412,12 @@ class _IconButton extends StatelessWidget {
 
 /// §7.6 — `breadcrumb` holds **ancestors only**; the category itself is
 /// stripped server-side, so it is appended here to render the full trail.
+///
+/// Currently unreferenced: the call site is commented out at the top of this
+/// file's build method, pending a decision on whether the trail earns its
+/// vertical space on a phone. Kept because it is complete and correct, and
+/// re-enabling it is a one-line uncomment.
+// ignore: unused_element
 class _Breadcrumb extends StatelessWidget {
   final GetCategoryResultView result;
 

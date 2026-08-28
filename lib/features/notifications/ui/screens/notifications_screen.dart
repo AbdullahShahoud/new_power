@@ -20,6 +20,7 @@ import '../../logic/badge_cubit/unread_badge_cubit.dart';
 import '../../logic/inbox_bloc/inbox_bloc.dart';
 import '../../logic/inbox_bloc/inbox_event.dart';
 import '../../logic/inbox_bloc/inbox_state.dart';
+import '../widgets/mark_read_on_view.dart';
 import '../widgets/notification_tile.dart';
 
 /// The inbox. Reached from the bell on the Home tab.
@@ -62,8 +63,20 @@ class _InboxView extends StatefulWidget {
   State<_InboxView> createState() => _InboxViewState();
 }
 
+/// `notifyListeners` is protected on `ChangeNotifier`, so the inbox cannot
+/// pump one directly. This exists only to expose it.
+class _ScrollTick extends ChangeNotifier {
+  void bump() => notifyListeners();
+}
+
 class _InboxViewState extends State<_InboxView> {
   final _scrollController = ScrollController();
+
+  /// Bumped on every scroll frame so each visible row can re-check whether
+  /// it has been on screen long enough to count as read. A single notifier
+  /// shared by every row, rather than each row subscribing to the controller
+  /// itself.
+  final _scrollTick = _ScrollTick();
 
   /// Which row is expanded. The payload is a title, a two-line message and a
   /// timestamp — a whole screen for that would be mostly empty, so it
@@ -83,10 +96,15 @@ class _InboxViewState extends State<_InboxView> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _scrollTick.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    // Lets every mounted row re-test whether it is on screen. Cheap: rows
+    // that are already read return immediately.
+    _scrollTick.bump();
+
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
     // Prefetch at ~70% rather than at the very bottom.
@@ -296,11 +314,21 @@ class _InboxViewState extends State<_InboxView> {
               direction: DismissDirection.endToStart,
               background: _ArchiveBackground(),
               onDismissed: (_) => _onArchive(notification),
-              child: NotificationTile(
-                notification: notification,
-                expanded: _expandedId == notification.id,
-                onTap: () => _onTapTile(notification),
-                onArchive: () => _onArchive(notification),
+              // Reading the inbox is what marks a notification read — a tap
+              // is no longer required, and never was a good proxy for it.
+              // Tapping opens the destination; that is a separate intent.
+              child: MarkReadOnView(
+                scrollTick: _scrollTick,
+                isUnread: notification.isUnread,
+                onRead: () => context.read<InboxBloc>().add(
+                  InboxEvent.readRequested(notification.id),
+                ),
+                child: NotificationTile(
+                  notification: notification,
+                  expanded: _expandedId == notification.id,
+                  onTap: () => _onTapTile(notification),
+                  onArchive: () => _onArchive(notification),
+                ),
               ),
             );
           },

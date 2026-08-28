@@ -161,6 +161,7 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
     }
     return files;
   }
+
   final Set<ProductCategory> _categories = {};
 
   // ── Shared ───────────────────────────────────────────────────────────
@@ -183,12 +184,49 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// §5 `narrative`/`notes` — optional, but `≤ 2000` chars when present.
-  /// Inline feedback instead of waiting for the model's `.validate()` to
-  /// reject it as a generic server error.
+  /// §5 `narrative`/`notes` — `≤ 2000` chars when present. Inline feedback
+  /// instead of waiting for the model's `.validate()` to reject it as a
+  /// generic server error.
   String? _validateOptionalLongText(String? value) {
     if (value != null && value.trim().length > 2000) {
       return context.tr('submit_outcome_text_too_long');
+    }
+    return null;
+  }
+
+  /// Same length ceiling, but the field must also be filled.
+  ///
+  /// Used for the WON side's free text and for the LOST side's narrative —
+  /// both are the account of *why*, which is the part a manager actually
+  /// reads when deciding, and which is unrecoverable once the rep has moved
+  /// on to the next building.
+  String? _validateRequiredLongText(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return context.tr('submit_outcome_field_required');
+    }
+    return _validateOptionalLongText(value);
+  }
+
+  /// A required amount: present, numeric, and greater than zero.
+  String? _validateRequiredAmount(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return context.tr('submit_outcome_field_required');
+    final parsed = double.tryParse(text);
+    if (parsed == null || parsed <= 0) {
+      return context.tr('submit_outcome_invalid_amount');
+    }
+    return null;
+  }
+
+  /// A required whole count. Zero is allowed — "none supplied yet" is a real
+  /// answer on a deal that is won but not delivered — but a blank or a
+  /// negative is not.
+  String? _validateRequiredCount(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return context.tr('submit_outcome_field_required');
+    final parsed = int.tryParse(text);
+    if (parsed == null || parsed < 0) {
+      return context.tr('submit_outcome_invalid_count');
     }
     return null;
   }
@@ -251,10 +289,28 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
     }
   }
 
+  /// Every field on the Won form is required except the attachments.
+  ///
+  /// The three checks here are the ones a `Form` validator cannot make: a
+  /// picker and a date picker hold no `FormField`, and a chip set is not a
+  /// text input. They run after `validate()` so the text fields show their
+  /// own inline errors first rather than being pre-empted by a snackbar.
   void _submitWon() {
     final distributor = _distributor;
     if (distributor == null) {
       _showSnack(context.tr('submit_won_distributor_required'));
+      return;
+    }
+    if (_buyerContact == null) {
+      _showSnack(context.tr('submit_won_buyer_contact_required'));
+      return;
+    }
+    if (_soldAt == null) {
+      _showSnack(context.tr('submit_won_sold_at_required'));
+      return;
+    }
+    if (_categories.isEmpty) {
+      _showSnack(context.tr('submit_won_categories_required'));
       return;
     }
     // Aborts while an upload is still running rather than submitting the
@@ -263,24 +319,30 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
     final files = _collectUploadedFiles();
     if (files == null) return;
 
-    final valueText = _valueController.text.trim();
-    final value = valueText.isEmpty ? null : double.tryParse(valueText);
-    final unitsSupplied = int.tryParse(_unitsSuppliedController.text.trim());
-    final unitsTotal = int.tryParse(_unitsTotalController.text.trim());
+    // Non-null past the validators above: `_validateRequiredAmount` and
+    // `_validateRequiredCount` already rejected blank and unparseable input.
+    final value = double.parse(_valueController.text.trim());
+    final unitsSupplied = int.parse(_unitsSuppliedController.text.trim());
+    final unitsTotal = int.parse(_unitsTotalController.text.trim());
+    // Caught here rather than letting `SubmitWonRequest.validate()` throw an
+    // ArgumentError at the repository — now that both counts are mandatory
+    // this comparison runs on every submission, so it needs a real message.
+    if (unitsSupplied > unitsTotal) {
+      _showSnack(context.tr('submit_won_units_exceed_total'));
+      return;
+    }
 
     final request = SubmitWonRequest(
       files: files,
       distributorAccountId: distributor.id,
       value: value,
-      currency: value != null ? _defaultCurrency : null,
+      currency: _defaultCurrency,
       soldAt: _soldAt,
       categories: _categories.toList(),
       unitsSupplied: unitsSupplied,
       unitsTotal: unitsTotal,
-      buyerContactId: _buyerContact?.id,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
+      buyerContactId: _buyerContact!.id,
+      notes: _notesController.text.trim(),
     );
 
     context.read<OutcomesBloc>().add(
@@ -307,9 +369,8 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
       competitorPrice: competitorPrice,
       currency: competitorPrice != null ? _defaultCurrency : null,
       competitorAccountId: _competitor?.id,
-      narrative: _narrativeController.text.trim().isEmpty
-          ? null
-          : _narrativeController.text.trim(),
+      // Mandatory now — `_validateRequiredLongText` already refused a blank.
+      narrative: _narrativeController.text.trim(),
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -405,15 +466,21 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
                           else
                             ..._buildLostFields(context),
                           verticalSpace(16.h),
+                          // Required on a won claim, optional on a loss:
+                          // everything on the Won form is evidence a manager
+                          // weighs before confirming, and attachments are
+                          // the only part that can reasonably be missing.
                           _Label(
                             context.tr('submit_outcome_notes'),
-                            optional: true,
+                            optional: _type != OutcomeType.won,
                           ),
                           AppTextField(
                             hintText: context.tr('submit_outcome_notes_hint'),
                             controller: _notesController,
                             maxLines: 3,
-                            validator: _validateOptionalLongText,
+                            validator: _type == OutcomeType.won
+                                ? _validateRequiredLongText
+                                : _validateOptionalLongText,
                           ),
                           // Won only: `SubmitLostRequest` has no `files`
                           // field, so offering the picker on a loss would
@@ -484,12 +551,15 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
         onTap: _pickCompetitor,
       ),
       verticalSpace(16.h),
-      _Label(context.tr('submit_outcome_narrative'), optional: true),
+      // Required on a loss: the reason enum says *which bucket*, the
+      // narrative says what actually happened — and it is the only part of
+      // a lost deal anyone can learn from later.
+      _Label(context.tr('submit_outcome_narrative')),
       AppTextField(
         hintText: context.tr('submit_outcome_narrative_hint'),
         controller: _narrativeController,
         maxLines: 4,
-        validator: _validateOptionalLongText,
+        validator: _validateRequiredLongText,
       ),
     ];
   }
@@ -503,7 +573,7 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
         onTap: _pickDistributor,
       ),
       verticalSpace(16.h),
-      _Label(context.tr('submit_won_buyer_contact'), optional: true),
+      _Label(context.tr('submit_won_buyer_contact')),
       _PickerField(
         hintText: context.tr('submit_won_buyer_contact_hint'),
         value: _buyerContact == null
@@ -512,14 +582,15 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
         onTap: _distributor == null ? null : _pickBuyerContact,
       ),
       verticalSpace(16.h),
-      _Label(context.tr('submit_won_value'), optional: true),
+      _Label(context.tr('submit_won_value')),
       AppTextField(
         hintText: context.tr('submit_won_value_hint'),
         controller: _valueController,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        validator: _validateRequiredAmount,
       ),
       verticalSpace(16.h),
-      _Label(context.tr('submit_won_sold_at'), optional: true),
+      _Label(context.tr('submit_won_sold_at')),
       _PickerField(
         hintText: context.tr('submit_won_sold_at_hint'),
         value: _soldAt == null
@@ -528,7 +599,7 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
         onTap: _pickSoldAt,
       ),
       verticalSpace(16.h),
-      _Label(context.tr('submit_won_categories'), optional: true),
+      _Label(context.tr('submit_won_categories')),
       Wrap(
         spacing: 8.w,
         runSpacing: 8.h,
@@ -552,11 +623,12 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Label(context.tr('submit_won_units_supplied'), optional: true),
+                _Label(context.tr('submit_won_units_supplied')),
                 AppTextField(
                   hintText: '0',
                   controller: _unitsSuppliedController,
                   keyboardType: TextInputType.number,
+                  validator: _validateRequiredCount,
                 ),
               ],
             ),
@@ -566,11 +638,12 @@ class _SubmitOutcomeViewState extends State<_SubmitOutcomeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Label(context.tr('submit_won_units_total'), optional: true),
+                _Label(context.tr('submit_won_units_total')),
                 AppTextField(
                   hintText: '0',
                   controller: _unitsTotalController,
                   keyboardType: TextInputType.number,
+                  validator: _validateRequiredCount,
                 ),
               ],
             ),
@@ -673,9 +746,7 @@ class _CategoryChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? colors.brand500 : colors.surface,
           borderRadius: BorderRadius.circular(AppRadius.full),
-          border: Border.all(
-            color: selected ? colors.brand500 : colors.ink200,
-          ),
+          border: Border.all(color: selected ? colors.brand500 : colors.ink200),
         ),
         child: Text(
           label,

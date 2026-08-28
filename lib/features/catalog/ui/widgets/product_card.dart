@@ -162,43 +162,161 @@ class ProductCard extends StatelessWidget {
                     // as ragged.
                     const Spacer(),
                     if (product.highlights.isNotEmpty)
-                      // A `Wrap` under a clip, not a horizontal strip.
-                      //
-                      // The strip laid three chips in a row and simply ran
-                      // off the card, leaving the first one sliced down the
-                      // middle — a stray ")" at the edge that reads as a
-                      // rendering fault. `Wrap` pushes whatever does not fit
-                      // onto a second line, and the clip hides that line
-                      // entirely, so the card shows *fewer* chips rather
-                      // than a broken one.
-                      //
-                      // `OverflowBox` is what keeps that legal: it hands the
-                      // Wrap an unbounded height to lay out in, so the extra
-                      // line is clipped rather than reported as an overflow.
-                      SizedBox(
-                        height: 18.h,
-                        width: double.infinity,
-                        child: ClipRect(
-                          child: OverflowBox(
-                            alignment: AlignmentDirectional.topStart,
-                            maxHeight: double.infinity,
-                            child: Wrap(
-                              spacing: 4.w,
-                              runSpacing: 4.h,
-                              children: [
-                                for (final highlight
-                                    in product.highlights.take(3))
-                                  HighlightChip(highlight: highlight),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      HighlightStrip(highlights: product.highlights),
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The row of spec chips under a product name.
+///
+/// ⚠️ It **measures** rather than clips. The previous version put a `Wrap`
+/// inside an `OverflowBox` and a `ClipRect`: anything past the first line
+/// was cut away, which in practice meant a card showed two chips no matter
+/// how many the product had, and — because the clip is a rectangle, not a
+/// chip boundary — a third could be sliced down its middle and left as a
+/// stray sliver at the card's edge. That is the artefact in the bug report.
+///
+/// Here the chips are laid out only if they fit whole, and anything left
+/// over is reported as a `+N` chip. Nothing is ever half-drawn, and the card
+/// stops silently lying about how much it knows: a fitting with five specs
+/// now says so instead of looking identical to one with two.
+///
+/// A single line by choice. The grid cell reserves a fixed text block
+/// (`kProductTextBlockHeight`), so a second line of chips would have to come
+/// out of the product name — and the name is what a rep scans first.
+class HighlightStrip extends StatelessWidget {
+  final List<HighlightView> highlights;
+
+  const HighlightStrip({super.key, required this.highlights});
+
+  /// Width a chip occupies: its text plus the horizontal padding
+  /// [HighlightChip] applies. Measured with the same style the chip renders
+  /// with, so the two cannot disagree.
+  static double _chipWidth(String label, TextStyle style, double textScale) {
+    final painter = TextPainter(
+      text: TextSpan(text: label, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+      textScaler: TextScaler.linear(textScale),
+    )..layout();
+    return painter.width + HighlightChip.horizontalPadding * 2;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final style = context.textStyles.xsSemibold.copyWith(
+      color: colors.textColor70,
+      fontSize: 10.sp,
+    );
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final spacing = 4.w;
+
+    return SizedBox(
+      height: 18.h,
+      width: double.infinity,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth;
+          final labels = [
+            for (final h in highlights) h.display.resolve(context),
+          ];
+          final widths = [
+            for (final label in labels) _chipWidth(label, style, textScale),
+          ];
+
+          // Greedy fit, reserving room for the "+N" chip whenever anything
+          // would be left behind. The count is only known once the fit is
+          // decided, so the reservation uses the widest plausible label
+          // ("+" plus the total count) — never narrower than what is drawn.
+          final overflowLabel = '+${highlights.length}';
+          final overflowWidth = _chipWidth(overflowLabel, style, textScale);
+
+          var used = 0.0;
+          var fitted = 0;
+          for (var i = 0; i < widths.length; i++) {
+            final needed = (i == 0 ? 0.0 : spacing) + widths[i];
+            final isLast = i == widths.length - 1;
+            // Every chip after this one still has to be announced, so the
+            // "+N" chip's width is part of the budget unless this is the
+            // final chip and it fits outright.
+            final reserve = isLast ? 0.0 : spacing + overflowWidth;
+            if (used + needed + reserve > maxWidth) break;
+            used += needed;
+            fitted++;
+          }
+
+          final hidden = highlights.length - fitted;
+
+          // Nothing fits — a very narrow card or a very long single spec.
+          // Show one chip clipped by ellipsis rather than an empty band:
+          // a truncated value the rep can tap through to is more use than
+          // no value at all.
+          if (fitted == 0 && highlights.isNotEmpty) {
+            return Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: HighlightChip(
+                highlight: highlights.first,
+                maxWidth: maxWidth,
+              ),
+            );
+          }
+
+          return Row(
+            children: [
+              for (var i = 0; i < fitted; i++) ...[
+                if (i > 0) SizedBox(width: spacing),
+                HighlightChip(highlight: highlights[i]),
+              ],
+              if (hidden > 0) ...[
+                SizedBox(width: spacing),
+                _OverflowChip(label: '+$hidden'),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// The `+N` marker closing a truncated [HighlightStrip].
+///
+/// Deliberately styled as a chip rather than plain text: it sits in a row of
+/// chips, and anything else there reads as a value rather than a count.
+class _OverflowChip extends StatelessWidget {
+  final String label;
+
+  const _OverflowChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: HighlightChip.horizontalPadding,
+        vertical: 2.h,
+      ),
+      decoration: BoxDecoration(
+        color: colors.Color13,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        // The count is a number in both languages; forcing LTR stops "+3"
+        // from being reordered to "3+" under an RTL layout.
+        textDirection: TextDirection.ltr,
+        style: context.textStyles.xsSemibold.copyWith(
+          color: colors.textColor70,
+          fontSize: 10.sp,
         ),
       ),
     );
@@ -211,24 +329,43 @@ class ProductCard extends StatelessWidget {
 class HighlightChip extends StatelessWidget {
   final HighlightView highlight;
 
-  const HighlightChip({super.key, required this.highlight});
+  /// Caps the chip and ellipsises its label. Only used by [HighlightStrip]
+  /// for the degenerate case where not even one chip fits whole.
+  final double? maxWidth;
+
+  /// Shared with [HighlightStrip]'s measurement so the width it predicts and
+  /// the width this renders can never drift apart.
+  static double get horizontalPadding => 7.w;
+
+  const HighlightChip({super.key, required this.highlight, this.maxWidth});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+    final chip = Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: 2.h,
+      ),
       decoration: BoxDecoration(
         color: colors.Color13,
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Text(
         highlight.display.resolve(context),
+        maxLines: 1,
+        overflow: maxWidth == null ? TextOverflow.clip : TextOverflow.ellipsis,
+        softWrap: false,
         style: context.textStyles.xsSemibold.copyWith(
           color: colors.textColor70,
           fontSize: 10.sp,
         ),
       ),
+    );
+    if (maxWidth == null) return chip;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth!),
+      child: chip,
     );
   }
 }
@@ -278,12 +415,16 @@ class _ProductThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // `thumbnailUrl` first — it is what a half-width card needs, and the
-    // full-resolution `url` costs bandwidth and cache room this grid cannot
-    // spare. §7.7 marks `thumbnailUrl` itself nullable, so the full image is
-    // the fallback rather than the default.
+    // `url` first, `thumbnailUrl` as the fallback.
+    //
+    // The order used to be the other way round, on bandwidth grounds. In
+    // practice the served thumbnails are too small for a half-width card on
+    // a modern handset — a 3x device asks for roughly 570 px of image and
+    // gets a thumbnail rendered soft. `CatalogImage` below decodes to the
+    // cell's real width and caches the decoded result, so the extra bytes
+    // are paid once per image rather than per scroll.
     final url =
-        product.primaryImage?.thumbnailUrl ?? product.primaryImage?.url;
+        product.primaryImage?.url ?? product.primaryImage?.thumbnailUrl;
 
     if (url == null) return _Placeholder(product: product);
 

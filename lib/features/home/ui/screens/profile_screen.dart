@@ -17,6 +17,7 @@ import '../../../../core/theming/app_shadows.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/theming/theme_notifier.dart';
 import '../../../../core/widget/app_button.dart';
+import '../../../../core/widget/app_dialog.dart';
 import '../../../../core/widget/pressable_scale.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/data/repo/auth_repository.dart';
@@ -69,6 +70,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
+    // Logging out is cheap to confirm and expensive to undo: signing back in
+    // means the password, and on a new device an OTP as well. A rep reaching
+    // for something else on a crowded Profile screen should not lose their
+    // session to a mis-tap.
+    final confirmed = await AppDialog.show<bool>(
+      context: context,
+      title: context.tr('logout'),
+      message: context.tr('logout_confirm'),
+      actions: [
+        AppDialogButton.secondary(
+          label: context.tr('cancel'),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        AppDialogButton.primary(
+          label: context.tr('logout'),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    );
+    // Dismissing the dialog is not consent, so anything but an explicit
+    // "yes" leaves the session alone.
+    if (confirmed != true || !mounted) return;
+
     setState(() => _loggingOut = true);
     await getIt<AuthService>().logout();
     if (!mounted) return;

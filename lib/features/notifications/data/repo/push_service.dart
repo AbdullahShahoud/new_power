@@ -211,6 +211,12 @@ class PushService {
           importance: channel.importance,
           priority: isSecurity ? Priority.high : Priority.defaultPriority,
           icon: 'ic_stat_notification',
+          // Matches `default_notification_color` in AndroidManifest.xml
+          // (@color/notification_accent, brand500). Without it a foreground
+          // notification is tinted the system grey while a backgrounded one
+          // is brand red — the same alert looking like two different apps
+          // depending on whether the rep had the app open.
+          color: const Color(0xFFEC1B23),
         ),
         iOS: const DarwinNotificationDetails(),
       ),
