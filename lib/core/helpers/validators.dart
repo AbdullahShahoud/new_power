@@ -291,24 +291,36 @@ class AppValidators {
     }
   }
 
-  /// stakeholders.md — a contact's/account's `phone` accepts western digits
-  /// only (same rule as [validateRegistrationNumber]'s digit script, not
-  /// its letters-only shape).
+  /// A contact's/account's `phone`: at most 30 characters, western digits
+  /// with an optional leading `+`.
+  ///
+  /// The digit-script rule is stakeholders.md's ("an Arabic-Indic value is
+  /// refused rather than transliterated"); the length and shape are the
+  /// bounds the standalone contact endpoints enforce.
   static void validateWesternPhone(String value, {String fieldName = 'phone'}) {
     if (arabicIndicDigitsRegex.hasMatch(value)) {
       throw ArgumentError('$fieldName must use western digits only');
     }
+    final trimmed = value.trim();
+    if (trimmed.length > 30) {
+      throw ArgumentError('$fieldName cannot exceed 30 characters');
+    }
+    // Separators a rep types out of habit (spaces, dashes, parentheses) are
+    // tolerated — the server normalises them. What is refused is a value
+    // that carries no digits at all, or a `+` anywhere but the front.
+    if (!RegExp(r'^\+?[0-9\s\-()]*[0-9][0-9\s\-()]*$').hasMatch(trimmed)) {
+      throw ArgumentError(
+        '$fieldName must be digits, optionally starting with +',
+      );
+    }
   }
 
   /// stakeholders.md `POST /accounts/{id}/contacts` — `firstName`/`lastName`
-  /// are both required; no exact bounds are documented beyond
-  /// `CONTACT_INVALID_NAME` existing as a code, so this only guards against
-  /// an empty submission and an unreasonably long one, leaving the server
-  /// authoritative on the exact floor.
+  /// are both required, 2–80 characters.
   static void validateContactName(String value, {String fieldName = 'name'}) {
     final trimmed = value.trim();
-    if (trimmed.isEmpty || trimmed.length > 100) {
-      throw ArgumentError('$fieldName must be 1-100 characters');
+    if (trimmed.length < 2 || trimmed.length > 80) {
+      throw ArgumentError('$fieldName must be 2-80 characters');
     }
   }
 }
