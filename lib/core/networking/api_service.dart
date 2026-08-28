@@ -24,7 +24,6 @@ import '../../features/auth/data/models/verify_otp_request.dart';
 import '../../features/auth/data/models/verify_otp_response.dart';
 import '../../features/catalog/data/models/catalog_responses.dart';
 import '../../features/notifications/data/models/notification_responses.dart';
-import '../../features/targets/data/models/attainment_view.dart';
 import '../../features/notifications/data/models/notification_view.dart';
 import '../../features/projects/data/models/accounts_list_response.dart';
 import '../../features/projects/data/models/activities_list_response.dart';

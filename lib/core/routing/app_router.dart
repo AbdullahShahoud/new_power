@@ -35,7 +35,6 @@ import '../../features/projects/ui/screens/register_account_screen.dart';
 import '../../features/projects/ui/screens/register_project_screen.dart';
 import '../../features/projects/ui/screens/replace_stakeholder_link_screen.dart';
 import '../../features/projects/ui/screens/submit_outcome_screen.dart';
-import '../../features/targets/ui/screens/year_targets_screen.dart';
 import '../../features/user/ui/screens/change_password_screen.dart';
 import '../../features/user/ui/screens/change_username_screen.dart';
 import '../widget/startup_error_screen.dart';
