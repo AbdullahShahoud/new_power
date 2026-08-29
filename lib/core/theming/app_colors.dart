@@ -1,10 +1,36 @@
 import 'package:flutter/material.dart';
 
+import 'brand.dart';
+
+/// Publishes the active [Brand] to the widget tree.
+///
+/// `context.colors` reads it, so every one of the ~100 call sites picks up
+/// the brand ramp without changing. Installed once by `MyApp`; the fallback
+/// below covers widgets built outside it — tests, and any screen shown
+/// before the brand is known.
+class BrandScope extends InheritedWidget {
+  final Brand brand;
+
+  const BrandScope({super.key, required this.brand, required super.child});
+
+  static Brand of(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<BrandScope>()
+          ?.brand ??
+      Brand.newPower;
+
+  @override
+  bool updateShouldNotify(BrandScope oldWidget) => oldWidget.brand != brand;
+}
+
 extension AppColorsExtension on BuildContext {
-  /// Get theme-aware colors based on current brightness
+  /// Theme-aware colours for the active brand.
+  ///
+  /// Two dimensions now, not one: brightness picks the ink/surface roles,
+  /// the brand picks the accent ramp.
   AppColors get colors {
     final isDark = Theme.of(this).brightness == Brightness.dark;
-    return isDark ? AppColors.dark : AppColors.light;
+    return AppColors.of(isDark: isDark, brand: BrandScope.of(this));
   }
 }
 
@@ -33,23 +59,39 @@ class StatusColor {
 class AppColors {
   final bool isDark;
 
-  const AppColors._(this.isDark);
+  /// The active brand. Only the accent ramp below depends on it — ink,
+  /// surfaces, status and chart hues are shared, because they carry meaning
+  /// (won/lost, error, disabled) that must not shift with branding.
+  final Brand brand;
 
-  static const light = AppColors._(false);
-  static const dark = AppColors._(true);
+  const AppColors._(this.isDark, this.brand);
 
-  // ==================== Brand red ramp (§2) ====================
-  Color get brand50 => const Color(0xFFFEF2F2);
-  Color get brand100 => const Color(0xFFFDE3E3);
-  Color get brand200 => const Color(0xFFFBC9CA);
-  Color get brand300 => const Color(0xFFF79FA2);
-  Color get brand400 => const Color(0xFFF25A60);
-  Color get brand500 => const Color(0xFFEC1B23);
-  Color get brand600 => const Color(0xFFCE1219);
-  Color get brand700 => const Color(0xFFAB1016);
-  Color get brand800 => const Color(0xFF8D1116);
-  Color get brand900 => const Color(0xFF751317);
-  Color get brand950 => const Color(0xFF400608);
+  /// NewPower is the default only where no brand has been resolved yet —
+  /// tests, and the frames before `BrandScope` is installed. It is never a
+  /// silent fallback for a rep who has chosen one.
+  static const light = AppColors._(false, Brand.newPower);
+  static const dark = AppColors._(true, Brand.newPower);
+
+  static AppColors of({required bool isDark, required Brand brand}) =>
+      AppColors._(isDark, brand);
+
+  // ==================== Brand accent ramp (§2) ====================
+  //
+  // Sourced from the active brand rather than hardcoded. The three ramps
+  // share one lightness/saturation curve (see `BrandPalette`), so a shade
+  // used for a given job — 300 for a focus border, 600 for a link — holds
+  // its contrast whichever brand is active.
+  Color get brand50 => brand.palette.shade50;
+  Color get brand100 => brand.palette.shade100;
+  Color get brand200 => brand.palette.shade200;
+  Color get brand300 => brand.palette.shade300;
+  Color get brand400 => brand.palette.shade400;
+  Color get brand500 => brand.palette.shade500;
+  Color get brand600 => brand.palette.shade600;
+  Color get brand700 => brand.palette.shade700;
+  Color get brand800 => brand.palette.shade800;
+  Color get brand900 => brand.palette.shade900;
+  Color get brand950 => brand.palette.shade950;
 
   /// Primary buttons (brand500, hover/pressed brand600), links (brand600).
   Color get primary => brand500;
@@ -83,12 +125,21 @@ class AppColors {
   /// separation from a read row, so the one thing the tint exists to say
   /// stopped being legible in dark mode.
   ///
-  /// Dark mode instead goes *lighter and warmer* than the page — the only
-  /// direction that reads as emphasis on a dark ground — and carries the
-  /// brand hue at low saturation so it still reads as "ours" rather than as
-  /// a generic hover state.
-  Color get unreadSurface =>
-      isDark ? const Color(0xFF2A1E1F) : const Color(0xFFFEF6F6);
+  /// Dark mode instead goes *lighter* than the page — the only direction
+  /// that reads as emphasis on a dark ground — and carries the brand hue at
+  /// low saturation so it still reads as "ours" rather than as a generic
+  /// hover state.
+  ///
+  /// Blended from the active ramp rather than fixed. It was a literal warm
+  /// red-brown, which is right for the two red brands and wrong for a cyan
+  /// one — a blue-accented app with red-tinted unread rows.
+  Color get unreadSurface => isDark
+      // Enough of the accent to be unmistakably intentional, over the card
+      // surface so it stays lighter than the page behind it.
+      ? Color.alphaBlend(brand900.withValues(alpha: 0.32), surface)
+      // A whisper over white: the light theme separates unread with a tint
+      // this faint because the row already carries a dot and bold text.
+      : Color.alphaBlend(brand50.withValues(alpha: 0.55), const Color(0xFFFFFFFF));
 
   /// Hairlines, table row dividers. Not brightness-split in the doc.
   Color get chartGrid => const Color(0xFFE7E5E0);

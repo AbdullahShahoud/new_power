@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:new_power/core/helpers/bottom_sheet_helper.dart';
 import 'package:new_power/core/localization/app_localizations.dart';
 import 'package:new_power/core/theming/app_themes.dart';
+import 'package:new_power/core/theming/brand.dart';
 import 'package:new_power/features/projects/data/models/enums.dart';
 import 'package:new_power/features/projects/data/models/nearby_project_card_view.dart';
 
@@ -46,7 +47,9 @@ Future<bool?> _openSheet(WidgetTester tester, int count) async {
       designSize: const Size(390, 844),
       minTextAdapt: true,
       child: MaterialApp(
-        theme: AppThemes.lightTheme,
+        // Themes are per-brand now; this sheet is brand-agnostic, so any
+        // brand renders it identically.
+        theme: AppThemes.light(Brand.newPower),
         locale: const Locale('en', 'US'),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [AppLocalizationsDelegate()],
