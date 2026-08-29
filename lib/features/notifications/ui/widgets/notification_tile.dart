@@ -71,7 +71,10 @@ class NotificationTile extends StatelessWidget {
         child: Container(
           margin: EdgeInsets.only(bottom: 8.h),
           decoration: BoxDecoration(
-            color: unread ? colors.brand50.withValues(alpha: 0.4) : null,
+            // Opaque, not an alpha wash. `brand50` at 40% was tuned against
+            // a white page and turned to mud on the dark one — the token
+            // now resolves per theme instead.
+            color: unread ? colors.unreadSurface : null,
             borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: IntrinsicHeight(

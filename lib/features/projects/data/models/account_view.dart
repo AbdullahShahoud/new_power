@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/networking/utc_date_time_converter.dart';
 import 'actor_view.dart';
@@ -14,7 +15,6 @@ part 'account_view.g.dart';
 /// **not** be rendered as a warning.
 @freezed
 abstract class AccountClassificationView with _$AccountClassificationView {
-  // ignore: invalid_annotation_target
   @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory AccountClassificationView({
     String? id,
@@ -46,14 +46,12 @@ abstract class AccountClassificationView with _$AccountClassificationView {
 /// endpoint a rep can't reach.
 @freezed
 abstract class AccountView with _$AccountView {
-  // ignore: invalid_annotation_target
   @JsonSerializable(converters: [UtcDateTimeConverter()])
   const factory AccountView({
     required String id,
     required String name,
     // Falls back rather than throwing — see AccountType.unknown. One row the
     // client cannot read must not fail the whole page.
-    // ignore: invalid_annotation_target
     @JsonKey(unknownEnumValue: AccountType.unknown)
     @Default(AccountType.unknown)
     AccountType type,
