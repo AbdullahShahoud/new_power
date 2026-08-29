@@ -125,11 +125,13 @@ final Map<String, String> enUS = {
   'projects_register_notes_hint': 'Anything else worth recording',
   'projects_register_optional': '(optional)',
   'projects_register_submit': 'Register Building',
-  'projects_register_nearby_confirm_title': 'Is this building already registered?',
+  'projects_register_nearby_confirm_title':
+      'Is this building already registered?',
   'projects_register_nearby_confirm_subtitle':
       '{count} buildings are already recorded within 300 m of your pin. Check them before adding another — registering a duplicate creates work for whoever owns the other record.',
   'projects_register_nearby_confirm_cancel': 'Go back and check',
-  'projects_register_nearby_confirm_proceed': 'This is a different building — register it',
+  'projects_register_nearby_confirm_proceed':
+      'This is a different building — register it',
   'projects_register_duplicates_title': 'Similar buildings nearby',
   'projects_register_duplicates_subtitle':
       'Your building was registered. These nearby buildings might be the same one — check before working both.',
@@ -1138,7 +1140,6 @@ final Map<String, String> enUS = {
       'Turning this off silences push only. Notifications still appear in your inbox.',
   'notifications_language_en': 'English',
   'notifications_language_ar': 'العربية',
-<<<<<<< HEAD
   // ===================== Attainment (GET /attainment/me) =====================
   'ok': 'OK',
   'attainment_title': 'My Attainment',
@@ -1158,7 +1159,8 @@ final Map<String, String> enUS = {
   'attainment_period_elapsed': '{percent} of the period elapsed',
   'attainment_days': 'days',
   'attainment_days_elapsed': 'Days elapsed',
-  'attainment_period_finished': 'This period is closed — this is the final result.',
+  'attainment_period_finished':
+      'This period is closed — this is the final result.',
   'attainment_targets': 'Targets',
   'attainment_sort': 'Sort',
   'attainment_target_id': 'Target ID:',
@@ -1186,7 +1188,8 @@ final Map<String, String> enUS = {
   'attainment_metric_sales_value': 'Sales value',
   'attainment_metric_units_supplied': 'Units supplied',
   'attainment_metric_wins_count': 'Wins count',
-  'attainment_metric_sales_value_desc': 'Value of confirmed sales in the period',
+  'attainment_metric_sales_value_desc':
+      'Value of confirmed sales in the period',
   'attainment_metric_units_supplied_desc':
       'Number of units supplied in the period',
   'attainment_metric_wins_count_desc': 'Number of confirmed wins in the period',
@@ -1216,5 +1219,4 @@ final Map<String, String> enUS = {
   'attainment_month_10': 'Oct',
   'attainment_month_11': 'Nov',
   'attainment_month_12': 'Dec',
-
 };
