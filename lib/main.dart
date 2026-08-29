@@ -14,7 +14,10 @@ import 'core/localization/language_manager.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/app_startup_router.dart';
 import 'core/routing/navigation_key.dart';
+import 'core/theming/app_colors.dart';
 import 'core/theming/app_themes.dart';
+import 'core/theming/brand.dart';
+import 'core/theming/brand_manager.dart';
 import 'core/theming/theme_notifier.dart';
 import 'firebase_options.dart';
 import 'features/notifications/data/repo/push_service.dart';
@@ -100,25 +103,46 @@ class MyApp extends StatelessWidget {
           return ValueListenableBuilder<Locale>(
             valueListenable: getIt<LanguageManager>(),
             builder: (context, locale, _) {
-              return MaterialApp(
-                navigatorKey: navigatorKey,
-                debugShowCheckedModeBanner: false,
-                title: 'NewPower',
-                onGenerateRoute: AppRouter.generateRoute,
-                initialRoute: initialRoute,
-                theme: AppThemes.lightTheme,
-                darkTheme: AppThemes.darkTheme,
-                themeMode: themeMode,
-                locale: locale,
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: const [
-                  AppLocalizationsDelegate(),
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                localeResolutionCallback:
-                    AppLocalizations.localeResolutionCallback,
+              // The brand outranks nothing and is outranked by nothing — it
+              // simply also has to be listened to, because it decides the
+              // accent ramp both themes are built from.
+              //
+              // It changes exactly once in an install's life, at the moment
+              // of first selection, and this listener is what repaints the
+              // app in the chosen colours without a restart.
+              return ValueListenableBuilder<Brand?>(
+                valueListenable: getIt<BrandManager>(),
+                builder: (context, brand, _) {
+                  // Until the picker is answered there is no brand. The app
+                  // still has to render — the picker itself needs a theme —
+                  // so it falls back to NewPower for those few frames. The
+                  // picker paints each card in its own brand regardless, so
+                  // nothing on screen is mislabelled by this default.
+                  final active = brand ?? Brand.newPower;
+                  return BrandScope(
+                    brand: active,
+                    child: MaterialApp(
+                      navigatorKey: navigatorKey,
+                      debugShowCheckedModeBanner: false,
+                      title: 'NewPower',
+                      onGenerateRoute: AppRouter.generateRoute,
+                      initialRoute: initialRoute,
+                      theme: AppThemes.light(active),
+                      darkTheme: AppThemes.dark(active),
+                      themeMode: themeMode,
+                      locale: locale,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      localizationsDelegates: const [
+                        AppLocalizationsDelegate(),
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                        GlobalCupertinoLocalizations.delegate,
+                      ],
+                      localeResolutionCallback:
+                          AppLocalizations.localeResolutionCallback,
+                    ),
+                  );
+                },
               );
             },
           );

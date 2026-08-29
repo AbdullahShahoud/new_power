@@ -6,6 +6,7 @@ import '../../features/auth/ui/screens/forgot_password_screen.dart';
 import '../../features/auth/ui/screens/login_screen.dart';
 import '../../features/auth/ui/screens/register_screen.dart';
 import '../../features/auth/ui/screens/reset_password_screen.dart';
+import '../../features/brand/ui/brand_selection_screen.dart';
 import '../../features/home/ui/main_screen.dart';
 import '../../features/notifications/ui/screens/notification_settings_screen.dart';
 import '../../features/notifications/ui/screens/notifications_screen.dart';
@@ -44,6 +45,8 @@ class AppRouter {
     switch (settings.name) {
       case Routes.startupError:
         return _fadeRoute(const StartupErrorScreen(), settings);
+      case Routes.brandSelection:
+        return _fadeRoute(const BrandSelectionScreen(), settings);
       case Routes.onboardingScreen:
         return _fadeRoute(const OnboardingScreen(), settings);
       // ========================== Auth Routes ==========================

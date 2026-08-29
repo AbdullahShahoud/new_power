@@ -11,6 +11,13 @@ class CacheHelper {
   // ── Non-sensitive key constants ─────────────────────────────────────────────
   static const String onBoarding = 'onBoarding';
 
+  /// The product line this install runs as ([Brand.storageKey]).
+  ///
+  /// Absent means the picker has not been answered yet — the app routes
+  /// there before anything else. Non-sensitive, so SharedPreferences is the
+  /// right home; it also means a reinstall correctly asks again.
+  static const String brand = 'brand';
+
   /// Set the first time the app runs after an install.
   ///
   /// Deliberately here and not in secure storage: SharedPreferences is wiped

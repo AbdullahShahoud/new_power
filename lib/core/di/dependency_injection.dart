@@ -36,6 +36,7 @@ import '../networking/api_service.dart';
 import '../networking/dio_factory.dart';
 import '../routing/navigation_key.dart';
 import '../services/auth_service.dart';
+import '../theming/brand_manager.dart';
 import '../theming/theme_notifier.dart';
 
 final getIt = GetIt.instance;
@@ -65,6 +66,11 @@ Future<void> setupCoreSingletons() async {
 
   // Preferred display currency
   getIt.registerLazySingleton<CurrencyManager>(() => CurrencyManager());
+
+  // The product line this install runs as. App-lifetime like the three
+  // above, and for a stronger reason: it is chosen once and then permanent,
+  // so a logout teardown must never be able to clear it.
+  getIt.registerLazySingleton<BrandManager>(() => BrandManager());
 }
 
 /// Name of the get_it scope holding everything tied to one signed-in session.

@@ -4,6 +4,18 @@ final Map<String, String> enUS = {
   // Common
   'Balance After': 'Balance After',
   'app_name': 'NewPower',
+
+  // Brand selection — first launch only.
+  'brand_new_power': 'NewPower',
+  'brand_osco': 'OSCO',
+  'brand_smart_home': 'Smart Home',
+  'brand_select_title': 'Choose your product line',
+  'brand_select_subtitle':
+      'This sets the logo and colours the app uses. It is chosen once and '
+      'cannot be changed afterwards.',
+  'brand_confirm_title': 'Confirm your choice',
+  'brand_confirm_message':
+      'The app will run as {brand}. This cannot be changed later — you would need to reinstall.',
   'welcome': 'Welcome',
   'loading': 'Loading...',
   'error': 'Error',

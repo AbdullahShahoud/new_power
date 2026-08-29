@@ -4,6 +4,18 @@ final Map<String, String> arSY = {
   // Common
   'Balance After': 'الرصيد بعد',
   'app_name': 'نيو باور',
+
+  // اختيار البراند — عند أول تشغيل فقط.
+  // أسماء البراندات لا تُترجم: هي علامات تجارية تُكتب كما هي.
+  'brand_new_power': 'NewPower',
+  'brand_osco': 'OSCO',
+  'brand_smart_home': 'Smart Home',
+  'brand_select_title': 'اختر خط المنتجات',
+  'brand_select_subtitle':
+      'يحدّد هذا شعار التطبيق وألوانه. يُختار مرة واحدة ولا يمكن تغييره لاحقاً.',
+  'brand_confirm_title': 'تأكيد الاختيار',
+  'brand_confirm_message':
+      'سيعمل التطبيق باسم {brand}. لا يمكن تغيير ذلك لاحقاً — سيتطلّب إعادة تثبيت التطبيق.',
   'welcome': 'مرحباً',
   'loading': 'جاري التحميل...',
   'error': 'خطأ',

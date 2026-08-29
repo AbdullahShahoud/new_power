@@ -40,7 +40,13 @@ enum Brand {
     displayNameKey: 'brand_osco',
     lightLogo: 'assets/images/logo_smart_2.svg',
     darkLogo: 'assets/images/logo_smart_2.svg',
-    logoAspectRatio: 425.2 / 330,
+    // Measured off the rendered ink, not read off the file's own viewBox.
+    // The Illustrator export declared 425.2×330 (1.29:1) but the artwork
+    // only occupied 62% of that width and 32% of its height — the rest was
+    // empty canvas. `SvgPicture(height:)` scales the *viewBox*, so a third
+    // of the requested height was margin and the lockup rendered tiny.
+    // The viewBox is now cropped to the ink and this is its true ratio.
+    logoAspectRatio: 262.1 / 104.5,
     palette: BrandPalette(
       shade50: Color(0xFFFDF2F2),
       shade100: Color(0xFFFBE2E3),

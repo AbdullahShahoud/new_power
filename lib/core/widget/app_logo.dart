@@ -1,60 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// NewPower horizontal logo lockup (DESIGN_GUIDELINES.md §1 "Brand").
-/// Sized by [height]; width follows the artwork's own aspect ratio.
-/// Client asset, reused as-is; never recoloured.
+import '../theming/app_colors.dart';
+import '../theming/brand.dart';
+
+/// The active brand's logo lockup (DESIGN_GUIDELINES.md §1 "Brand").
 ///
-/// ⚠️ **The `.svg` is not vector artwork.** It is a base64 PNG wrapped in an
-/// `<svg>` element — zero `path`/`rect` elements, one `<image>`. So it
-/// rasterises exactly like the old `.png` did and gains no sharpness at any
-/// size; `flutter_svg` simply decodes the embedded bitmap.
+/// Sized by [height]; width follows the artwork's own aspect ratio, which
+/// comes from the [Brand] rather than a constant — the three lockups are a
+/// 7.7:1 horizontal wordmark, a 1.3:1 block and a square, so one shared
+/// ratio would letterbox two of them and stretch the third.
 ///
-/// Kept on the SVG because that is the asset the brand owner maintains, but
-/// if the logo ever looks soft on a high-density screen, the fix is a real
-/// vector export from the source file — not anything in this widget.
+/// Client assets, reused as-is; never recoloured.
 ///
 /// ## Dark theme
 ///
-/// Two files, not a colour filter. The lockup is two-tone — red "NEW",
-/// near-black "POWER" and rule — so on a dark surface the black half simply
-/// disappeared while the red half stayed put, leaving a logo that read as
-/// "NEW" alone. A tint would have flattened both halves to one colour and
-/// lost the mark entirely.
+/// Only NewPower ships a second file. Its wordmark is half near-black, so on
+/// a dark surface that half disappears and the lockup reads as "NEW" alone;
+/// `newpower-logo-dark.svg` lifts just the achromatic ink and leaves the
+/// brand red untouched. It is generated from the light asset — regenerate it
+/// rather than editing it.
 ///
-/// `newpower-logo-dark.svg` lifts only the achromatic ink to a light warm
-/// neutral and leaves the brand red exactly as delivered, so the two files
-/// are the same artwork rather than two different logos. It is generated
-/// from the light asset — regenerate it rather than editing it, and if the
-/// brand owner ships a new lockup, regenerate from that.
+/// The other two are drawn entirely in their own accent (OSCO red, Smart
+/// Home cyan) and read on both grounds, so they point at one file for both
+/// brightnesses. If a future lockup introduces near-black ink, give it a
+/// dark variant in [Brand.darkLogo] rather than tinting it here — a tint
+/// would flatten a two-tone mark to one colour and lose it.
+///
+/// ⚠️ **The NewPower `.svg` is not vector artwork.** It is a base64 PNG
+/// wrapped in an `<svg>` element, so it rasterises and gains no sharpness at
+/// any size. The other two are real paths. If the NewPower logo ever looks
+/// soft on a high-density screen, the fix is a real vector export from the
+/// source file — not anything in this widget.
 class AppLogo extends StatelessWidget {
   final double height;
 
-  const AppLogo({super.key, this.height = 36});
+  /// Overrides the ambient selection. Used by the brand picker, which has to
+  /// show all three at once before any of them is active.
+  final Brand? brand;
 
-  /// The SVG's own `viewBox` is `0 0 345 45`, which is the ratio to honour —
-  /// the old PNG's 250×36 was a different crop of the same lockup and using
-  /// it here would letterbox or stretch the artwork.
-  static const double _aspectRatio = 345 / 45;
+  const AppLogo({super.key, this.height = 36, this.brand});
 
   @override
   Widget build(BuildContext context) {
+    final resolved = brand ?? BrandScope.of(context);
+
     // Read from the ambient Theme, not from `AppColors.isDark` directly, so
     // the logo follows a subtree that overrides brightness (a dark sheet on
     // a light screen) rather than the app-wide setting.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brightness = Theme.of(context).brightness;
+    final width = height * resolved.logoAspectRatio;
 
     return SvgPicture.asset(
-      isDark
-          ? 'assets/images/newpower-logo-dark.svg'
-          : 'assets/images/newpower-logo.svg',
+      resolved.logoFor(brightness),
       height: height,
-      width: height * _aspectRatio,
+      width: width,
       fit: BoxFit.contain,
       // Reserves the final size while the asset is parsed, so the header
       // does not jump as it appears.
-      placeholderBuilder: (_) =>
-          SizedBox(height: height, width: height * _aspectRatio),
+      placeholderBuilder: (_) => SizedBox(height: height, width: width),
     );
   }
 }

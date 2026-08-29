@@ -2,6 +2,10 @@ class Routes {
   // Startup
   static const String startupError = '/startup-error';
 
+  // Brand selection — first launch only, ahead of onboarding. Once answered
+  // it is never routed to again (the choice is permanent for the install).
+  static const String brandSelection = '/brand';
+
   // Onboarding
   static const String onboardingScreen = '/onboarding';
 

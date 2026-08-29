@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../di/dependency_injection.dart';
 import '../helpers/cache_helper.dart';
 import '../services/auth_service.dart';
+import '../theming/brand_manager.dart';
 import 'routes.dart';
 
 /// Generic reasons [AppStartupRouter.resolve] can fail to determine a route.
@@ -38,6 +39,18 @@ class AppStartupRouter {
 
   static Future<String> resolve() async {
     try {
+      // Ahead of everything, including the session check. The brand decides
+      // the accent every later screen is painted in and the logo on the
+      // login form — resolving a session first would mean the rep's very
+      // first frame is branded as somebody else's product line.
+      //
+      // Answered once per install and then never routed to again, so this
+      // costs one synchronous preference read on every later launch.
+      if (!getIt<BrandManager>().hasSelection) {
+        debugPrint('[AppStartupRouter] No brand chosen — picker');
+        return Routes.brandSelection;
+      }
+
       final authService = getIt<AuthService>();
       final hasRefreshToken = await authService.hasRefreshToken();
 
