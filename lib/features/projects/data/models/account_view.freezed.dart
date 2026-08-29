@@ -301,6 +301,7 @@ mixin _$AccountView {
 
  String get id; String get name;// Falls back rather than throwing — see AccountType.unknown. One row the
 // client cannot read must not fail the whole page.
+// ignore: invalid_annotation_target
 @JsonKey(unknownEnumValue: AccountType.unknown) AccountType get type; String? get registrationNumber; String? get phone; String? get email; String? get city; String? get addressLine; String? get notes; bool get isVerified; DateTime? get verifiedAt; String? get verifiedBy; ActorView? get verifiedByUser; int? get contactCount; int? get activeLinkCount; DateTime? get createdAt; DateTime? get updatedAt; DateTime? get archivedAt; String? get mergedIntoId; DateTime? get mergedAt; List<AccountClassificationView> get classifications;
 /// Create a copy of AccountView
 /// with the given fields replaced by the non-null parameter values.
@@ -534,6 +535,7 @@ class _AccountView implements AccountView {
 @override final  String name;
 // Falls back rather than throwing — see AccountType.unknown. One row the
 // client cannot read must not fail the whole page.
+// ignore: invalid_annotation_target
 @override@JsonKey(unknownEnumValue: AccountType.unknown) final  AccountType type;
 @override final  String? registrationNumber;
 @override final  String? phone;
