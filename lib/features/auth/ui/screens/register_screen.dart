@@ -18,7 +18,7 @@ import '../../data/models/register_request.dart';
 import '../../logic/register_cubit/register_cubit.dart';
 import '../../logic/register_cubit/register_state.dart';
 import '../widgets/password_strength_indicator.dart';
-import '../widgets/password_text_field.dart';
+import '../../../../core/widget/password_text_field.dart';
 import '../../../../core/widget/phone_text_field.dart';
 
 class RegisterScreen extends StatelessWidget {

@@ -11,7 +11,7 @@ import '../../../../core/theming/app_colors.dart';
 import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/app_button.dart';
 import '../../../../core/widget/app_header.dart';
-import '../../../../core/widget/app_text_field.dart';
+import '../../../../core/widget/password_text_field.dart';
 import '../../logic/account_settings_cubit/account_settings_cubit.dart';
 import '../../logic/account_settings_cubit/account_settings_state.dart';
 
@@ -122,12 +122,15 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _Label(context.tr('change_password_current')),
-                          AppTextField(
+                          // Same control as the sign-in and reset screens:
+                          // obscured, LTR, with a reveal toggle. Without the
+                          // toggle a rep types three unseeable passwords and
+                          // finds out only on submit which one they fumbled.
+                          PasswordTextField(
                             hintText: context.tr(
                               'change_password_current_hint',
                             ),
                             controller: _currentController,
-                            obscureText: true,
                             validator: (value) {
                               if (_currentPasswordError != null) {
                                 return _currentPasswordError;
@@ -142,10 +145,9 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
                           ),
                           verticalSpace(16.h),
                           _Label(context.tr('change_password_new')),
-                          AppTextField(
+                          PasswordTextField(
                             hintText: context.tr('change_password_new_hint'),
                             controller: _newController,
-                            obscureText: true,
                             // Reuses the same complexity rule the auth
                             // screens already enforce — one source of truth.
                             validator: (value) =>
@@ -153,12 +155,11 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
                           ),
                           verticalSpace(16.h),
                           _Label(context.tr('change_password_confirm')),
-                          AppTextField(
+                          PasswordTextField(
                             hintText: context.tr(
                               'change_password_confirm_hint',
                             ),
                             controller: _confirmController,
-                            obscureText: true,
                             validator: (value) =>
                                 AppValidators.validateConfirmPassword(
                                   context,

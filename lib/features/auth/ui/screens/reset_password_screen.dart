@@ -17,7 +17,7 @@ import '../../../../core/widget/app_text_field.dart';
 import '../../logic/forgot_password_cubit/forgot_password_cubit.dart';
 import '../../logic/forgot_password_cubit/forgot_password_state.dart';
 import '../widgets/password_strength_indicator.dart';
-import '../widgets/password_text_field.dart';
+import '../../../../core/widget/password_text_field.dart';
 
 class ResetPasswordScreen extends StatelessWidget {
   const ResetPasswordScreen({super.key});

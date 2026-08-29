@@ -16,7 +16,7 @@ import '../../../../core/widget/app_logo.dart';
 import '../../../../core/widget/app_text_field.dart';
 import '../../logic/login_cubit/login_cubit.dart';
 import '../../logic/login_cubit/login_state.dart';
-import '../widgets/password_text_field.dart';
+import '../../../../core/widget/password_text_field.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
