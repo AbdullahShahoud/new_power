@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/networking/utc_date_time_converter.dart';
+import 'activity_view.dart';
 import 'actor_view.dart';
 import 'counterparty_view.dart';
 import 'enums.dart';
@@ -42,6 +43,17 @@ abstract class OutcomeView with _$OutcomeView {
 
     String? currency,
     String? notes,
+
+    /// The proof filed with a WON claim — the award letter, the signed PO,
+    /// the delivery note. Same `{id, key, name, contentType, byteSize, url,
+    /// urlExpiresAt, uploadedAt, uploadedBy}` shape an activity attachment
+    /// uses, so [ActivityAttachmentView] is reused rather than duplicated
+    /// under a second name; nothing about it is activity-specific.
+    ///
+    /// Always empty on a LOST outcome — `POST /projects/{id}/lost` has no
+    /// `files` field to fill it from.
+    @Default(<ActivityAttachmentView>[])
+    List<ActivityAttachmentView> attachments,
 
     required DateTime submittedAt,
     String? submittedBy,

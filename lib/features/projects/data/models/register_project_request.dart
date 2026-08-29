@@ -74,6 +74,21 @@ abstract class NewStakeholderContact with _$NewStakeholderContact {
       _$NewStakeholderContactFromJson(json);
 }
 
+extension NewStakeholderContactValidation on NewStakeholderContact {
+  /// The same rules the standalone contact endpoints apply — an inlined
+  /// person is created through the same path, so a value this form accepts
+  /// but `POST /accounts/{id}/contacts` would refuse is a 400 that costs
+  /// the rep the whole registration.
+  void validate() {
+    AppValidators.validateContactName(firstName, fieldName: 'firstName');
+    AppValidators.validateContactName(lastName, fieldName: 'lastName');
+    final trimmedPhone = phone?.trim();
+    if (trimmedPhone != null && trimmedPhone.isNotEmpty) {
+      AppValidators.validateWesternPhone(trimmedPhone);
+    }
+  }
+}
+
 extension ProjectStakeholderRefDtoValidation on ProjectStakeholderRefDto {
   void validate() {
     final id = accountId?.trim();
@@ -93,9 +108,24 @@ extension ProjectStakeholderRefDtoValidation on ProjectStakeholderRefDto {
         'primaryContactId is only valid alongside accountId',
       );
     }
-    if (hasName && (name.length < 2 || name.length > 200)) {
-      throw ArgumentError('accountName must be 2-200 characters');
+    // You either point at an existing person or describe a new one, never
+    // both — the server would have to guess which is the link's primary
+    // contact.
+    if (primaryContactId != null && contact != null) {
+      throw ArgumentError(
+        'a stakeholder needs at most one of primaryContactId or contact',
+      );
     }
+    if (hasName) {
+      AppValidators.validateAccountName(name, fieldName: 'accountName');
+    }
+    // `accountType` only says anything about an account being created; next
+    // to an `accountId` it is a claim about a record this request does not
+    // own.
+    if (accountType != null && !hasName) {
+      throw ArgumentError('accountType is only valid alongside accountName');
+    }
+    contact?.validate();
     final trimmedNote = note?.trim();
     if (trimmedNote != null && trimmedNote.length > 500) {
       throw ArgumentError('stakeholder note cannot exceed 500 characters');

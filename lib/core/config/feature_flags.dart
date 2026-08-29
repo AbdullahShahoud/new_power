@@ -20,6 +20,28 @@ class FeatureFlags {
   ///   - `dio_factory.dart` lets a connection error fail instead of parking
   ///     the request
   ///
-  /// Flip to `true` to bring the whole feature back — no other edits.
+  /// ⚠️ **Do not flip this to `true` without first re-wiring the retry
+  /// path.** The comment above was accurate when written and is no longer
+  /// the whole story.
+  ///
+  /// `DioFactory._enqueueOfflineRequest` parks the `ErrorInterceptorHandler`
+  /// for a failed GET instead of completing it, on the promise that
+  /// `_retryOfflineQueue` will drain the queue when connectivity returns.
+  /// Nothing calls `_retryOfflineQueue` — the analyzer reports it as
+  /// unreferenced, because the connectivity subscription that used to invoke
+  /// it does not exist in `DioFactory`. `main.dart`'s listener drives
+  /// `OfflineSyncBloc` (the *activity* queue), which is a different queue
+  /// entirely.
+  ///
+  /// So with this flag on, the first network blip parks every in-flight GET
+  /// for the full three-minute `_offlineQueueTimeout` and then fails it. To
+  /// the user that is an app which hangs for three minutes on a subway.
+  ///
+  /// Turning the feature back on means, at minimum:
+  ///   1. subscribing to `Connectivity().onConnectivityChanged` inside
+  ///      `DioFactory` and calling `_retryOfflineQueue()` from it, and
+  ///   2. re-testing the hang path with airplane mode toggled mid-request.
+  ///
+  /// Verified shipping value: `false`. See finding S6 in RELEASE_PLAN.html.
   static bool offlineSyncEnabled = false;
 }

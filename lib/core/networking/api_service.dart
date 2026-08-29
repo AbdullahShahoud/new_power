@@ -469,9 +469,7 @@ abstract class ApiService {
   });
 
   @GET(ApiConstants.categoryById)
-  Future<CategoryDetailResponse> getCategory(
-    @Path('idOrSlug') String idOrSlug,
-  );
+  Future<CategoryDetailResponse> getCategory(@Path('idOrSlug') String idOrSlug);
 
   /// `@Queries` rather than named `@Query` parameters because the `attr`
   /// map is flattened into `attr[CODE]` keys that cannot be declared
@@ -546,9 +544,7 @@ abstract class ApiService {
   /// why it maps to [NotificationActionResponse] rather than a data-bearing
   /// envelope.
   @DELETE(ApiConstants.notificationById)
-  Future<NotificationActionResponse> archiveNotification(
-    @Path('id') String id,
-  );
+  Future<NotificationActionResponse> archiveNotification(@Path('id') String id);
 
   @PUT(ApiConstants.deviceFcmToken)
   Future<FcmTokenResponse> registerFcmToken(

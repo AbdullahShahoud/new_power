@@ -8,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'core/config/feature_flags.dart';
 import 'core/di/dependency_injection.dart';
 import 'core/helpers/cache_helper.dart';
+import 'core/helpers/secure_storage_helper.dart';
 import 'core/localization/app_localizations.dart';
 import 'core/localization/language_manager.dart';
 import 'core/routing/app_router.dart';
@@ -23,8 +24,16 @@ import 'features/projects/logic/offline_sync_bloc/offline_sync_event.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CacheHelper.init();
+  // Must run after CacheHelper.init() (it reads the marker) and before
+  // anything touches a token — AppStartupRouter.resolve() below is the first
+  // thing that would.
+  await SecureStorageHelper.purgeIfFreshInstall();
   await Hive.initFlutter();
   await _initialiseFirebase();
+  // Theme/language/currency first and separately: they outlive any session,
+  // and `resetGetIt()` on logout deliberately does not touch them. See
+  // `setupCoreSingletons`.
+  await setupCoreSingletons();
   await setupGetIt();
   // Suspended — see `FeatureFlags.offlineSyncEnabled`. Left wired so the
   // feature comes back by flipping that one flag.

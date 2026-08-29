@@ -11,6 +11,7 @@ import '../../../../core/theming/styles.dart';
 import '../../../../core/widget/app_button.dart';
 import '../../../../core/widget/app_header.dart';
 import '../../../../core/widget/app_text_field.dart';
+import '../../../../core/widget/phone_text_field.dart';
 import '../../data/models/add_contact_request.dart';
 import '../../logic/accounts_bloc/accounts_bloc.dart';
 import '../../logic/accounts_bloc/accounts_event.dart';
@@ -47,6 +48,10 @@ class _AddContactViewState extends State<_AddContactView> {
   final _lastNameController = TextEditingController();
   final _positionController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  /// The dial code lives in the picker's state, so the full number is read
+  /// through this key — never off `_phoneController`.
+  final _phoneFieldKey = GlobalKey<PhoneTextFieldState>();
   final _emailController = TextEditingController();
   bool _isPrimary = false;
 
@@ -81,7 +86,13 @@ class _AddContactViewState extends State<_AddContactView> {
       // is always opened from an account so it always has one.
       accountId: widget.accountId,
       position: _textOrNull(_positionController),
-      phone: _textOrNull(_phoneController),
+      // Assembled with its dial code — see PhoneTextField. Reading the
+      // controller alone would post a local number with no country on it.
+      phone: _phoneController.text.trim().isEmpty
+          ? null
+          : (_phoneFieldKey.currentState?.fullPhoneNumber ??
+                    _phoneController.text)
+                .trim(),
       email: _textOrNull(_emailController),
       isPrimary: _isPrimary,
     );
@@ -167,10 +178,10 @@ class _AddContactViewState extends State<_AddContactView> {
                             context.tr('add_contact_phone'),
                             optional: true,
                           ),
-                          AppTextField(
-                            hintText: context.tr('add_contact_phone_hint'),
+                          PhoneTextField(
+                            key: _phoneFieldKey,
                             controller: _phoneController,
-                            keyboardType: TextInputType.phone,
+                            hintText: context.tr('add_contact_phone_hint'),
                           ),
                           verticalSpace(16.h),
                           _Label(

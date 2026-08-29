@@ -4,22 +4,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/helpers/spacing.dart';
-import '../../../../core/theming/app_colors.dart';
-import '../../../../core/theming/app_radius.dart';
-import '../../../../core/theming/styles.dart';
-import '../../../../core/widget/glow_animation.dart';
-import '../../../../core/widget/shake_animation.dart';
+import '../helpers/spacing.dart';
+import '../theming/app_colors.dart';
+import '../theming/app_radius.dart';
+import '../theming/styles.dart';
+import 'glow_animation.dart';
+import 'shake_animation.dart';
 
+/// Phone entry with a country picker, shared app-wide.
+///
+/// Lived under `features/auth/ui/widgets/` while sign-up was its only
+/// caller. It is now used by the directory and project screens too, and a
+/// project screen reaching into the auth feature for a text field is the
+/// kind of dependency that quietly turns features into one feature.
+///
+/// ⚠️ Read the value with [PhoneTextFieldState.fullPhoneNumber] through a
+/// `GlobalKey<PhoneTextFieldState>`, **not** from the controller: the
+/// controller holds only the local part, and the dial code lives in the
+/// picker's own state. Sending `controller.text` posts a number with no
+/// country on it.
 class PhoneTextField extends StatefulWidget {
   final TextEditingController controller;
   final String? Function(String?)? validator;
   final String hintText;
 
+  /// Fires on every keystroke with the **local** part, for callers whose
+  /// own state depends on what has been typed — a sheet whose confirm
+  /// button enables once a phone is present, for instance.
+  ///
+  /// The widget consumed `onChanged` internally before this existed (it
+  /// clears the error state), so a caller had no way to observe typing at
+  /// all and any button gated on the number stayed disabled forever.
+  final ValueChanged<String>? onChanged;
+
   const PhoneTextField({
     super.key,
     required this.controller,
     this.validator,
+    this.onChanged,
     this.hintText = '7400 123456',
   });
 
@@ -92,6 +114,7 @@ class PhoneTextFieldState extends State<PhoneTextField> {
               if (_hasError) {
                 setState(() => _hasError = false);
               }
+              widget.onChanged?.call(value);
             },
             keyboardType: TextInputType.phone,
             style: context.textStyles.smRegular,

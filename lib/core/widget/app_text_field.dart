@@ -119,7 +119,10 @@ class _AppTextFieldState extends State<AppTextField> {
           style: context.textStyles.smRegular.copyWith(
             color: context.colors.textColor,
           ),
-          textDirection: widget.textDirection,
+          // Mirrors the Directionality decision below — see the note there.
+          textDirection:
+              widget.textDirection ??
+              (widget.obscureText ? TextDirection.ltr : null),
           decoration: InputDecoration(
             hintText: widget.hintText,
             hintStyle: context.textStyles.smRegular.copyWith(
@@ -169,8 +172,19 @@ class _AppTextFieldState extends State<AppTextField> {
     // the TextFormField's own `textDirection` param — that alone only
     // affects text flow, not the hint/decoration layout which otherwise
     // still follows the ambient (possibly RTL) Directionality.
-    if (widget.textDirection != null) {
-      return Directionality(textDirection: widget.textDirection!, child: field);
+    //
+    // Obscured fields default to LTR when the caller has not said otherwise.
+    // A password is a sequence of Latin letters, digits and symbols; under
+    // an Arabic layout the caret starts on the right and the dots build
+    // away from where the characters actually are, which makes a mistyped
+    // password genuinely hard to see and correct. `PasswordTextField`
+    // already passed `ltr` explicitly — this catches the screens that use
+    // `AppTextField(obscureText: true)` directly, and any added later.
+    final effectiveDirection =
+        widget.textDirection ??
+        (widget.obscureText ? TextDirection.ltr : null);
+    if (effectiveDirection != null) {
+      return Directionality(textDirection: effectiveDirection, child: field);
     }
     return field;
   }

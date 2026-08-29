@@ -10,6 +10,14 @@ class CacheHelper {
 
   // ── Non-sensitive key constants ─────────────────────────────────────────────
   static const String onBoarding = 'onBoarding';
+
+  /// Set the first time the app runs after an install.
+  ///
+  /// Deliberately here and not in secure storage: SharedPreferences is wiped
+  /// on uninstall, the iOS Keychain is not. "Marker absent but keychain
+  /// populated" is what identifies a reinstall — see
+  /// [SecureStorageHelper.purgeIfFreshInstall].
+  static const String secureStorageInitialised = 'secureStorageInitialised';
   static const String themeMode = 'themeMode';
   static const String notifPermissionShown = 'notifPermissionShown';
   // SECURITY (#13): User-controlled privacy toggle — when true, the chat

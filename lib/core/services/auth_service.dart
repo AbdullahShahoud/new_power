@@ -210,7 +210,9 @@ class AuthService {
       // Best-effort — local cleanup below always runs regardless.
     }
     await _clearLocalSession();
-    resetGetIt();
+    // Awaited: this drops and rebuilds the session scope, and the login
+    // screen resolves dependencies out of it the moment we return.
+    await resetGetIt();
   }
 
   Future<void> _clearLocalSession() async {

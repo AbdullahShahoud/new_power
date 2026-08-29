@@ -26,6 +26,8 @@ import '../../data/models/change_status_request.dart';
 import '../../data/models/close_stakeholder_link_request.dart';
 import '../../data/models/contact_view.dart';
 import '../../data/models/enums.dart';
+import '../../data/models/outcome_view.dart';
+import 'log_activity_screen.dart';
 import '../../data/models/project_detail_view.dart';
 import '../../data/models/project_history_entry_view.dart';
 import '../../data/models/project_image_view.dart';
@@ -339,6 +341,8 @@ class _ProjectDetailBody extends StatelessWidget {
                     projectId: project.id,
                     activities: project.activities,
                     stakeholders: project.stakeholders,
+                    currentStage: project.stage,
+                    version: project.version,
                     isClosed: project.isClosed,
                   ),
                 ),
@@ -387,7 +391,7 @@ class _ProjectDetailBody extends StatelessWidget {
                   ExpandableSection(
                     icon: Icons.emoji_events_outlined,
                     title: context.tr('projects_detail_section_outcome'),
-                    child: _OutcomeSection(projectId: project.id),
+                    child: _OutcomeSection(project: project),
                   ),
                 ],
               ],
@@ -781,23 +785,36 @@ class _StageControl extends StatelessWidget {
 
 // ── Outcome section ──────────────────────────────────────────────────────
 
-/// §5 `POST /projects/{id}/won` and `.../lost` entry points — both open
-/// `SubmitOutcomeScreen`, pre-selecting the matching tab.
+/// §5 `POST /projects/{id}/won` and `.../lost` entry point — opens
+/// `SubmitOutcomeScreen`.
+///
+/// Unless a claim is already pending. `ProjectDetailView.pendingOutcome`
+/// carries the one the rep (or a colleague) already filed and a manager has
+/// not yet decided; while it is there the button is replaced by the claim
+/// itself. The server would refuse a second submission anyway
+/// (`OUTCOME_ALREADY_OPEN`, handled on the submit screen), but only after
+/// the rep had filled the entire form a second time — and without ever
+/// showing them what the first one said.
 class _OutcomeSection extends StatelessWidget {
-  final String projectId;
-  const _OutcomeSection({required this.projectId});
+  final ProjectDetailView project;
+  const _OutcomeSection({required this.project});
 
   /// No `initialType`: the submit screen defaults to `lost` and lets the rep
   /// choose, rather than this button deciding for them.
   void _open(BuildContext context) {
     context.pushNamed(
       Routes.submitOutcomeScreen,
-      arguments: {'projectId': projectId},
+      arguments: {'projectId': project.id},
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final pending = project.pendingOutcome;
+    if (project.hasPendingOutcome && pending != null) {
+      return _PendingOutcomeCard(outcome: pending);
+    }
+
     // One button, not two. The submit screen already carries its own
     // won/lost selector, so a pair here only asked the same question twice —
     // and pre-answering it makes the rep more likely to submit the outcome
@@ -805,6 +822,165 @@ class _OutcomeSection extends StatelessWidget {
     return AppButton(
       text: context.tr('projects_detail_submit_outcome'),
       onPressed: () => _open(context),
+    );
+  }
+}
+
+/// The claim already filed on this project, shown in place of the submit
+/// button while a manager decides.
+///
+/// Renders what was actually claimed — not just "a request is pending" —
+/// because the rep's next question after "why can't I submit?" is always
+/// "what did it say?", and answering it here saves a round trip to the
+/// outcome screen.
+class _PendingOutcomeCard extends StatelessWidget {
+  final OutcomeView outcome;
+
+  const _PendingOutcomeCard({required this.outcome});
+
+  static String _formatDate(DateTime value) {
+    final local = value.toLocal();
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${local.year}-${two(local.month)}-${two(local.day)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final won = outcome.type == OutcomeType.won;
+    // Amber, not the won/lost colour: nothing has been decided yet, and
+    // painting a pending claim green would read as an approval.
+    final status = colors.statusFollowUp;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          decoration: BoxDecoration(
+            color: status.badgeBg,
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            border: Border.all(color: status.core.withValues(alpha: 0.25)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.hourglass_top_rounded,
+                    size: 18.sp,
+                    color: status.core,
+                  ),
+                  horizontalSpace(10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context
+                              .tr('projects_detail_outcome_pending_title')
+                              .replaceAll(
+                                '{type}',
+                                context.tr(outcome.type.labelKey),
+                              ),
+                          style: context.textStyles.smBold.copyWith(
+                            color: status.badgeText,
+                          ),
+                        ),
+                        verticalSpace(3.h),
+                        Text(
+                          context.tr('projects_detail_outcome_pending_lock'),
+                          style: context.textStyles.xsMedium.copyWith(
+                            color: status.badgeText,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              verticalSpace(12.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.field),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _InfoRow(
+                      label: context.tr('projects_detail_outcome_submitted_at'),
+                      value: _formatDate(outcome.submittedAt),
+                    ),
+                    if (won) ...[
+                      if (outcome.distributor != null)
+                        _InfoRow(
+                          label: context.tr('submit_won_distributor'),
+                          value: outcome.distributor!.name,
+                        ),
+                      if (outcome.value != null)
+                        _InfoRow(
+                          label: context.tr('submit_won_value'),
+                          value:
+                              '${outcome.value!.toStringAsFixed(0)}'
+                                      ' ${outcome.currency ?? ''}'
+                                  .trim(),
+                        ),
+                      if (outcome.unitsSupplied != null &&
+                          outcome.unitsTotal != null)
+                        _InfoRow(
+                          label: context.tr('submit_won_units_supplied'),
+                          value:
+                              '${outcome.unitsSupplied} / ${outcome.unitsTotal}',
+                        ),
+                      // The count, not the files: these URLs expire, and
+                      // re-signing a whole list to render thumbnails nobody
+                      // asked for spends requests for nothing. The outcome
+                      // screen opens them properly.
+                      if (outcome.attachments.isNotEmpty)
+                        _InfoRow(
+                          label: context.tr('submit_won_files'),
+                          value: '${outcome.attachments.length}',
+                        ),
+                    ] else ...[
+                      if (outcome.lossReason != null)
+                        _InfoRow(
+                          label: context.tr('submit_outcome_reason'),
+                          value: context.tr(outcome.lossReason!.labelKey),
+                        ),
+                      if (outcome.competitor != null)
+                        _InfoRow(
+                          label: context.tr('submit_outcome_competitor'),
+                          value: outcome.competitor!.name,
+                        ),
+                      if (outcome.narrative != null &&
+                          outcome.narrative!.trim().isNotEmpty)
+                        _InfoRow(
+                          label: context.tr('submit_outcome_narrative'),
+                          value: outcome.narrative!.trim(),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        verticalSpace(12.h),
+        AppButton(
+          text: context.tr('projects_detail_outcome_pending_open'),
+          onPressed: () => context.pushNamed(
+            Routes.outcomeDetailScreen,
+            arguments: {'outcomeId': outcome.id},
+          ),
+        ),
+      ],
     );
   }
 }
@@ -885,56 +1061,57 @@ class _StatusControl extends StatelessWidget {
           )
         else
           switch (project.status) {
-          ProjectStatus.active => Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  text: context.tr('projects_detail_set_dormant'),
-                  variant: AppButtonVariant.secondary,
-                  size: AppButtonSize.sm,
-                  onPressed: () =>
-                      _changeStatus(context, ProjectStatus.dormant),
+            ProjectStatus.active => Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    text: context.tr('projects_detail_set_dormant'),
+                    variant: AppButtonVariant.secondary,
+                    size: AppButtonSize.sm,
+                    onPressed: () =>
+                        _changeStatus(context, ProjectStatus.dormant),
+                  ),
                 ),
-              ),
-              horizontalSpace(10),
-              Expanded(
-                child: AppButton(
-                  text: context.tr('projects_detail_set_cancelled'),
-                  variant: AppButtonVariant.secondary,
-                  size: AppButtonSize.sm,
-                  onPressed: () =>
-                      _changeStatus(context, ProjectStatus.cancelled),
+                horizontalSpace(10),
+                Expanded(
+                  child: AppButton(
+                    text: context.tr('projects_detail_set_cancelled'),
+                    variant: AppButtonVariant.secondary,
+                    size: AppButtonSize.sm,
+                    onPressed: () =>
+                        _changeStatus(context, ProjectStatus.cancelled),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          ProjectStatus.dormant => Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  text: context.tr('projects_detail_resume'),
-                  variant: AppButtonVariant.secondary,
-                  size: AppButtonSize.sm,
-                  onPressed: () => _changeStatus(context, ProjectStatus.active),
+              ],
+            ),
+            ProjectStatus.dormant => Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    text: context.tr('projects_detail_resume'),
+                    variant: AppButtonVariant.secondary,
+                    size: AppButtonSize.sm,
+                    onPressed: () =>
+                        _changeStatus(context, ProjectStatus.active),
+                  ),
                 ),
-              ),
-              horizontalSpace(10),
-              Expanded(
-                child: AppButton(
-                  text: context.tr('projects_detail_set_cancelled'),
-                  variant: AppButtonVariant.secondary,
-                  size: AppButtonSize.sm,
-                  onPressed: () =>
-                      _changeStatus(context, ProjectStatus.cancelled),
+                horizontalSpace(10),
+                Expanded(
+                  child: AppButton(
+                    text: context.tr('projects_detail_set_cancelled'),
+                    variant: AppButtonVariant.secondary,
+                    size: AppButtonSize.sm,
+                    onPressed: () =>
+                        _changeStatus(context, ProjectStatus.cancelled),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          ProjectStatus.cancelled => Text(
-            context.tr('projects_detail_cancelled_note'),
-            style: context.textStyles.xsMedium,
-          ),
-        },
+              ],
+            ),
+            ProjectStatus.cancelled => Text(
+              context.tr('projects_detail_cancelled_note'),
+              style: context.textStyles.xsMedium,
+            ),
+          },
       ],
     );
   }
@@ -947,6 +1124,15 @@ class _ActivitiesSection extends StatelessWidget {
   final List<ActivityView> activities;
   final List<StakeholderRefView> stakeholders;
 
+  /// Passed down so the visit form can show — and let the rep move — the
+  /// funnel stage without a second round trip to read it.
+  final ProjectStage currentStage;
+
+  /// For the optimistic-concurrency check on a stage change the log screen
+  /// asks for. Kept on this side because the log screen has no `ProjectsBloc`
+  /// and therefore no view of the project's version.
+  final int version;
+
   /// A confirmed WON/LOST outcome makes the project a closed record: the
   /// feed stays readable — those visits genuinely happened and are what the
   /// outcome was judged on — but nothing new can be logged against it.
@@ -956,17 +1142,46 @@ class _ActivitiesSection extends StatelessWidget {
     required this.projectId,
     required this.activities,
     required this.stakeholders,
+    required this.currentStage,
+    required this.version,
     required this.isClosed,
   });
 
   Future<void> _openLogActivity(BuildContext context) async {
-    final suggestion = await context.pushNamed(
+    final result = await context.pushNamed(
       Routes.logActivityScreen,
-      arguments: {'projectId': projectId, 'stakeholders': stakeholders},
+      arguments: {
+        'projectId': projectId,
+        'stakeholders': stakeholders,
+        'currentStage': currentStage,
+      },
     );
     if (!context.mounted) return;
-    context.read<ProjectsBloc>().add(ProjectsEvent.detailRefreshed(projectId));
-    if (suggestion == 'SET_DORMANT') {
+
+    // The offline branch pops bare, so a non-record result is expected.
+    final logResult = result is LogActivityResult ? result : null;
+    final newStage = logResult?.stage;
+
+    final bloc = context.read<ProjectsBloc>();
+    if (newStage != null && newStage != currentStage) {
+      // Not followed by a `detailRefreshed`: the stage change responds with
+      // the updated project and the Bloc folds it into `selectedProject`.
+      // Firing both would race, and the refresh could land first and be
+      // overwritten by a staler read.
+      bloc.add(
+        ProjectsEvent.stageChangeSubmitted(
+          id: projectId,
+          request: ChangeStageRequest(
+            stage: newStage,
+            expectedVersion: version,
+          ),
+        ),
+      );
+    } else {
+      bloc.add(ProjectsEvent.detailRefreshed(projectId));
+    }
+
+    if (logResult?.suggestion == 'SET_DORMANT') {
       _promptSetDormant(context);
     }
   }
@@ -1591,41 +1806,41 @@ class _StakeholdersSectionState extends State<_StakeholdersSection> {
           children: [
             // Title lives on the ExpandableSection header now.
             if (!widget.isClosed)
-            Row(
-              children: [
-                const Spacer(),
-                PressableScale(
-                  onTap: _openAddStakeholder,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 5.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.colors.brand50,
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.add,
-                          size: 14.sp,
-                          color: context.colors.brand600,
-                        ),
-                        horizontalSpace(4),
-                        Text(
-                          context.tr('add_stakeholder_cta'),
-                          style: context.textStyles.xsSemibold.copyWith(
+              Row(
+                children: [
+                  const Spacer(),
+                  PressableScale(
+                    onTap: _openAddStakeholder,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 5.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: context.colors.brand50,
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add,
+                            size: 14.sp,
                             color: context.colors.brand600,
                           ),
-                        ),
-                      ],
+                          horizontalSpace(4),
+                          Text(
+                            context.tr('add_stakeholder_cta'),
+                            style: context.textStyles.xsSemibold.copyWith(
+                              color: context.colors.brand600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             verticalSpace(4.h),
             if (widget.stakeholders.isEmpty)
               _InlineEmptyHint(
@@ -1723,29 +1938,29 @@ class _StakeholdersSectionState extends State<_StakeholdersSection> {
               ),
             verticalSpace(8.h),
             if (!widget.isClosed)
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _promptSetDecisionMaker,
-                    child: Text(
-                      widget.decisionMaker == null
-                          ? context.tr('decision_maker_set_cta')
-                          : context.tr('decision_maker_change_cta'),
-                    ),
-                  ),
-                ),
-                if (widget.decisionMaker != null) ...[
-                  horizontalSpace(8),
+              Row(
+                children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _promptRemoveDecisionMaker,
-                      child: Text(context.tr('decision_maker_remove_cta')),
+                      onPressed: _promptSetDecisionMaker,
+                      child: Text(
+                        widget.decisionMaker == null
+                            ? context.tr('decision_maker_set_cta')
+                            : context.tr('decision_maker_change_cta'),
+                      ),
                     ),
                   ),
+                  if (widget.decisionMaker != null) ...[
+                    horizontalSpace(8),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _promptRemoveDecisionMaker,
+                        child: Text(context.tr('decision_maker_remove_cta')),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
+              ),
           ],
         ),
       ),

@@ -1,4 +1,4 @@
-package com.example.new_power
+package com.newpower.app
 
 import io.flutter.embedding.android.FlutterActivity
 

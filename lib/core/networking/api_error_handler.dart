@@ -176,20 +176,38 @@ class ApiErrorHandler {
       '"deviceId":"***MASKED***"',
     );
 
-    // Remove file paths (Windows and Unix)
+    // Remove absolute filesystem paths — Windows drive paths, and Unix paths
+    // deep enough to be a real path rather than ordinary prose.
+    //
+    // ⚠️ The Unix branch requires **two** segments and a leading space or
+    // start-of-string. The previous pattern was `\/[a-zA-Z0-9_\-\.\/]+`,
+    // which matched the slash in any ordinary sentence: "Owner/Manager
+    // required" was shown to the user as "Owner[path] required", and "24/7"
+    // as "24[path]".
     sanitized = sanitized.replaceAll(
-      RegExp(r'(\/[a-zA-Z0-9_\-\.\/]+|[A-Za-z]:\\[a-zA-Z0-9_\-\.\\\s]+)'),
+      RegExp(r'(?:^|(?<=\s))(?:[A-Za-z]:\\[^\s]+|\/[\w.-]+\/[\w./-]+)'),
       '[path]',
     );
 
-    // Remove SQL keywords and potential SQL injection attempts
-    sanitized = sanitized.replaceAll(
-      RegExp(
-        r'\b(SELECT|FROM|WHERE|INSERT|DELETE|UPDATE|DROP|TABLE|CREATE|ALTER|EXEC|EXECUTE)\b',
-        caseSensitive: false,
-      ),
-      '[sql]',
-    );
+    // NOTE: SQL-keyword scrubbing was removed here, deliberately.
+    //
+    // It replaced \b(SELECT|FROM|WHERE|INSERT|DELETE|UPDATE|DROP|TABLE|
+    // CREATE|ALTER|EXEC|EXECUTE)\b with "[sql]", case-insensitively — and
+    // this message is **rendered to the user**, not written to a log. Every
+    // feature Bloc in the app displays `error.message` verbatim
+    // (`listErrorMessage: error.message` in projects/activities/outcomes,
+    // `error.message ?? 'Login failed'` in LoginCubit), so the server's
+    // ordinary English business copy was being mangled on screen:
+    //
+    //     "You cannot update a confirmed outcome"
+    //   → "You cannot [sql] a confirmed outcome"
+    //
+    // The words are common English verbs; the filter could not tell them
+    // from an injected query. It also protected nothing: the server is the
+    // trust boundary for its own message text, and a string that has already
+    // been rendered into a Flutter Text widget cannot be executed. The
+    // credential masking above is the part that carries real value, and it
+    // is untouched.
 
     // Remove error codes like [Errno 2], [Error 404], etc.
     sanitized = sanitized.replaceAll(RegExp(r'\[\w+\s+\d+\]'), '[error]');

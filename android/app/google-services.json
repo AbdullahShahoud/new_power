@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:141224916519:android:7f8ada3af18da0aa538002",
+        "mobilesdk_app_id": "1:141224916519:android:ee6e085e683cdeeb538002",
         "android_client_info": {
-          "package_name": "com.example.new_power"
+          "package_name": "com.newpower.app"
         }
       },
       "oauth_client": [],

@@ -113,6 +113,8 @@ final Map<String, String> enUS = {
   'projects_register_address': 'Address',
   'projects_register_address_hint':
       'e.g. Al Mazzah Road, opposite the fire station',
+  'projects_register_address_required':
+      'Add a written address — a map pin alone is hard to find on site.',
   'projects_register_unit_count': 'Unit count',
   'projects_register_unit_count_hint': 'Number of units',
   'projects_register_estimated_value': 'Estimated value (SAR)',
@@ -123,6 +125,11 @@ final Map<String, String> enUS = {
   'projects_register_notes_hint': 'Anything else worth recording',
   'projects_register_optional': '(optional)',
   'projects_register_submit': 'Register Building',
+  'projects_register_nearby_confirm_title': 'Is this building already registered?',
+  'projects_register_nearby_confirm_subtitle':
+      '{count} buildings are already recorded within 300 m of your pin. Check them before adding another — registering a duplicate creates work for whoever owns the other record.',
+  'projects_register_nearby_confirm_cancel': 'Go back and check',
+  'projects_register_nearby_confirm_proceed': 'This is a different building — register it',
   'projects_register_duplicates_title': 'Similar buildings nearby',
   'projects_register_duplicates_subtitle':
       'Your building was registered. These nearby buildings might be the same one — check before working both.',
@@ -301,7 +308,11 @@ final Map<String, String> enUS = {
   'activity_detail_person_communication': 'Person you spoke with',
   'log_activity_persons_required': 'Select at least one person',
   'log_activity_persons_empty':
-      'No contacts linked to this project yet — the stakeholder directory is coming in a future update.',
+      'No contacts are linked to this project yet. Add a stakeholder to record who you met.',
+  'log_activity_add_stakeholder': 'Add a stakeholder',
+  'log_activity_stage': 'Project stage',
+  'log_activity_stage_will_change':
+      'The project stage will move from {from} to {to} when you save.',
   'log_activity_location': 'Location',
   'log_activity_location_cta': 'Tap to capture your current location',
   'log_activity_construction_phase_observed': 'Construction phase observed',
@@ -426,6 +437,20 @@ final Map<String, String> enUS = {
   'submit_won_units_supplied': 'Units supplied',
   'submit_won_units_total': 'Units total',
   'submit_won_units_exceed_total': 'Units supplied cannot exceed units total',
+  'submit_won_buyer_contact_required': 'Select the buyer contact',
+  'submit_won_sold_at_required': 'Select the sale date',
+  'submit_won_categories_required': 'Select at least one product category',
+  'submit_outcome_field_required': 'This field is required',
+  'submit_outcome_invalid_amount': 'Enter an amount greater than zero',
+  'submit_outcome_invalid_count': 'Enter a valid number',
+
+  'projects_detail_outcome_pending_title':
+      'A {type} request is awaiting review',
+  'projects_detail_outcome_pending_lock':
+      'You cannot submit another outcome until your manager decides on this '
+      'one.',
+  'projects_detail_outcome_pending_open': 'View the request',
+  'projects_detail_outcome_submitted_at': 'Submitted on',
 
   'projects_detail_mark_as_won': 'Mark as won',
   'projects_detail_submit_outcome': 'Submit project outcome',
@@ -818,16 +843,66 @@ final Map<String, String> enUS = {
   // API Error Messages - Rate Limiting (429)
   'error_too_many_requests': 'Too many requests. Please try again later',
 
-  // API Error Messages - Transactions & P2P Transfers
-  'error_insufficient_balance':
-      'Insufficient balance to complete this transfer',
-  'error_wallet_frozen': 'Your wallet is frozen. Please contact support',
-  'error_kyc_required': 'KYC verification required to proceed',
-  'error_self_transfer': 'You cannot transfer to the same wallet',
+  // Per-screen rate-limit countdowns. `{seconds}` is substituted by the
+  // calling screen from the server's Retry-After header.
+  //
+  // These five are consumed by login_screen, register_screen,
+  // email_verification_screen, forgot_password_screen and
+  // reset_password_screen. They existed only in ar_sy.dart, and
+  // AppLocalizations.translate returns the raw key on a miss — so an
+  // English user who tripped a rate limit was shown the literal text
+  // "error_rate_limited_login".
+  'error_rate_limited_login':
+      'Too many failed attempts. Try again in {seconds} seconds.',
+  'error_rate_limited_otp':
+      'Too many incorrect attempts. Try again in {seconds} seconds.',
+  'error_rate_limited_register':
+      'Too many failed attempts. Try again in {seconds} seconds.',
+  'error_rate_limited_forgot_password':
+      'Too many requests. Try again in {seconds} seconds.',
+  'error_rate_limited_reset_password':
+      'Too many failed attempts. Try again in {seconds} seconds.',
+  'error_rate_limited_pin_setup':
+      'Too many failed attempts. Try again in {seconds} seconds.',
+
+  // Relative-time units. `time_ago_pattern` composes {n} with one of the
+  // unit words below; the `time_*_two` family elsewhere in this file handles
+  // Arabic's dual, which English does not have.
+  'ago': 'ago',
+  'time_ago_pattern': '{n} {unit} ago',
+  'minute': 'minute',
+  'minutes': 'minutes',
+  'minutes_ago': '{n} minutes ago',
+  'hour': 'hour',
+  'hours': 'hours',
+  'hours_ago': '{n} hours ago',
+  'day': 'day',
+  'days': 'days',
+  'days_ago': '{n} days ago',
+  'unknown': 'Unknown',
+
+  'back_home': 'Back to home',
+  'logout_confirm': 'Are you sure you want to log out?',
+
+  // Account deletion — the Arabic side of these already existed. Wired up
+  // when the deletion endpoint lands (finding B13).
+  'delete_account': 'Delete account',
+  'cancel_delete_account': 'Cancel account deletion',
+
+  // Offline queue — suspended behind FeatureFlags.offlineSyncEnabled.
+  'offline_queue_full':
+      'Could not queue the request. Please retry when you are online.',
+
+  // API Error Messages - Conflict (409)
+  //
+  // Mapped from the CONFLICT error code in ApiErrorHandler._getErrorKeyFromCode.
+  //
+  // The wallet/KYC/P2P-transfer strings that used to sit here came from the
+  // e-wallet app this project was forked from. NewPower has no wallet, no
+  // balance and no transfers — none of those keys were reachable from any
+  // error code this API produces, so they have been removed rather than
+  // translated.
   'error_duplicate_request': 'This request has already been processed',
-  'error_authorization_failed': 'Authorization failed. Please try again',
-  'error_challenge_expired':
-      'Authorization challenge has expired. Please start over',
 
   // Settings
   'settings_title': 'Settings',
@@ -910,13 +985,11 @@ final Map<String, String> enUS = {
   'notif_pref_save_error': 'Could not save preferences. Please try again.',
   'just_now': 'Just now',
 
-  // Language names
-  'lang_english': 'English',
-  'lang_arabic': 'العربية',
-  'lang_german': 'Deutsch',
-  'lang_french': 'Français',
-  'lang_turkish': 'Türkçe',
-  'lang_russian': 'Русский',
+  // Language names are not defined here: AppLanguage (app_localizations.dart)
+  // carries each language's endonym on the enum itself, which is what the
+  // language picker renders. The six keys that used to live here — including
+  // German, French, Turkish and Russian, none of which this app supports —
+  // were unreferenced.
 
   // Map picker (google_maps_flutter)
   'map_picker_title': 'Choose a location',
@@ -1016,15 +1089,15 @@ final Map<String, String> enUS = {
   // maps two of them onto the same string.
   'time_just_now': 'Just now',
   'time_minute_one': 'A minute ago',
-  'time_minute_two': '{count} minutes ago',
+  'time_minute_two': 'Two minutes ago',
   'time_minute_few': '{count} minutes ago',
   'time_minute_many': '{count} minutes ago',
   'time_hour_one': 'An hour ago',
-  'time_hour_two': '{count} hours ago',
+  'time_hour_two': 'Two hours ago',
   'time_hour_few': '{count} hours ago',
   'time_hour_many': '{count} hours ago',
   'time_day_one': 'Yesterday',
-  'time_day_two': '{count} days ago',
+  'time_day_two': 'Two days ago',
   'time_day_few': '{count} days ago',
   'time_day_many': '{count} days ago',
   // Registration — parties and neighbours
@@ -1032,10 +1105,20 @@ final Map<String, String> enUS = {
   'stakeholder_slot_developer': 'Developer / owner',
   'stakeholder_slot_consultant': 'Consulting office',
   'stakeholder_slot_contractor': 'Main contractor',
+  'projects_register_contractor_required':
+      'Add the main contractor, including a contact name and phone number',
   'add_stakeholder_pick_hint': 'Search or add',
-  'add_stakeholder_search_hint': 'Search by company or person name',
+  'add_stakeholder_search_hint': 'Type at least 2 letters to search',
+  'upload_too_large_short': 'Too big',
+  'upload_rejected_short': 'Rejected',
+  'add_stakeholder_search_failed':
+      'Search failed — check your connection and try again.',
+  'add_stakeholder_account_name': 'Company name',
+  'add_stakeholder_account_name_hint': 'Full company name',
   'add_stakeholder_create_named': 'Add “{name}” as new',
   'add_stakeholder_contact_optional': 'Contact person (optional)',
+  'add_stakeholder_contact_required': 'Contact person',
+  'add_contact_phone_optional_hint': 'Phone (optional)',
   'projects_register_nearby_loading': 'Checking nearby buildings…',
   'projects_register_nearby_title': '{count} buildings already nearby',
   'projects_register_nearby_subtitle':
@@ -1055,6 +1138,7 @@ final Map<String, String> enUS = {
       'Turning this off silences push only. Notifications still appear in your inbox.',
   'notifications_language_en': 'English',
   'notifications_language_ar': 'العربية',
+<<<<<<< HEAD
   // ===================== Attainment (GET /attainment/me) =====================
   'ok': 'OK',
   'attainment_title': 'My Attainment',
@@ -1132,4 +1216,5 @@ final Map<String, String> enUS = {
   'attainment_month_10': 'Oct',
   'attainment_month_11': 'Nov',
   'attainment_month_12': 'Dec',
+
 };

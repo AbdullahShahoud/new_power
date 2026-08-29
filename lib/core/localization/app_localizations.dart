@@ -39,9 +39,20 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  /// Get localized string by key
+  /// Get localized string by key.
+  ///
+  /// Falls back to English before falling back to the key itself. The class
+  /// doc below already claimed this behaviour; it was not actually
+  /// implemented, so a key present in `ar_sy.dart` but missing from
+  /// `en_us.dart` rendered on screen as its own identifier — five auth
+  /// rate-limit messages did exactly that.
+  ///
+  /// Returning the key remains the last resort: it is a loud, greppable
+  /// signal in development, which a silent empty string would not be.
   String translate(String key) {
-    return _localizedStrings[key] ?? key;
+    final value = _localizedStrings[key];
+    if (value != null) return value;
+    return enUS[key] ?? key;
   }
 
   /// Get language map based on locale — falls back to English for missing keys.

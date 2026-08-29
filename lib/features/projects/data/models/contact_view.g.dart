@@ -19,12 +19,13 @@ Map<String, dynamic> _$ContactAccountRefViewToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
-  'type': _$AccountTypeEnumMap[instance.type]!,
+  'type': _$AccountTypeEnumMap[instance.type],
 };
 
 const _$AccountTypeEnumMap = {
   AccountType.company: 'COMPANY',
   AccountType.individual: 'INDIVIDUAL',
+  AccountType.unknown: null,
 };
 
 _ContactView _$ContactViewFromJson(Map<String, dynamic> json) => _ContactView(

@@ -104,8 +104,8 @@ class AppRouter {
         return _slideRoute(
           LogActivityScreen(
             projectId: args['projectId'] as String,
-            stakeholders:
-                args['stakeholders'] as List<StakeholderRefView>,
+            stakeholders: args['stakeholders'] as List<StakeholderRefView>,
+            currentStage: args['currentStage'] as ProjectStage,
           ),
           settings,
         );
@@ -165,8 +165,7 @@ class AppRouter {
         final args = settings.arguments as Map?;
         return _slideRoute(
           AccountPickerScreen(
-            classification:
-                args?['classification'] as AccountClassification?,
+            classification: args?['classification'] as AccountClassification?,
           ),
           settings,
         );

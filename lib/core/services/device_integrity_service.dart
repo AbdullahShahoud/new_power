@@ -16,12 +16,27 @@ import 'package:safe_device/safe_device.dart';
 class DeviceIntegrityService {
   DeviceIntegrityService._();
 
-  /// Returns `true` if the device appears to be rooted / jailbroken,
-  /// is running inside an emulator, or has a mock location active.
+  /// Returns `true` if the device appears to be rooted / jailbroken, or has
+  /// a mock location active.
   ///
   /// Each check is run independently so that a single library error cannot
-  /// suppress all signals. Emulator/mock-location checks are skipped in
-  /// debug mode to keep development unblocked.
+  /// suppress all signals.
+  ///
+  /// ⚠️ **Emulator detection was deliberately removed.** It used to run under
+  /// `if (!kDebugMode)`, which made it the only behavioural difference
+  /// between debug and release builds in the whole app — and it sat in front
+  /// of `login`, `register` and `verifyOtp` via
+  /// [AuthRepository._integrityGuard]. Two consequences made it unshippable:
+  ///
+  ///   - Google Play's pre-launch report and Firebase Test Lab run release
+  ///     builds on **virtual** devices. They would have reported the app as
+  ///     unusable, because it is: you cannot sign in.
+  ///   - It meant the release authentication path had never once been
+  ///     executed by anyone on the team.
+  ///
+  /// If blocking emulators is a real business requirement, it belongs in
+  /// Play Integrity / App Attest with the verdict verified **server-side** —
+  /// not in a client check that the stores' own tooling trips.
   ///
   /// Security: Prevents device registration on compromised devices
   static Future<bool> isCompromised() async {
@@ -31,14 +46,7 @@ class DeviceIntegrityService {
     // 1. Root / jailbreak
     if (await _check(() => SafeDevice.isJailBroken)) return true;
 
-    // 2. Emulator detection — skip in debug so the team can use simulators
-    if (!kDebugMode) {
-      if (await _check(() => SafeDevice.isRealDevice.then((r) => !r))) {
-        return true;
-      }
-    }
-
-    // 3. Mock location (Android only) — irrelevant on iOS
+    // 2. Mock location (Android only) — irrelevant on iOS
     if (Platform.isAndroid) {
       if (await _check(() => SafeDevice.isMockLocation)) return true;
     }
@@ -69,19 +77,18 @@ class DeviceIntegrityService {
   /// Get detailed integrity report with all check results
   static Future<IntegrityReport> getDetailedReport() async {
     final isRooted = await _check(() => SafeDevice.isJailBroken);
-    // M-5: Mirror the kDebugMode guard from isCompromised() so the two methods
-    // are consistent — emulator is only flagged in release builds.
-    final isEmulator = kDebugMode
-        ? false
-        : !await _check(
-            () => SafeDevice.isRealDevice.then((r) => r),
-            defaultValue: false,
-          );
+    // Reported for diagnostics only — see the note on [isCompromised]. It is
+    // deliberately **not** part of the verdict any more, so the two methods
+    // stay consistent with each other.
+    final isEmulator = !await _check(
+      () => SafeDevice.isRealDevice,
+      defaultValue: true,
+    );
     final isMockLocation = Platform.isAndroid
         ? await _check(() => SafeDevice.isMockLocation)
         : false;
 
-    final verdict = (isRooted || (isEmulator && !kDebugMode) || isMockLocation)
+    final verdict = (isRooted || isMockLocation)
         ? IntegrityVerdict.fail
         : IntegrityVerdict.pass;
 
@@ -99,12 +106,22 @@ class DeviceIntegrityService {
     );
   }
 
-  /// Runs [check] and returns its result. Any exception is treated as
-  /// `true` (compromised) to prevent hooking attacks that suppress checks
-  /// by throwing.
+  /// Runs [check] and returns its result, falling back to [defaultValue]
+  /// when it throws.
+  ///
+  /// ⚠️ The default is **`false` (not compromised)** — it used to be `true`.
+  /// Failing closed reads as the safer choice and is not: this guard sits in
+  /// front of login, so any exception from `safe_device` — a plugin channel
+  /// error, an OEM ROM it mis-reads, a Play Services gap — locked the user
+  /// out of the app entirely, with no in-app recovery and no way for support
+  /// to help. That is a self-inflicted outage on a real customer, traded
+  /// against an attacker who can patch the check out of the binary anyway.
+  ///
+  /// Callers that genuinely need fail-closed semantics pass `defaultValue`
+  /// explicitly.
   static Future<bool> _check(
     Future<bool> Function() check, {
-    bool defaultValue = true,
+    bool defaultValue = false,
   }) async {
     try {
       return await check();
@@ -175,12 +192,12 @@ class IntegrityReport {
     !isNotMockLocation,
   ].where((check) => check).length;
 
-  /// Check if device is safe for sensitive operations
+  /// Check if device is safe for sensitive operations.
+  ///
+  /// [isNotEmulator] is deliberately excluded — it is carried on the report
+  /// for diagnostics only. See the note on [DeviceIntegrityService.isCompromised].
   bool isSafeForSensitiveOps() {
-    return verdict == IntegrityVerdict.pass &&
-        isNotRooted &&
-        isNotEmulator &&
-        isNotMockLocation;
+    return verdict == IntegrityVerdict.pass && isNotRooted && isNotMockLocation;
   }
 
   /// Get human-readable status
@@ -199,7 +216,6 @@ class IntegrityReport {
   List<String> getFailureReasons() {
     final reasons = <String>[];
     if (!isNotRooted) reasons.add('Device appears to be rooted/jailbroken');
-    if (!isNotEmulator) reasons.add('Device appears to be running in emulator');
     if (!isNotMockLocation) reasons.add('Mock location detected');
     return reasons;
   }

@@ -915,7 +915,16 @@ as String,
 /// @nodoc
 mixin _$ProjectDetailView {
 
- String get id; String get name; BuildingType get buildingType; String get description; double get latitude; double get longitude; String? get addressLine; String? get territoryId; TerritoryRefView? get territory; bool get outsideTerritory; ConstructionPhase get constructionPhase; ProjectStage get stage; ProjectStatus get status; String get ownerId; ActorView? get owner; int? get unitCount; double? get estimatedValue; String? get currency; String? get notes; DateTime? get lastActivityAt; DateTime? get nextActionAt; DateTime? get closedAt; String? get closedBy; int get version; String? get createdBy; ActorView? get createdByUser; DateTime get createdAt; DateTime get updatedAt; int get imageCount; List<ProjectImageView> get images; List<ActivityView> get activities; List<StakeholderRefView> get stakeholders; DecisionMakerRefView? get decisionMaker;
+ String get id; String get name; BuildingType get buildingType; String get description; double get latitude; double get longitude; String? get addressLine; String? get territoryId; TerritoryRefView? get territory; bool get outsideTerritory; ConstructionPhase get constructionPhase; ProjectStage get stage; ProjectStatus get status; String get ownerId; ActorView? get owner; int? get unitCount; double? get estimatedValue; String? get currency; String? get notes; DateTime? get lastActivityAt; DateTime? get nextActionAt; DateTime? get closedAt; String? get closedBy; int get version; String? get createdBy; ActorView? get createdByUser; DateTime get createdAt; DateTime get updatedAt; int get imageCount; List<ProjectImageView> get images; List<ActivityView> get activities; List<StakeholderRefView> get stakeholders; DecisionMakerRefView? get decisionMaker;/// The outcome already submitted on this project and still awaiting a
+/// manager's decision (`status: "PENDING"`), or `null` when there is
+/// none.
+///
+/// Load-bearing for the UI, not decoration: while this is present the
+/// rep must not be able to submit another won/lost claim. The server
+/// refuses a second one anyway (`OUTCOME_ALREADY_OPEN`), but a rep who
+/// only learns that after filling the whole form has been made to do
+/// the work twice — and cannot see what the first claim said.
+ OutcomeView? get pendingOutcome;
 /// Create a copy of ProjectDetailView
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -928,16 +937,16 @@ $ProjectDetailViewCopyWith<ProjectDetailView> get copyWith => _$ProjectDetailVie
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProjectDetailView&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.buildingType, buildingType) || other.buildingType == buildingType)&&(identical(other.description, description) || other.description == description)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.addressLine, addressLine) || other.addressLine == addressLine)&&(identical(other.territoryId, territoryId) || other.territoryId == territoryId)&&(identical(other.territory, territory) || other.territory == territory)&&(identical(other.outsideTerritory, outsideTerritory) || other.outsideTerritory == outsideTerritory)&&(identical(other.constructionPhase, constructionPhase) || other.constructionPhase == constructionPhase)&&(identical(other.stage, stage) || other.stage == stage)&&(identical(other.status, status) || other.status == status)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.unitCount, unitCount) || other.unitCount == unitCount)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.lastActivityAt, lastActivityAt) || other.lastActivityAt == lastActivityAt)&&(identical(other.nextActionAt, nextActionAt) || other.nextActionAt == nextActionAt)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.closedBy, closedBy) || other.closedBy == closedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByUser, createdByUser) || other.createdByUser == createdByUser)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.imageCount, imageCount) || other.imageCount == imageCount)&&const DeepCollectionEquality().equals(other.images, images)&&const DeepCollectionEquality().equals(other.activities, activities)&&const DeepCollectionEquality().equals(other.stakeholders, stakeholders)&&(identical(other.decisionMaker, decisionMaker) || other.decisionMaker == decisionMaker));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProjectDetailView&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.buildingType, buildingType) || other.buildingType == buildingType)&&(identical(other.description, description) || other.description == description)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.addressLine, addressLine) || other.addressLine == addressLine)&&(identical(other.territoryId, territoryId) || other.territoryId == territoryId)&&(identical(other.territory, territory) || other.territory == territory)&&(identical(other.outsideTerritory, outsideTerritory) || other.outsideTerritory == outsideTerritory)&&(identical(other.constructionPhase, constructionPhase) || other.constructionPhase == constructionPhase)&&(identical(other.stage, stage) || other.stage == stage)&&(identical(other.status, status) || other.status == status)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.unitCount, unitCount) || other.unitCount == unitCount)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.lastActivityAt, lastActivityAt) || other.lastActivityAt == lastActivityAt)&&(identical(other.nextActionAt, nextActionAt) || other.nextActionAt == nextActionAt)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.closedBy, closedBy) || other.closedBy == closedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByUser, createdByUser) || other.createdByUser == createdByUser)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.imageCount, imageCount) || other.imageCount == imageCount)&&const DeepCollectionEquality().equals(other.images, images)&&const DeepCollectionEquality().equals(other.activities, activities)&&const DeepCollectionEquality().equals(other.stakeholders, stakeholders)&&(identical(other.decisionMaker, decisionMaker) || other.decisionMaker == decisionMaker)&&(identical(other.pendingOutcome, pendingOutcome) || other.pendingOutcome == pendingOutcome));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,buildingType,description,latitude,longitude,addressLine,territoryId,territory,outsideTerritory,constructionPhase,stage,status,ownerId,owner,unitCount,estimatedValue,currency,notes,lastActivityAt,nextActionAt,closedAt,closedBy,version,createdBy,createdByUser,createdAt,updatedAt,imageCount,const DeepCollectionEquality().hash(images),const DeepCollectionEquality().hash(activities),const DeepCollectionEquality().hash(stakeholders),decisionMaker]);
+int get hashCode => Object.hashAll([runtimeType,id,name,buildingType,description,latitude,longitude,addressLine,territoryId,territory,outsideTerritory,constructionPhase,stage,status,ownerId,owner,unitCount,estimatedValue,currency,notes,lastActivityAt,nextActionAt,closedAt,closedBy,version,createdBy,createdByUser,createdAt,updatedAt,imageCount,const DeepCollectionEquality().hash(images),const DeepCollectionEquality().hash(activities),const DeepCollectionEquality().hash(stakeholders),decisionMaker,pendingOutcome]);
 
 @override
 String toString() {
-  return 'ProjectDetailView(id: $id, name: $name, buildingType: $buildingType, description: $description, latitude: $latitude, longitude: $longitude, addressLine: $addressLine, territoryId: $territoryId, territory: $territory, outsideTerritory: $outsideTerritory, constructionPhase: $constructionPhase, stage: $stage, status: $status, ownerId: $ownerId, owner: $owner, unitCount: $unitCount, estimatedValue: $estimatedValue, currency: $currency, notes: $notes, lastActivityAt: $lastActivityAt, nextActionAt: $nextActionAt, closedAt: $closedAt, closedBy: $closedBy, version: $version, createdBy: $createdBy, createdByUser: $createdByUser, createdAt: $createdAt, updatedAt: $updatedAt, imageCount: $imageCount, images: $images, activities: $activities, stakeholders: $stakeholders, decisionMaker: $decisionMaker)';
+  return 'ProjectDetailView(id: $id, name: $name, buildingType: $buildingType, description: $description, latitude: $latitude, longitude: $longitude, addressLine: $addressLine, territoryId: $territoryId, territory: $territory, outsideTerritory: $outsideTerritory, constructionPhase: $constructionPhase, stage: $stage, status: $status, ownerId: $ownerId, owner: $owner, unitCount: $unitCount, estimatedValue: $estimatedValue, currency: $currency, notes: $notes, lastActivityAt: $lastActivityAt, nextActionAt: $nextActionAt, closedAt: $closedAt, closedBy: $closedBy, version: $version, createdBy: $createdBy, createdByUser: $createdByUser, createdAt: $createdAt, updatedAt: $updatedAt, imageCount: $imageCount, images: $images, activities: $activities, stakeholders: $stakeholders, decisionMaker: $decisionMaker, pendingOutcome: $pendingOutcome)';
 }
 
 
@@ -948,11 +957,11 @@ abstract mixin class $ProjectDetailViewCopyWith<$Res>  {
   factory $ProjectDetailViewCopyWith(ProjectDetailView value, $Res Function(ProjectDetailView) _then) = _$ProjectDetailViewCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, BuildingType buildingType, String description, double latitude, double longitude, String? addressLine, String? territoryId, TerritoryRefView? territory, bool outsideTerritory, ConstructionPhase constructionPhase, ProjectStage stage, ProjectStatus status, String ownerId, ActorView? owner, int? unitCount, double? estimatedValue, String? currency, String? notes, DateTime? lastActivityAt, DateTime? nextActionAt, DateTime? closedAt, String? closedBy, int version, String? createdBy, ActorView? createdByUser, DateTime createdAt, DateTime updatedAt, int imageCount, List<ProjectImageView> images, List<ActivityView> activities, List<StakeholderRefView> stakeholders, DecisionMakerRefView? decisionMaker
+ String id, String name, BuildingType buildingType, String description, double latitude, double longitude, String? addressLine, String? territoryId, TerritoryRefView? territory, bool outsideTerritory, ConstructionPhase constructionPhase, ProjectStage stage, ProjectStatus status, String ownerId, ActorView? owner, int? unitCount, double? estimatedValue, String? currency, String? notes, DateTime? lastActivityAt, DateTime? nextActionAt, DateTime? closedAt, String? closedBy, int version, String? createdBy, ActorView? createdByUser, DateTime createdAt, DateTime updatedAt, int imageCount, List<ProjectImageView> images, List<ActivityView> activities, List<StakeholderRefView> stakeholders, DecisionMakerRefView? decisionMaker, OutcomeView? pendingOutcome
 });
 
 
-$TerritoryRefViewCopyWith<$Res>? get territory;$ActorViewCopyWith<$Res>? get owner;$ActorViewCopyWith<$Res>? get createdByUser;$DecisionMakerRefViewCopyWith<$Res>? get decisionMaker;
+$TerritoryRefViewCopyWith<$Res>? get territory;$ActorViewCopyWith<$Res>? get owner;$ActorViewCopyWith<$Res>? get createdByUser;$DecisionMakerRefViewCopyWith<$Res>? get decisionMaker;$OutcomeViewCopyWith<$Res>? get pendingOutcome;
 
 }
 /// @nodoc
@@ -965,7 +974,7 @@ class _$ProjectDetailViewCopyWithImpl<$Res>
 
 /// Create a copy of ProjectDetailView
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? buildingType = null,Object? description = null,Object? latitude = null,Object? longitude = null,Object? addressLine = freezed,Object? territoryId = freezed,Object? territory = freezed,Object? outsideTerritory = null,Object? constructionPhase = null,Object? stage = null,Object? status = null,Object? ownerId = null,Object? owner = freezed,Object? unitCount = freezed,Object? estimatedValue = freezed,Object? currency = freezed,Object? notes = freezed,Object? lastActivityAt = freezed,Object? nextActionAt = freezed,Object? closedAt = freezed,Object? closedBy = freezed,Object? version = null,Object? createdBy = freezed,Object? createdByUser = freezed,Object? createdAt = null,Object? updatedAt = null,Object? imageCount = null,Object? images = null,Object? activities = null,Object? stakeholders = null,Object? decisionMaker = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? buildingType = null,Object? description = null,Object? latitude = null,Object? longitude = null,Object? addressLine = freezed,Object? territoryId = freezed,Object? territory = freezed,Object? outsideTerritory = null,Object? constructionPhase = null,Object? stage = null,Object? status = null,Object? ownerId = null,Object? owner = freezed,Object? unitCount = freezed,Object? estimatedValue = freezed,Object? currency = freezed,Object? notes = freezed,Object? lastActivityAt = freezed,Object? nextActionAt = freezed,Object? closedAt = freezed,Object? closedBy = freezed,Object? version = null,Object? createdBy = freezed,Object? createdByUser = freezed,Object? createdAt = null,Object? updatedAt = null,Object? imageCount = null,Object? images = null,Object? activities = null,Object? stakeholders = null,Object? decisionMaker = freezed,Object? pendingOutcome = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -1000,7 +1009,8 @@ as int,images: null == images ? _self.images : images // ignore: cast_nullable_t
 as List<ProjectImageView>,activities: null == activities ? _self.activities : activities // ignore: cast_nullable_to_non_nullable
 as List<ActivityView>,stakeholders: null == stakeholders ? _self.stakeholders : stakeholders // ignore: cast_nullable_to_non_nullable
 as List<StakeholderRefView>,decisionMaker: freezed == decisionMaker ? _self.decisionMaker : decisionMaker // ignore: cast_nullable_to_non_nullable
-as DecisionMakerRefView?,
+as DecisionMakerRefView?,pendingOutcome: freezed == pendingOutcome ? _self.pendingOutcome : pendingOutcome // ignore: cast_nullable_to_non_nullable
+as OutcomeView?,
   ));
 }
 /// Create a copy of ProjectDetailView
@@ -1050,6 +1060,18 @@ $DecisionMakerRefViewCopyWith<$Res>? get decisionMaker {
 
   return $DecisionMakerRefViewCopyWith<$Res>(_self.decisionMaker!, (value) {
     return _then(_self.copyWith(decisionMaker: value));
+  });
+}/// Create a copy of ProjectDetailView
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$OutcomeViewCopyWith<$Res>? get pendingOutcome {
+    if (_self.pendingOutcome == null) {
+    return null;
+  }
+
+  return $OutcomeViewCopyWith<$Res>(_self.pendingOutcome!, (value) {
+    return _then(_self.copyWith(pendingOutcome: value));
   });
 }
 }
@@ -1133,10 +1155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  BuildingType buildingType,  String description,  double latitude,  double longitude,  String? addressLine,  String? territoryId,  TerritoryRefView? territory,  bool outsideTerritory,  ConstructionPhase constructionPhase,  ProjectStage stage,  ProjectStatus status,  String ownerId,  ActorView? owner,  int? unitCount,  double? estimatedValue,  String? currency,  String? notes,  DateTime? lastActivityAt,  DateTime? nextActionAt,  DateTime? closedAt,  String? closedBy,  int version,  String? createdBy,  ActorView? createdByUser,  DateTime createdAt,  DateTime updatedAt,  int imageCount,  List<ProjectImageView> images,  List<ActivityView> activities,  List<StakeholderRefView> stakeholders,  DecisionMakerRefView? decisionMaker)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  BuildingType buildingType,  String description,  double latitude,  double longitude,  String? addressLine,  String? territoryId,  TerritoryRefView? territory,  bool outsideTerritory,  ConstructionPhase constructionPhase,  ProjectStage stage,  ProjectStatus status,  String ownerId,  ActorView? owner,  int? unitCount,  double? estimatedValue,  String? currency,  String? notes,  DateTime? lastActivityAt,  DateTime? nextActionAt,  DateTime? closedAt,  String? closedBy,  int version,  String? createdBy,  ActorView? createdByUser,  DateTime createdAt,  DateTime updatedAt,  int imageCount,  List<ProjectImageView> images,  List<ActivityView> activities,  List<StakeholderRefView> stakeholders,  DecisionMakerRefView? decisionMaker,  OutcomeView? pendingOutcome)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProjectDetailView() when $default != null:
-return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.latitude,_that.longitude,_that.addressLine,_that.territoryId,_that.territory,_that.outsideTerritory,_that.constructionPhase,_that.stage,_that.status,_that.ownerId,_that.owner,_that.unitCount,_that.estimatedValue,_that.currency,_that.notes,_that.lastActivityAt,_that.nextActionAt,_that.closedAt,_that.closedBy,_that.version,_that.createdBy,_that.createdByUser,_that.createdAt,_that.updatedAt,_that.imageCount,_that.images,_that.activities,_that.stakeholders,_that.decisionMaker);case _:
+return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.latitude,_that.longitude,_that.addressLine,_that.territoryId,_that.territory,_that.outsideTerritory,_that.constructionPhase,_that.stage,_that.status,_that.ownerId,_that.owner,_that.unitCount,_that.estimatedValue,_that.currency,_that.notes,_that.lastActivityAt,_that.nextActionAt,_that.closedAt,_that.closedBy,_that.version,_that.createdBy,_that.createdByUser,_that.createdAt,_that.updatedAt,_that.imageCount,_that.images,_that.activities,_that.stakeholders,_that.decisionMaker,_that.pendingOutcome);case _:
   return orElse();
 
 }
@@ -1154,10 +1176,10 @@ return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  BuildingType buildingType,  String description,  double latitude,  double longitude,  String? addressLine,  String? territoryId,  TerritoryRefView? territory,  bool outsideTerritory,  ConstructionPhase constructionPhase,  ProjectStage stage,  ProjectStatus status,  String ownerId,  ActorView? owner,  int? unitCount,  double? estimatedValue,  String? currency,  String? notes,  DateTime? lastActivityAt,  DateTime? nextActionAt,  DateTime? closedAt,  String? closedBy,  int version,  String? createdBy,  ActorView? createdByUser,  DateTime createdAt,  DateTime updatedAt,  int imageCount,  List<ProjectImageView> images,  List<ActivityView> activities,  List<StakeholderRefView> stakeholders,  DecisionMakerRefView? decisionMaker)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  BuildingType buildingType,  String description,  double latitude,  double longitude,  String? addressLine,  String? territoryId,  TerritoryRefView? territory,  bool outsideTerritory,  ConstructionPhase constructionPhase,  ProjectStage stage,  ProjectStatus status,  String ownerId,  ActorView? owner,  int? unitCount,  double? estimatedValue,  String? currency,  String? notes,  DateTime? lastActivityAt,  DateTime? nextActionAt,  DateTime? closedAt,  String? closedBy,  int version,  String? createdBy,  ActorView? createdByUser,  DateTime createdAt,  DateTime updatedAt,  int imageCount,  List<ProjectImageView> images,  List<ActivityView> activities,  List<StakeholderRefView> stakeholders,  DecisionMakerRefView? decisionMaker,  OutcomeView? pendingOutcome)  $default,) {final _that = this;
 switch (_that) {
 case _ProjectDetailView():
-return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.latitude,_that.longitude,_that.addressLine,_that.territoryId,_that.territory,_that.outsideTerritory,_that.constructionPhase,_that.stage,_that.status,_that.ownerId,_that.owner,_that.unitCount,_that.estimatedValue,_that.currency,_that.notes,_that.lastActivityAt,_that.nextActionAt,_that.closedAt,_that.closedBy,_that.version,_that.createdBy,_that.createdByUser,_that.createdAt,_that.updatedAt,_that.imageCount,_that.images,_that.activities,_that.stakeholders,_that.decisionMaker);case _:
+return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.latitude,_that.longitude,_that.addressLine,_that.territoryId,_that.territory,_that.outsideTerritory,_that.constructionPhase,_that.stage,_that.status,_that.ownerId,_that.owner,_that.unitCount,_that.estimatedValue,_that.currency,_that.notes,_that.lastActivityAt,_that.nextActionAt,_that.closedAt,_that.closedBy,_that.version,_that.createdBy,_that.createdByUser,_that.createdAt,_that.updatedAt,_that.imageCount,_that.images,_that.activities,_that.stakeholders,_that.decisionMaker,_that.pendingOutcome);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1174,10 +1196,10 @@ return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  BuildingType buildingType,  String description,  double latitude,  double longitude,  String? addressLine,  String? territoryId,  TerritoryRefView? territory,  bool outsideTerritory,  ConstructionPhase constructionPhase,  ProjectStage stage,  ProjectStatus status,  String ownerId,  ActorView? owner,  int? unitCount,  double? estimatedValue,  String? currency,  String? notes,  DateTime? lastActivityAt,  DateTime? nextActionAt,  DateTime? closedAt,  String? closedBy,  int version,  String? createdBy,  ActorView? createdByUser,  DateTime createdAt,  DateTime updatedAt,  int imageCount,  List<ProjectImageView> images,  List<ActivityView> activities,  List<StakeholderRefView> stakeholders,  DecisionMakerRefView? decisionMaker)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  BuildingType buildingType,  String description,  double latitude,  double longitude,  String? addressLine,  String? territoryId,  TerritoryRefView? territory,  bool outsideTerritory,  ConstructionPhase constructionPhase,  ProjectStage stage,  ProjectStatus status,  String ownerId,  ActorView? owner,  int? unitCount,  double? estimatedValue,  String? currency,  String? notes,  DateTime? lastActivityAt,  DateTime? nextActionAt,  DateTime? closedAt,  String? closedBy,  int version,  String? createdBy,  ActorView? createdByUser,  DateTime createdAt,  DateTime updatedAt,  int imageCount,  List<ProjectImageView> images,  List<ActivityView> activities,  List<StakeholderRefView> stakeholders,  DecisionMakerRefView? decisionMaker,  OutcomeView? pendingOutcome)?  $default,) {final _that = this;
 switch (_that) {
 case _ProjectDetailView() when $default != null:
-return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.latitude,_that.longitude,_that.addressLine,_that.territoryId,_that.territory,_that.outsideTerritory,_that.constructionPhase,_that.stage,_that.status,_that.ownerId,_that.owner,_that.unitCount,_that.estimatedValue,_that.currency,_that.notes,_that.lastActivityAt,_that.nextActionAt,_that.closedAt,_that.closedBy,_that.version,_that.createdBy,_that.createdByUser,_that.createdAt,_that.updatedAt,_that.imageCount,_that.images,_that.activities,_that.stakeholders,_that.decisionMaker);case _:
+return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.latitude,_that.longitude,_that.addressLine,_that.territoryId,_that.territory,_that.outsideTerritory,_that.constructionPhase,_that.stage,_that.status,_that.ownerId,_that.owner,_that.unitCount,_that.estimatedValue,_that.currency,_that.notes,_that.lastActivityAt,_that.nextActionAt,_that.closedAt,_that.closedBy,_that.version,_that.createdBy,_that.createdByUser,_that.createdAt,_that.updatedAt,_that.imageCount,_that.images,_that.activities,_that.stakeholders,_that.decisionMaker,_that.pendingOutcome);case _:
   return null;
 
 }
@@ -1189,7 +1211,7 @@ return $default(_that.id,_that.name,_that.buildingType,_that.description,_that.l
 
 @JsonSerializable(converters: [UtcDateTimeConverter()])
 class _ProjectDetailView implements ProjectDetailView {
-  const _ProjectDetailView({required this.id, required this.name, required this.buildingType, required this.description, required this.latitude, required this.longitude, this.addressLine, this.territoryId, this.territory, this.outsideTerritory = false, required this.constructionPhase, required this.stage, required this.status, required this.ownerId, this.owner, this.unitCount, this.estimatedValue, this.currency, this.notes, this.lastActivityAt, this.nextActionAt, this.closedAt, this.closedBy, required this.version, this.createdBy, this.createdByUser, required this.createdAt, required this.updatedAt, required this.imageCount, final  List<ProjectImageView> images = const <ProjectImageView>[], final  List<ActivityView> activities = const <ActivityView>[], final  List<StakeholderRefView> stakeholders = const <StakeholderRefView>[], this.decisionMaker}): _images = images,_activities = activities,_stakeholders = stakeholders;
+  const _ProjectDetailView({required this.id, required this.name, required this.buildingType, required this.description, required this.latitude, required this.longitude, this.addressLine, this.territoryId, this.territory, this.outsideTerritory = false, required this.constructionPhase, required this.stage, required this.status, required this.ownerId, this.owner, this.unitCount, this.estimatedValue, this.currency, this.notes, this.lastActivityAt, this.nextActionAt, this.closedAt, this.closedBy, required this.version, this.createdBy, this.createdByUser, required this.createdAt, required this.updatedAt, required this.imageCount, final  List<ProjectImageView> images = const <ProjectImageView>[], final  List<ActivityView> activities = const <ActivityView>[], final  List<StakeholderRefView> stakeholders = const <StakeholderRefView>[], this.decisionMaker, this.pendingOutcome}): _images = images,_activities = activities,_stakeholders = stakeholders;
   factory _ProjectDetailView.fromJson(Map<String, dynamic> json) => _$ProjectDetailViewFromJson(json);
 
 @override final  String id;
@@ -1243,6 +1265,16 @@ class _ProjectDetailView implements ProjectDetailView {
 }
 
 @override final  DecisionMakerRefView? decisionMaker;
+/// The outcome already submitted on this project and still awaiting a
+/// manager's decision (`status: "PENDING"`), or `null` when there is
+/// none.
+///
+/// Load-bearing for the UI, not decoration: while this is present the
+/// rep must not be able to submit another won/lost claim. The server
+/// refuses a second one anyway (`OUTCOME_ALREADY_OPEN`), but a rep who
+/// only learns that after filling the whole form has been made to do
+/// the work twice — and cannot see what the first claim said.
+@override final  OutcomeView? pendingOutcome;
 
 /// Create a copy of ProjectDetailView
 /// with the given fields replaced by the non-null parameter values.
@@ -1257,16 +1289,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProjectDetailView&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.buildingType, buildingType) || other.buildingType == buildingType)&&(identical(other.description, description) || other.description == description)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.addressLine, addressLine) || other.addressLine == addressLine)&&(identical(other.territoryId, territoryId) || other.territoryId == territoryId)&&(identical(other.territory, territory) || other.territory == territory)&&(identical(other.outsideTerritory, outsideTerritory) || other.outsideTerritory == outsideTerritory)&&(identical(other.constructionPhase, constructionPhase) || other.constructionPhase == constructionPhase)&&(identical(other.stage, stage) || other.stage == stage)&&(identical(other.status, status) || other.status == status)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.unitCount, unitCount) || other.unitCount == unitCount)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.lastActivityAt, lastActivityAt) || other.lastActivityAt == lastActivityAt)&&(identical(other.nextActionAt, nextActionAt) || other.nextActionAt == nextActionAt)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.closedBy, closedBy) || other.closedBy == closedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByUser, createdByUser) || other.createdByUser == createdByUser)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.imageCount, imageCount) || other.imageCount == imageCount)&&const DeepCollectionEquality().equals(other._images, _images)&&const DeepCollectionEquality().equals(other._activities, _activities)&&const DeepCollectionEquality().equals(other._stakeholders, _stakeholders)&&(identical(other.decisionMaker, decisionMaker) || other.decisionMaker == decisionMaker));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProjectDetailView&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.buildingType, buildingType) || other.buildingType == buildingType)&&(identical(other.description, description) || other.description == description)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.addressLine, addressLine) || other.addressLine == addressLine)&&(identical(other.territoryId, territoryId) || other.territoryId == territoryId)&&(identical(other.territory, territory) || other.territory == territory)&&(identical(other.outsideTerritory, outsideTerritory) || other.outsideTerritory == outsideTerritory)&&(identical(other.constructionPhase, constructionPhase) || other.constructionPhase == constructionPhase)&&(identical(other.stage, stage) || other.stage == stage)&&(identical(other.status, status) || other.status == status)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.unitCount, unitCount) || other.unitCount == unitCount)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.lastActivityAt, lastActivityAt) || other.lastActivityAt == lastActivityAt)&&(identical(other.nextActionAt, nextActionAt) || other.nextActionAt == nextActionAt)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.closedBy, closedBy) || other.closedBy == closedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByUser, createdByUser) || other.createdByUser == createdByUser)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.imageCount, imageCount) || other.imageCount == imageCount)&&const DeepCollectionEquality().equals(other._images, _images)&&const DeepCollectionEquality().equals(other._activities, _activities)&&const DeepCollectionEquality().equals(other._stakeholders, _stakeholders)&&(identical(other.decisionMaker, decisionMaker) || other.decisionMaker == decisionMaker)&&(identical(other.pendingOutcome, pendingOutcome) || other.pendingOutcome == pendingOutcome));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,buildingType,description,latitude,longitude,addressLine,territoryId,territory,outsideTerritory,constructionPhase,stage,status,ownerId,owner,unitCount,estimatedValue,currency,notes,lastActivityAt,nextActionAt,closedAt,closedBy,version,createdBy,createdByUser,createdAt,updatedAt,imageCount,const DeepCollectionEquality().hash(_images),const DeepCollectionEquality().hash(_activities),const DeepCollectionEquality().hash(_stakeholders),decisionMaker]);
+int get hashCode => Object.hashAll([runtimeType,id,name,buildingType,description,latitude,longitude,addressLine,territoryId,territory,outsideTerritory,constructionPhase,stage,status,ownerId,owner,unitCount,estimatedValue,currency,notes,lastActivityAt,nextActionAt,closedAt,closedBy,version,createdBy,createdByUser,createdAt,updatedAt,imageCount,const DeepCollectionEquality().hash(_images),const DeepCollectionEquality().hash(_activities),const DeepCollectionEquality().hash(_stakeholders),decisionMaker,pendingOutcome]);
 
 @override
 String toString() {
-  return 'ProjectDetailView(id: $id, name: $name, buildingType: $buildingType, description: $description, latitude: $latitude, longitude: $longitude, addressLine: $addressLine, territoryId: $territoryId, territory: $territory, outsideTerritory: $outsideTerritory, constructionPhase: $constructionPhase, stage: $stage, status: $status, ownerId: $ownerId, owner: $owner, unitCount: $unitCount, estimatedValue: $estimatedValue, currency: $currency, notes: $notes, lastActivityAt: $lastActivityAt, nextActionAt: $nextActionAt, closedAt: $closedAt, closedBy: $closedBy, version: $version, createdBy: $createdBy, createdByUser: $createdByUser, createdAt: $createdAt, updatedAt: $updatedAt, imageCount: $imageCount, images: $images, activities: $activities, stakeholders: $stakeholders, decisionMaker: $decisionMaker)';
+  return 'ProjectDetailView(id: $id, name: $name, buildingType: $buildingType, description: $description, latitude: $latitude, longitude: $longitude, addressLine: $addressLine, territoryId: $territoryId, territory: $territory, outsideTerritory: $outsideTerritory, constructionPhase: $constructionPhase, stage: $stage, status: $status, ownerId: $ownerId, owner: $owner, unitCount: $unitCount, estimatedValue: $estimatedValue, currency: $currency, notes: $notes, lastActivityAt: $lastActivityAt, nextActionAt: $nextActionAt, closedAt: $closedAt, closedBy: $closedBy, version: $version, createdBy: $createdBy, createdByUser: $createdByUser, createdAt: $createdAt, updatedAt: $updatedAt, imageCount: $imageCount, images: $images, activities: $activities, stakeholders: $stakeholders, decisionMaker: $decisionMaker, pendingOutcome: $pendingOutcome)';
 }
 
 
@@ -1277,11 +1309,11 @@ abstract mixin class _$ProjectDetailViewCopyWith<$Res> implements $ProjectDetail
   factory _$ProjectDetailViewCopyWith(_ProjectDetailView value, $Res Function(_ProjectDetailView) _then) = __$ProjectDetailViewCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, BuildingType buildingType, String description, double latitude, double longitude, String? addressLine, String? territoryId, TerritoryRefView? territory, bool outsideTerritory, ConstructionPhase constructionPhase, ProjectStage stage, ProjectStatus status, String ownerId, ActorView? owner, int? unitCount, double? estimatedValue, String? currency, String? notes, DateTime? lastActivityAt, DateTime? nextActionAt, DateTime? closedAt, String? closedBy, int version, String? createdBy, ActorView? createdByUser, DateTime createdAt, DateTime updatedAt, int imageCount, List<ProjectImageView> images, List<ActivityView> activities, List<StakeholderRefView> stakeholders, DecisionMakerRefView? decisionMaker
+ String id, String name, BuildingType buildingType, String description, double latitude, double longitude, String? addressLine, String? territoryId, TerritoryRefView? territory, bool outsideTerritory, ConstructionPhase constructionPhase, ProjectStage stage, ProjectStatus status, String ownerId, ActorView? owner, int? unitCount, double? estimatedValue, String? currency, String? notes, DateTime? lastActivityAt, DateTime? nextActionAt, DateTime? closedAt, String? closedBy, int version, String? createdBy, ActorView? createdByUser, DateTime createdAt, DateTime updatedAt, int imageCount, List<ProjectImageView> images, List<ActivityView> activities, List<StakeholderRefView> stakeholders, DecisionMakerRefView? decisionMaker, OutcomeView? pendingOutcome
 });
 
 
-@override $TerritoryRefViewCopyWith<$Res>? get territory;@override $ActorViewCopyWith<$Res>? get owner;@override $ActorViewCopyWith<$Res>? get createdByUser;@override $DecisionMakerRefViewCopyWith<$Res>? get decisionMaker;
+@override $TerritoryRefViewCopyWith<$Res>? get territory;@override $ActorViewCopyWith<$Res>? get owner;@override $ActorViewCopyWith<$Res>? get createdByUser;@override $DecisionMakerRefViewCopyWith<$Res>? get decisionMaker;@override $OutcomeViewCopyWith<$Res>? get pendingOutcome;
 
 }
 /// @nodoc
@@ -1294,7 +1326,7 @@ class __$ProjectDetailViewCopyWithImpl<$Res>
 
 /// Create a copy of ProjectDetailView
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? buildingType = null,Object? description = null,Object? latitude = null,Object? longitude = null,Object? addressLine = freezed,Object? territoryId = freezed,Object? territory = freezed,Object? outsideTerritory = null,Object? constructionPhase = null,Object? stage = null,Object? status = null,Object? ownerId = null,Object? owner = freezed,Object? unitCount = freezed,Object? estimatedValue = freezed,Object? currency = freezed,Object? notes = freezed,Object? lastActivityAt = freezed,Object? nextActionAt = freezed,Object? closedAt = freezed,Object? closedBy = freezed,Object? version = null,Object? createdBy = freezed,Object? createdByUser = freezed,Object? createdAt = null,Object? updatedAt = null,Object? imageCount = null,Object? images = null,Object? activities = null,Object? stakeholders = null,Object? decisionMaker = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? buildingType = null,Object? description = null,Object? latitude = null,Object? longitude = null,Object? addressLine = freezed,Object? territoryId = freezed,Object? territory = freezed,Object? outsideTerritory = null,Object? constructionPhase = null,Object? stage = null,Object? status = null,Object? ownerId = null,Object? owner = freezed,Object? unitCount = freezed,Object? estimatedValue = freezed,Object? currency = freezed,Object? notes = freezed,Object? lastActivityAt = freezed,Object? nextActionAt = freezed,Object? closedAt = freezed,Object? closedBy = freezed,Object? version = null,Object? createdBy = freezed,Object? createdByUser = freezed,Object? createdAt = null,Object? updatedAt = null,Object? imageCount = null,Object? images = null,Object? activities = null,Object? stakeholders = null,Object? decisionMaker = freezed,Object? pendingOutcome = freezed,}) {
   return _then(_ProjectDetailView(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -1329,7 +1361,8 @@ as int,images: null == images ? _self._images : images // ignore: cast_nullable_
 as List<ProjectImageView>,activities: null == activities ? _self._activities : activities // ignore: cast_nullable_to_non_nullable
 as List<ActivityView>,stakeholders: null == stakeholders ? _self._stakeholders : stakeholders // ignore: cast_nullable_to_non_nullable
 as List<StakeholderRefView>,decisionMaker: freezed == decisionMaker ? _self.decisionMaker : decisionMaker // ignore: cast_nullable_to_non_nullable
-as DecisionMakerRefView?,
+as DecisionMakerRefView?,pendingOutcome: freezed == pendingOutcome ? _self.pendingOutcome : pendingOutcome // ignore: cast_nullable_to_non_nullable
+as OutcomeView?,
   ));
 }
 
@@ -1380,6 +1413,18 @@ $DecisionMakerRefViewCopyWith<$Res>? get decisionMaker {
 
   return $DecisionMakerRefViewCopyWith<$Res>(_self.decisionMaker!, (value) {
     return _then(_self.copyWith(decisionMaker: value));
+  });
+}/// Create a copy of ProjectDetailView
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$OutcomeViewCopyWith<$Res>? get pendingOutcome {
+    if (_self.pendingOutcome == null) {
+    return null;
+  }
+
+  return $OutcomeViewCopyWith<$Res>(_self.pendingOutcome!, (value) {
+    return _then(_self.copyWith(pendingOutcome: value));
   });
 }
 }

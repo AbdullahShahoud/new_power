@@ -147,9 +147,23 @@ class _NonScrollableContent extends StatelessWidget {
           SizedBox(height: 12.h),
         ] else
           SizedBox(height: 16.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: builder(bottomSheetContext),
+        // ⚠️ `Flexible`, not a bare `Padding`.
+        //
+        // As a non-flex child the content was handed the sheet's **full**
+        // height, so anything that wanted to fill the space took all of it
+        // — and then the grabber above and the spacer below were added on
+        // top, overflowing this Column by exactly their combined height
+        // ("A RenderFlex overflowed by 213 pixels on the bottom").
+        //
+        // The fit is loose, so this only ever *permits* shrinking: content
+        // smaller than the sheet is laid out exactly as before, and content
+        // larger than it now gets a bounded box it can clamp a scrollable
+        // against instead of running off the bottom.
+        Flexible(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: builder(bottomSheetContext),
+          ),
         ),
         SizedBox(height: 20.h),
       ],

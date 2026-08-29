@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!-- Project registration / activity logging: GPS fix (geolocator) and
@@ -12,10 +13,61 @@
     <!-- Push notifications. Runtime-requested on Android 13+ (API 33);
          granted implicitly below that. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!-- ── Permissions merged in by dependencies and removed again ──────────
+         `open_filex` declares the broad media-read permissions so that it can
+         open files anywhere on shared storage. This app never uses it that
+         way: the only thing it opens is an attachment the app itself just
+         downloaded into its own directory, handed to the OS viewer through
+         open_filex's own FileProvider — which needs no read permission at
+         all.
+
+         Leaving them declared is not free. READ_MEDIA_IMAGES and
+         READ_MEDIA_VIDEO put the listing into Google Play's Photo and Video
+         Permissions policy, which requires a written declaration and rejects
+         any app whose declared use is not core functionality. "A library we
+         depend on asked for it" is exactly the answer that fails that
+         review.
+
+         image_picker is unaffected: since Android 13 it goes through the
+         Photo Picker, which returns a scoped URI and deliberately requires
+         no media permission.
+
+         ⚠️ If a future feature genuinely needs to browse the user's media
+         library, remove the matching line here rather than working around
+         it — and be ready to fill in the Play declaration. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- Auto-backup is off, deliberately.
+
+         SecureStorageHelper runs flutter_secure_storage with
+         AndroidOptions(encryptedSharedPreferences: true). That stores an
+         EncryptedSharedPreferences blob whose master key lives in the
+         hardware-backed keystore — and the keystore does **not** travel with
+         a backup.
+
+         With backup left at its default (true), a device-to-device transfer
+         or a Google restore reinstates the ciphertext onto a device that has
+         no key for it. Every read then throws: SecureStorageHelper.readSafe
+         raises SecureStorageException, AppStartupRouter.resolve() catches it
+         and routes to startupError on every launch, and DioFactory's
+         onRequest interceptor throws before any request leaves. The user has
+         no in-app way out of that state.
+
+         Losing backup costs the user a re-login. Keeping it cost them the
+         app.
+
+         allowBackup/fullBackupContent cover API ≤ 30; dataExtractionRules is
+         the API 31+ replacement, and both must agree. -->
     <application
         android:label="NewPower"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <!-- Google Maps SDK (google_maps_flutter) — free-tier display only:
              MapPickerScreen (long-press to place a pin) and the nearby-own-
              projects overlay while logging a visit. No location tracking. -->
@@ -52,11 +104,28 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="newpower_security" />
-        <!-- Without this the tray shows the full-colour launcher icon
-             squashed into a white square on Android 5+. -->
+        <!-- Small icon for a push rendered by the **system**, i.e. one that
+             arrives while the app is backgrounded or terminated. The
+             foreground path never reaches here: PushService suppresses the
+             OS banner and presents its own notification, passing
+             `icon: 'ic_stat_notification'` directly.
+
+             ⚠️ Must be @drawable, not @mipmap. Firebase resolves this the
+             same way flutter_local_notifications does — by drawable
+             identifier — so @mipmap/ic_launcher resolved to 0 and Android
+             silently dropped the notification rather than showing a
+             fallback. The old comment here claimed this line prevented a
+             white square; pointing it at the colour launcher icon is what
+             caused the problem it described. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
+            android:resource="@drawable/ic_stat_notification" />
+        <!-- Tint applied behind the silhouette. Without it the system picks
+             its own grey, and a security alert looks identical to a routine
+             announcement in the shade. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_accent" />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

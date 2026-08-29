@@ -49,7 +49,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDmemC33trUPQqhgf2JKW-Z-f1SvSfULt8',
-    appId: '1:141224916519:android:7f8ada3af18da0aa538002',
+    appId: '1:141224916519:android:ee6e085e683cdeeb538002',
     messagingSenderId: '141224916519',
     projectId: 'newpower-bgx',
     storageBucket: 'newpower-bgx.firebasestorage.app',
@@ -57,15 +57,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyARCDDmb1GeZeJt2OkNvN5iy-iqxPnA4Zo',
-    appId: '1:141224916519:ios:aaac66e2081516b9538002',
+    appId: '1:141224916519:ios:f4db093176574bb4538002',
     messagingSenderId: '141224916519',
     projectId: 'newpower-bgx',
     storageBucket: 'newpower-bgx.firebasestorage.app',
-    // ⚠️ From GoogleService-Info.plist, and it does **not** match the
-    // Android applicationId (`com.example.new_power`). That is how the
-    // Firebase project is registered, so it is reproduced verbatim rather
-    // than "corrected" — changing it here would break iOS push while
-    // looking tidier.
-    iosBundleId: 'com.example.newPower',
+    // Must equal PRODUCT_BUNDLE_IDENTIFIER in Runner.xcodeproj and BUNDLE_ID
+    // in GoogleService-Info.plist. All three read com.newpower.app, which
+    // also matches the Android applicationId.
+    iosBundleId: 'com.newpower.app',
   );
 }

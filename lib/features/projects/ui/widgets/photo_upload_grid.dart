@@ -8,7 +8,9 @@ import '../../../../core/theming/app_colors.dart';
 import '../../../../core/theming/app_radius.dart';
 import '../../../../core/widget/image_viewer_screen.dart';
 import '../../../../core/widget/pressable_scale.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../logic/file_upload_bloc/file_upload_bloc.dart';
+import '../../logic/file_upload_bloc/file_upload_event.dart';
 import '../../logic/file_upload_bloc/file_upload_state.dart';
 
 /// Shared photo picker grid — thumbnails with an upload-progress overlay, a
@@ -72,6 +74,21 @@ class PhotoUploadGrid extends StatelessWidget {
                 // on a phone thumbnail it's hard to tell a usable shot from
                 // a blurred one.
                 onTap: () => _openViewer(context, localId),
+                // Re-dispatching `uploadRequested` for the same localId is
+                // the retry: the Bloc resets that entry to `uploading` and
+                // starts the request again, so the tile picks the new state
+                // up with no extra plumbing. The file is still on disk —
+                // nothing about a failed upload consumed it.
+                onRetry: () {
+                  final file = pickedFiles[localId];
+                  if (file == null) return;
+                  context.read<FileUploadBloc>().add(
+                    FileUploadEvent.uploadRequested(
+                      localId: localId,
+                      file: file,
+                    ),
+                  );
+                },
               ),
             if (localIds.length < maxPhotos)
               PressableScale(
@@ -97,17 +114,87 @@ class PhotoUploadGrid extends StatelessWidget {
   }
 }
 
+/// What a failed upload shows in place of the old flat red wash.
+///
+/// Sized for a 76×76 tile, so it is an icon and one short word — the full
+/// reason has nowhere to live at this size and the icon carries it.
+class _FailedOverlay extends StatelessWidget {
+  final FileUploadFailureReason? reason;
+  final VoidCallback onRetry;
+
+  const _FailedOverlay({required this.reason, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    // Only a network failure can succeed on a second attempt. A file the
+    // server rejected or one over the ceiling will fail the same way every
+    // time, so those get the plain marker and the rep uses the ✕.
+    final retryable =
+        reason == FileUploadFailureReason.network || reason == null;
+
+    final overlay = Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(AppRadius.field),
+        border: Border.all(color: colors.error, width: 1.5),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              retryable ? Icons.refresh_rounded : Icons.block_rounded,
+              color: Colors.white,
+              size: 22.sp,
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              context.tr(
+                retryable
+                    ? 'retry'
+                    : reason == FileUploadFailureReason.tooLarge
+                    ? 'upload_too_large_short'
+                    : 'upload_rejected_short',
+              ),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!retryable) return overlay;
+    return GestureDetector(
+      onTap: onRetry,
+      // The whole tile is the target, not just the glyph — 76dp square is
+      // comfortably above the 48dp minimum, and a rep retrying on site is
+      // often doing it one-handed.
+      behavior: HitTestBehavior.opaque,
+      child: overlay,
+    );
+  }
+}
+
 class _PhotoTile extends StatelessWidget {
   final File? file;
   final FileUploadItem? item;
   final VoidCallback onRemove;
   final VoidCallback onTap;
+  final VoidCallback onRetry;
 
   const _PhotoTile({
     required this.file,
     required this.item,
     required this.onRemove,
     required this.onTap,
+    required this.onRetry,
   });
 
   @override
@@ -148,16 +235,26 @@ class _PhotoTile extends StatelessWidget {
               ),
             ),
           ),
+        // A failed upload offers the action that fixes it.
+        //
+        // This used to be a flat red wash with a static error icon — it
+        // announced the problem and then gave the rep nothing to do about
+        // it. The only control on the tile was the ✕, so the way to retry a
+        // photo that failed on a weak site connection was to delete it and
+        // pick it from the gallery again. Reps standing on a building site
+        // lose uploads to the network constantly; that is the normal case,
+        // not the exceptional one.
+        //
+        // Only a *network* failure is offered a retry. Re-sending a file the
+        // server rejected, or one over the size ceiling, fails identically
+        // every time — offering the button there would just be a slower way
+        // of reaching the same dead end, so those keep the plain error and
+        // the rep removes the photo.
         if (item?.status == FileUploadItemStatus.failed)
           Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                color: colors.error.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(AppRadius.field),
-              ),
-              child: const Center(
-                child: Icon(Icons.error_outline, color: Colors.white),
-              ),
+            child: _FailedOverlay(
+              reason: item!.failureReason,
+              onRetry: onRetry,
             ),
           ),
         Positioned(

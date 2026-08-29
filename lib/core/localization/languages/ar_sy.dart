@@ -105,6 +105,8 @@ final Map<String, String> arSY = {
   'projects_register_photos_still_uploading': 'انتظر حتى تنتهي الصور من الرفع',
   'projects_register_address': 'العنوان',
   'projects_register_address_hint': 'مثال: طريق المزة، مقابل الإطفاء',
+  'projects_register_address_required':
+      'أضف عنواناً مكتوباً — الدبوس وحده يصعب الوصول إليه في الموقع.',
   'projects_register_unit_count': 'عدد الوحدات',
   'projects_register_unit_count_hint': 'عدد الوحدات',
   'projects_register_estimated_value': 'القيمة التقديرية (ريال)',
@@ -115,6 +117,11 @@ final Map<String, String> arSY = {
   'projects_register_notes_hint': 'أي شيء آخر يستحق التسجيل',
   'projects_register_optional': '(اختياري)',
   'projects_register_submit': 'تسجيل المبنى',
+  'projects_register_nearby_confirm_title': 'هل هذا المبنى مُسجَّل مسبقاً؟',
+  'projects_register_nearby_confirm_subtitle':
+      'يوجد {count} مبنى مسجّل أصلاً ضمن ٣٠٠ متر من موقعك. راجعها قبل إضافة مبنى آخر — تسجيل نسخة مكرّرة يخلق عملاً لمن يملك السجل الآخر.',
+  'projects_register_nearby_confirm_cancel': 'رجوع للمراجعة',
+  'projects_register_nearby_confirm_proceed': 'هذا مبنى مختلف — سجّله',
   'projects_register_duplicates_title': 'مبانٍ مشابهة قريبة',
   'projects_register_duplicates_subtitle':
       'تم تسجيل مبناك. قد تكون هذه المباني القريبة هي نفس المبنى — تحقق قبل العمل عليها جميعًا.',
@@ -286,7 +293,11 @@ final Map<String, String> arSY = {
   'activity_detail_person_communication': 'الشخص الذي تحدثت معه',
   'log_activity_persons_required': 'اختر شخصًا واحدًا على الأقل',
   'log_activity_persons_empty':
-      'لا يوجد جهات اتصال مرتبطة بهذا المشروع بعد — دليل أصحاب المصلحة قادم في تحديث لاحق.',
+      'لا توجد جهات اتصال مرتبطة بهذا المشروع بعد. أضف صاحب مصلحة لتسجيل من قابلت.',
+  'log_activity_add_stakeholder': 'إضافة صاحب مصلحة',
+  'log_activity_stage': 'مرحلة المشروع',
+  'log_activity_stage_will_change':
+      'ستنتقل مرحلة المشروع من {from} إلى {to} عند الحفظ.',
   'log_activity_location': 'الموقع',
   'log_activity_location_cta': 'اضغط لالتقاط موقعك الحالي',
   'log_activity_construction_phase_observed': 'مرحلة البناء الملاحظة',
@@ -408,6 +419,18 @@ final Map<String, String> arSY = {
   'submit_won_units_total': 'إجمالي الوحدات',
   'submit_won_units_exceed_total':
       'لا يمكن أن تتجاوز الوحدات الموردة إجمالي الوحدات',
+  'submit_won_buyer_contact_required': 'اختر جهة الاتصال المشترية',
+  'submit_won_sold_at_required': 'اختر تاريخ البيع',
+  'submit_won_categories_required': 'اختر فئة منتجات واحدة على الأقل',
+  'submit_outcome_field_required': 'هذا الحقل مطلوب',
+  'submit_outcome_invalid_amount': 'أدخل مبلغًا أكبر من الصفر',
+  'submit_outcome_invalid_count': 'أدخل رقمًا صحيحًا',
+
+  'projects_detail_outcome_pending_title': 'طلب {type} قيد المراجعة',
+  'projects_detail_outcome_pending_lock':
+      'لا يمكنك تقديم نتيجة أخرى حتى يبتّ مديرك في هذا الطلب.',
+  'projects_detail_outcome_pending_open': 'عرض الطلب',
+  'projects_detail_outcome_submitted_at': 'تاريخ التقديم',
 
   'outcome_detail_title': 'النتيجة',
   'outcome_detail_not_found': 'تعذر العثور على هذه النتيجة',
@@ -868,12 +891,10 @@ final Map<String, String> arSY = {
   'offline_queue_full':
       'تعذّر وضع الطلب في قائمة الانتظار. أعد المحاولة عند الاتصال.',
 
-  // Send Money Screen
   'back_home': 'العودة إلى الرئيسية',
 
-  'qr_tx_status_success': 'نجح',
-  'qr_tx_status_failed': 'فشل',
-  'qr_tx_status_pending': 'قيد الانتظار',
+  // Conflict (409) — mapped from CONFLICT in ApiErrorHandler.
+  'error_duplicate_request': 'تمت معالجة هذا الطلب مسبقاً',
 
   // Notifications
   'notifications': 'الإشعارات',
@@ -1026,10 +1047,20 @@ final Map<String, String> arSY = {
   'stakeholder_slot_developer': 'المطوّر العقاري / المالك',
   'stakeholder_slot_consultant': 'المكتب الاستشاري',
   'stakeholder_slot_contractor': 'شركة المقاولات',
+  'projects_register_contractor_required':
+      'أضف شركة المقاولات مع اسم جهة الاتصال ورقم هاتفها',
   'add_stakeholder_pick_hint': 'ابحث أو أضف',
-  'add_stakeholder_search_hint': 'ابحث باسم الشركة أو الشخص',
+  'add_stakeholder_search_hint': 'اكتب حرفين على الأقل للبحث',
+  'upload_too_large_short': 'كبير جداً',
+  'upload_rejected_short': 'مرفوض',
+  'add_stakeholder_search_failed':
+      'فشل البحث — تحقّق من الاتصال وأعد المحاولة.',
+  'add_stakeholder_account_name': 'اسم الشركة',
+  'add_stakeholder_account_name_hint': 'اسم الشركة كاملاً',
   'add_stakeholder_create_named': 'إضافة «{name}» كجديد',
   'add_stakeholder_contact_optional': 'الشخص الذي تتعامل معه (اختياري)',
+  'add_stakeholder_contact_required': 'الشخص الذي تتعامل معه',
+  'add_contact_phone_optional_hint': 'رقم الهاتف (اختياري)',
   'projects_register_nearby_loading': 'جارٍ التحقق من المباني المجاورة…',
   'projects_register_nearby_title': '{count} مبانٍ مسجّلة بالجوار',
   'projects_register_nearby_subtitle':
@@ -1097,8 +1128,7 @@ final Map<String, String> arSY = {
   'attainment_metric_units_supplied': 'الوحدات المورَّدة',
   'attainment_metric_wins_count': 'عدد الصفقات الرابحة',
   'attainment_metric_sales_value_desc': 'قيمة المبيعات المؤكَّدة خلال الفترة',
-  'attainment_metric_units_supplied_desc':
-      'عدد الوحدات المورَّدة خلال الفترة',
+  'attainment_metric_units_supplied_desc': 'عدد الوحدات المورَّدة خلال الفترة',
   'attainment_metric_wins_count_desc':
       'عدد الصفقات الرابحة المؤكَّدة خلال الفترة',
   'attainment_sort_period_asc': 'الفترة — الأقدم أولاً',

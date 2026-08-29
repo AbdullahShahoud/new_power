@@ -188,6 +188,9 @@ _ProjectDetailView _$ProjectDetailViewFromJson(
       : DecisionMakerRefView.fromJson(
           json['decisionMaker'] as Map<String, dynamic>,
         ),
+  pendingOutcome: json['pendingOutcome'] == null
+      ? null
+      : OutcomeView.fromJson(json['pendingOutcome'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ProjectDetailViewToJson(
@@ -235,6 +238,7 @@ Map<String, dynamic> _$ProjectDetailViewToJson(
   'activities': instance.activities,
   'stakeholders': instance.stakeholders,
   'decisionMaker': instance.decisionMaker,
+  'pendingOutcome': instance.pendingOutcome,
 };
 
 const _$BuildingTypeEnumMap = {

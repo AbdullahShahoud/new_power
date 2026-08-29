@@ -147,13 +147,26 @@ class AppColors {
   /// Secondary text (labels, hints, meta) — ink600 in light, ink300 in dark.
   Color get textColor70 => isDark ? ink300 : ink600;
 
+  // The three accessors below are named after the opacity percentages they
+  // replaced (70%, 13%, 10% ink), which is why they are PascalCase and why
+  // the analyzer flags them. They have ~44 call sites across the widget
+  // layer, so renaming them is a mechanical but wide diff — deliberately
+  // deferred rather than folded into release-prep, where a sweeping rename
+  // would obscure the changes that actually matter for shipping.
+  //
+  // When renaming: Color70 → textColor70 (it is already a pure alias),
+  // Color13 → surfaceSubtle, Color10 → surfaceFaint.
+
   /// Alias kept for existing call sites — same as [textColor70].
+  // ignore: non_constant_identifier_names
   Color get Color70 => textColor70;
 
   /// Subtle divider/bg tone — ink100 in light, ink800 in dark.
+  // ignore: non_constant_identifier_names
   Color get Color13 => isDark ? ink800 : ink100;
 
   /// Barely-there overlay tone — ink50 in light, ink900 in dark.
+  // ignore: non_constant_identifier_names
   Color get Color10 => isDark ? ink900 : ink50;
 
   /// Links, accent text (e.g. "Create account") → brand600 (§2: "links

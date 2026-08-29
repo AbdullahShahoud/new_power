@@ -40,7 +40,47 @@ import '../theming/theme_notifier.dart';
 
 final getIt = GetIt.instance;
 
+/// App-lifetime singletons — registered **once**, from `main()`, and
+/// deliberately left alone by [resetGetIt].
+///
+/// These three back `ValueListenableBuilder`s in `MyApp.build`, which capture
+/// the notifier instance at first build and hold it for the life of the
+/// widget. `MyApp` is a `StatelessWidget` with no parent that ever rebuilds
+/// it, so nothing re-reads `getIt<ThemeNotifier>()` after startup.
+///
+/// When these lived in [setupGetIt], logging out replaced all three: the
+/// widgets kept listening to the orphaned originals while every
+/// `toggleTheme()` / `setLanguage()` call mutated the new ones. Theme and
+/// language switching silently stopped working after the first logout and
+/// only came back on a cold start.
+///
+/// A session teardown has no business touching display preferences anyway —
+/// they are user settings persisted in `CacheHelper`, not session state.
+Future<void> setupCoreSingletons() async {
+  // Theme Notifier (singleton for global theme state)
+  getIt.registerLazySingleton<ThemeNotifier>(() => ThemeNotifier());
+
+  // Language Manager (singleton for global language state)
+  getIt.registerLazySingleton<LanguageManager>(() => LanguageManager());
+
+  // Preferred display currency
+  getIt.registerLazySingleton<CurrencyManager>(() => CurrencyManager());
+}
+
+/// Name of the get_it scope holding everything tied to one signed-in session.
+///
+/// A scope rather than per-type unregistration: dropping a scope disposes
+/// exactly what was registered inside it and leaves the base scope — the
+/// [setupCoreSingletons] instances — physically untouched. Re-registering
+/// them after a `reset()` would not do: that constructs *new* notifiers, and
+/// the widgets are holding the old ones, which is the whole bug.
+const String _sessionScope = 'session';
+
+/// Session-scoped graph: repositories, services and Blocs. Torn down and
+/// rebuilt by [resetGetIt] on logout so no previous user's state survives.
 Future<void> setupGetIt() async {
+  getIt.pushNewScope(scopeName: _sessionScope);
+
   // ========================== Core ==========================
 
   // Auth Dio: register, login, verify-otp, refresh, logout, me,
@@ -56,14 +96,9 @@ Future<void> setupGetIt() async {
   final appDio = DioFactory.getAppDio();
   getIt.registerLazySingleton<ApiService>(() => ApiService(appDio));
 
-  // Theme Notifier (singleton for global theme state)
-  getIt.registerLazySingleton<ThemeNotifier>(() => ThemeNotifier());
-
-  // Language Manager (singleton for global language state)
-  getIt.registerLazySingleton<LanguageManager>(() => LanguageManager());
-
-  // Preferred display currency (singleton for the wallet card ordering)
-  getIt.registerLazySingleton<CurrencyManager>(() => CurrencyManager());
+  // ThemeNotifier, LanguageManager and CurrencyManager are **not** registered
+  // here — see setupCoreSingletons() above for why moving them out was
+  // necessary.
 
   // ========================== Auth ==========================
 
@@ -74,9 +109,7 @@ Future<void> setupGetIt() async {
     () => AuthService(getIt<ApiService>(instanceName: 'authApiService')),
   );
 
-  getIt.registerFactory<LoginCubit>(
-    () => LoginCubit(getIt<AuthRepository>()),
-  );
+  getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt<AuthRepository>()));
   getIt.registerFactory<RegisterCubit>(
     () => RegisterCubit(getIt<AuthRepository>()),
   );
@@ -130,7 +163,10 @@ Future<void> setupGetIt() async {
   // regardless of which screen is currently open.
   getIt.registerLazySingleton<OfflineQueueStore>(() => OfflineQueueStore());
   getIt.registerLazySingleton<OfflineSyncBloc>(
-    () => OfflineSyncBloc(getIt<OfflineQueueStore>(), getIt<ActivitiesRepository>()),
+    () => OfflineSyncBloc(
+      getIt<OfflineQueueStore>(),
+      getIt<ActivitiesRepository>(),
+    ),
   );
 
   // ========================== Projects (Phase 6) ==========================
@@ -226,7 +262,16 @@ Future<void> setupGetIt() async {
   );
 }
 
+/// Drops the session scope and builds a fresh one, leaving the app-lifetime
+/// singletons from [setupCoreSingletons] in place.
+///
+/// ⚠️ `await`ed throughout, and its caller awaits it too. It used to call
+/// `setupGetIt()` without `await` from inside an `async` function, so
+/// `AuthService.logout()` could return — and the login screen could start
+/// resolving dependencies — while re-registration was still in flight.
 Future<void> resetGetIt() async {
-  await getIt.reset(dispose: true);
-  setupGetIt();
+  if (getIt.hasScope(_sessionScope)) {
+    await getIt.dropScope(_sessionScope);
+  }
+  await setupGetIt();
 }

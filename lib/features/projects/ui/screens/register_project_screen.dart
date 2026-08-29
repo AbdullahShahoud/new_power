@@ -24,7 +24,6 @@ import '../../data/models/enums.dart';
 import '../../data/models/location_dto.dart';
 import '../../data/models/nearby_project_card_view.dart';
 import '../../data/models/register_project_request.dart';
-import '../../data/models/register_project_result.dart';
 import '../../data/repo/projects_repository.dart';
 import '../../../../core/networking/api_result.dart';
 import '../../data/models/stored_file.dart';
@@ -95,6 +94,11 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
   /// than a cleanup job.
   List<NearbyProjectCardView> _nearby = const [];
   bool _nearbyLoading = false;
+
+  /// Set once the rep has been shown the neighbouring buildings and chosen
+  /// to register anyway. Stops the post-registration sheet re-asking a
+  /// question that was just answered about the same list.
+  bool _confirmedNearby = false;
 
   /// The three parties that appear on essentially every building, each
   /// pinned to a fixed [StakeholderRole].
@@ -245,7 +249,7 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_buildingType == null) {
       _showSnack(context.tr('projects_register_building_type_required'));
@@ -257,6 +261,12 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
     }
     if (_latitude == null || _longitude == null) {
       _showSnack(context.tr('projects_register_location_required'));
+      return;
+    }
+    // Checked before the photo loop below, so a rep missing the contractor
+    // is told immediately rather than after waiting on uploads.
+    if (_contractor == null || !_contractor!.hasFullContact) {
+      _showSnack(context.tr('projects_register_contractor_required'));
       return;
     }
 
@@ -296,6 +306,9 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
       files: uploadedFiles
           .map((f) => ProjectFileRefDto(key: f.key, name: f.name))
           .toList(),
+      // Required by the form now, so it is always present. The empty check
+      // stays as a belt-and-braces guard: `addressLine` is nullable on the
+      // wire and an empty string is not the same as an absent field.
       addressLine: _addressController.text.trim().isEmpty
           ? null
           : _addressController.text.trim(),
@@ -311,40 +324,62 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
           : _notesController.text.trim(),
     );
 
+    // ⚠️ The duplicate question is asked **here**, before the row exists.
+    //
+    // It used to be asked only of the server's own `nearbyProjects`, in the
+    // response to `POST /projects` — which meant the building was already
+    // registered by the time the rep was shown the buildings it might
+    // duplicate, and their only option was an "OK" button. Answering "is
+    // this already someone's project?" after creating it turns a decision
+    // into a cleanup job for whoever owns the other row.
+    //
+    // `_nearby` is already loaded and current: `_loadNearby` runs on every
+    // pin drop, so this costs no extra request and no extra wait.
+    if (_nearby.isNotEmpty) {
+      final proceed = await _confirmNearbyBeforeRegister();
+      if (!proceed || !mounted) return;
+      // Suppress the post-registration sheet — the rep has just answered
+      // this exact question about this exact list.
+      _confirmedNearby = true;
+    }
+
+    if (!mounted) return;
     context.read<ProjectsBloc>().add(ProjectsEvent.registerSubmitted(request));
+  }
+
+  /// Shows the neighbouring buildings and asks whether to register anyway.
+  ///
+  /// Returns `false` on a dismiss (tap-outside or back) as well as on an
+  /// explicit cancel: an unanswered "are you sure" is not a yes.
+  Future<bool> _confirmNearbyBeforeRegister() async {
+    final confirmed = await showAnimatedBottomSheet<bool>(
+      context: context,
+      // ⚠️ `useScrollWrapper: false` is load-bearing.
+      //
+      // The wrapper puts the builder's output inside a ListView, and this
+      // sheet needs its own scrolling list for the candidates. Two nested
+      // scrollables is what broke it: the inner list, handed unbounded
+      // height by the outer one, ends up with a viewport exactly as tall as
+      // its content — so it can never scroll, yet it still consumes every
+      // vertical drag over it. The outer sheet therefore could not scroll
+      // either, and with more than a couple of buildings the buttons sat
+      // below the fold with no way to reach them.
+      //
+      // Off, this sheet owns its layout: a fixed header, a list that
+      // scrolls inside whatever height is left, and the two buttons pinned
+      // underneath where they cannot be scrolled away from.
+      useScrollWrapper: false,
+      initialChildSize: 0.65,
+      maxChildSize: 0.9,
+      builder: (sheetContext) => _NearbyConfirmSheet(candidates: _nearby),
+    );
+    return confirmed ?? false;
   }
 
   void _showSnack(String message) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  /// `GET /projects/nearby` around the building just registered.
-  ///
-  /// 300 m: far enough to catch the rest of a street, inside the endpoint's
-  /// 1–1200 m bound, and tight enough that a dense city block doesn't return
-  /// a list nobody reads.
-  ///
-  /// The new project is filtered out — it is trivially "near itself", and
-  /// showing it back as a possible duplicate of itself would be nonsense.
-  /// A failure here is swallowed: this is an extra courtesy after a
-  /// registration that already succeeded, and an error toast would read as
-  /// though the registration went wrong.
-  Future<List<NearbyProjectCardView>> _fetchNearby(
-    RegisteredProjectView project,
-  ) async {
-    final result = await getIt<ProjectsRepository>().nearby(
-      lat: project.latitude,
-      lng: project.longitude,
-      radiusM: 300,
-    );
-    if (result is! Success<List<NearbyProjectCardView>>) {
-      return const <NearbyProjectCardView>[];
-    }
-    return result.data
-        .where((candidate) => candidate.projectId != project.id)
-        .toList();
   }
 
   Future<void> _showDuplicateCandidates(
@@ -354,68 +389,76 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
       context: context,
       initialChildSize: 0.55,
       builder: (sheetContext) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              sheetContext.tr('projects_register_duplicates_title'),
-              style: sheetContext.textStyles.baseBold,
-            ),
-            verticalSpace(4.h),
-            Text(
-              sheetContext.tr('projects_register_duplicates_subtitle'),
-              style: sheetContext.textStyles.smRegular,
-            ),
-            verticalSpace(12.h),
-            for (final candidate in candidates)
-              Padding(
-                padding: EdgeInsets.only(bottom: 10.h),
-                child: Container(
-                  padding: EdgeInsets.all(12.w),
-                  decoration: BoxDecoration(
-                    color: sheetContext.colors.page,
-                    borderRadius: BorderRadius.circular(AppRadius.field),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              candidate.name,
-                              style: sheetContext.textStyles.smBold,
-                            ),
-                            Text(
-                              '${candidate.distanceM.round()} ${sheetContext.tr('unit_meters_short')} · '
-                              '${sheetContext.tr(candidate.stage.labelKey)}',
-                              style: sheetContext.textStyles.xsMedium,
-                            ),
-                            Text(
-                              '${sheetContext.tr('projects_register_duplicates_owner')}: '
-                              '${candidate.owner.firstName} ${candidate.owner.lastName}',
-                              style: sheetContext.textStyles.xsMedium,
-                            ),
-                          ],
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                sheetContext.tr('projects_register_duplicates_title'),
+                style: sheetContext.textStyles.baseBold,
+              ),
+              verticalSpace(4.h),
+              Text(
+                sheetContext.tr('projects_register_duplicates_subtitle'),
+                style: sheetContext.textStyles.smRegular,
+              ),
+              verticalSpace(12.h),
+              for (final candidate in candidates)
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10.h),
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: sheetContext.colors.page,
+                      borderRadius: BorderRadius.circular(AppRadius.field),
+                    ),
+                    child: Row(
+                      children: [
+                        _ProjectThumb(
+                          images: candidate.images,
+                          width: 52.w,
+                          height: 52.w,
+                          radius: AppRadius.field,
                         ),
-                      ),
-                      if (candidate.isYours == true)
-                        Icon(
-                          Icons.check_circle,
-                          color: sheetContext.colors.statusWon.core,
+                        horizontalSpace(10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                candidate.name,
+                                style: sheetContext.textStyles.smBold,
+                              ),
+                              Text(
+                                '${candidate.distanceM.round()} ${sheetContext.tr('unit_meters_short')} · '
+                                '${sheetContext.tr(candidate.stage.labelKey)}',
+                                style: sheetContext.textStyles.xsMedium,
+                              ),
+                              Text(
+                                '${sheetContext.tr('projects_register_duplicates_owner')}: '
+                                '${candidate.owner.firstName} ${candidate.owner.lastName}',
+                                style: sheetContext.textStyles.xsMedium,
+                              ),
+                            ],
+                          ),
                         ),
-                    ],
+                        if (candidate.isYours == true)
+                          Icon(
+                            Icons.check_circle,
+                            color: sheetContext.colors.statusWon.core,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
+              verticalSpace(4.h),
+              AppButton(
+                text: sheetContext.tr('projects_register_duplicates_continue'),
+                variant: AppButtonVariant.secondary,
+                onPressed: () => Navigator.of(sheetContext).pop(),
               ),
-            verticalSpace(4.h),
-            AppButton(
-              text: sheetContext.tr('projects_register_duplicates_continue'),
-              variant: AppButtonVariant.secondary,
-              onPressed: () => Navigator.of(sheetContext).pop(),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -432,16 +475,26 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
           case ProjectMutationStatus.success:
             final result = state.lastRegistrationResult;
             if (result == null) return;
-            // `POST /projects` only returns `nearbyProjects` when the server
-            // itself judged something a possible duplicate, which is a
-            // narrow radius and often empty. When it is, ask
-            // `GET /projects/nearby` what is actually around the pin — the
-            // rep still wants to know whose buildings they are standing
-            // next to, and that endpoint crosses ownership on purpose (§5).
-            final candidates = result.nearbyProjects.isNotEmpty
-                ? result.nearbyProjects
-                : await _fetchNearby(result.project);
-            if (candidates.isNotEmpty) {
+            // Only what `POST /projects` already returned — the server's own
+            // duplicate judgement, which rides along in the registration
+            // response at no extra cost.
+            //
+            // `GET /projects/nearby` is deliberately **not** called here.
+            // Neighbours are a thing to see *before* committing, which is
+            // why `_loadNearby` runs the moment the pin lands; asking again
+            // afterwards spends a request to answer a question the rep can
+            // no longer act on.
+            // Skipped when the rep was already shown the neighbours and
+            // chose to register anyway (see `_confirmNearbyBeforeRegister`).
+            // Re-presenting the same buildings immediately after they
+            // answered the question reads as the app not having listened.
+            //
+            // Still shown otherwise: the server's radius and criteria are
+            // its own, so it can surface a candidate the pin-time client
+            // check did not — and if `GET /projects/nearby` had failed,
+            // `_nearby` was empty and no question was asked at all.
+            final candidates = result.nearbyProjects;
+            if (candidates.isNotEmpty && !_confirmedNearby) {
               await _showDuplicateCandidates(candidates);
             }
             if (!context.mounted) return;
@@ -571,6 +624,31 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
                               projects: _nearby,
                             ),
                           ],
+                          verticalSpace(16.h),
+                          _SectionLabel(
+                            context.tr('projects_register_address'),
+                          ),
+                          AppTextField(
+                            hintText: context.tr(
+                              'projects_register_address_hint',
+                            ),
+                            controller: _addressController,
+                            // A pin alone is not an address. Someone driving
+                            // to this building later needs the written
+                            // description too — "opposite the fire station"
+                            // is what gets a rep to the door when GPS drops
+                            // them on the wrong side of a block.
+                            validator: (value) {
+                              final trimmed = value?.trim() ?? '';
+                              if (trimmed.isEmpty) {
+                                return context.tr(
+                                  'projects_register_address_required',
+                                );
+                              }
+                              return null;
+                            },
+                          ),
+
                           verticalSpace(20.h),
                           _SectionLabel(
                             context.tr('projects_register_parties'),
@@ -589,10 +667,15 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
                             onChanged: (v) => setState(() => _consultant = v),
                           ),
                           verticalSpace(12.h),
+                          // The one mandatory party: a project is worked
+                          // through its main contractor, so registering one
+                          // without naming them — and someone to call there
+                          // — leaves a record nobody can act on.
                           StakeholderSlotField(
                             labelKey: 'stakeholder_slot_contractor',
                             value: _contractor,
                             onChanged: (v) => setState(() => _contractor = v),
+                            required: true,
                           ),
 
                           verticalSpace(16.h),
@@ -636,18 +719,6 @@ class _RegisterProjectViewState extends State<_RegisterProjectView> {
                               }
                               return null;
                             },
-                          ),
-
-                          verticalSpace(16.h),
-                          _SectionLabel(
-                            context.tr('projects_register_address'),
-                            optional: true,
-                          ),
-                          AppTextField(
-                            hintText: context.tr(
-                              'projects_register_address_hint',
-                            ),
-                            controller: _addressController,
                           ),
 
                           verticalSpace(16.h),
@@ -885,6 +956,190 @@ class _NearbyStrip extends StatelessWidget {
   }
 }
 
+/// A project's own photo, or an on-brand placeholder.
+///
+/// §9 — a photo whose URL could not be signed arrives with `url: null`, so
+/// the first *displayable* one is picked rather than `images.first`. Shared
+/// between the neighbours strip and the duplicate sheet: both answer "is
+/// this the building in front of me?", and a name alone rarely settles it.
+/// Asked **before** `POST /projects`, so the answer is still a decision.
+///
+/// Two buttons rather than the single "Continue" of the post-registration
+/// sheet, and cancel leads: the default action on a screen that has just
+/// told you the building may already exist should not be to create it
+/// again.
+class _NearbyConfirmSheet extends StatelessWidget {
+  final List<NearbyProjectCardView> candidates;
+
+  const _NearbyConfirmSheet({required this.candidates});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.help_outline_rounded,
+              size: 20.sp,
+              color: colors.brand600,
+            ),
+            horizontalSpace(8),
+            Expanded(
+              child: Text(
+                context.tr('projects_register_nearby_confirm_title'),
+                style: context.textStyles.baseBold,
+              ),
+            ),
+          ],
+        ),
+        verticalSpace(4.h),
+        Text(
+          context
+              .tr('projects_register_nearby_confirm_subtitle')
+              .replaceAll('{count}', '${candidates.length}'),
+          style: context.textStyles.smRegular,
+        ),
+        verticalSpace(12.h),
+        // Flexible + shrinkWrap: a short list stays compact, a long one
+        // clamps to the space left over and scrolls inside it. Either way
+        // the buttons below keep their place instead of being pushed off
+        // the bottom of the sheet.
+        Flexible(
+          child: ListView.separated(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            itemCount: candidates.length,
+            separatorBuilder: (_, _) => verticalSpace(10.h),
+            itemBuilder: (_, index) {
+              final candidate = candidates[index];
+              return Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: colors.page,
+                  borderRadius: BorderRadius.circular(AppRadius.field),
+                ),
+                child: Row(
+                  children: [
+                    _ProjectThumb(
+                      images: candidate.images,
+                      width: 52.w,
+                      height: 52.w,
+                      radius: AppRadius.field,
+                    ),
+                    horizontalSpace(10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            candidate.name,
+                            style: context.textStyles.smBold,
+                          ),
+                          Text(
+                            '${candidate.distanceM.round()} '
+                            '${context.tr('unit_meters_short')} · '
+                            '${context.tr(candidate.stage.labelKey)}',
+                            style: context.textStyles.xsMedium,
+                          ),
+                          Text(
+                            '${context.tr('projects_register_duplicates_owner')}: '
+                            '${candidate.owner.firstName} '
+                            '${candidate.owner.lastName}',
+                            style: context.textStyles.xsMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // A building already on this rep's own list is the most
+                    // likely accidental duplicate of all, so it is marked.
+                    if (candidate.isYours == true)
+                      Icon(Icons.check_circle, color: colors.statusWon.core),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        verticalSpace(12.h),
+        // SafeArea so the lower button clears the gesture bar — this sheet
+        // can now run the full height of the screen.
+        SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppButton(
+                text: context.tr('projects_register_nearby_confirm_cancel'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              verticalSpace(8.h),
+              AppButton(
+                text: context.tr('projects_register_nearby_confirm_proceed'),
+                variant: AppButtonVariant.secondary,
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProjectThumb extends StatelessWidget {
+  final List<StoredFileView> images;
+  final double width;
+  final double height;
+  final double radius;
+
+  const _ProjectThumb({
+    required this.images,
+    required this.width,
+    required this.height,
+    this.radius = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final imageUrl = images
+        .map((image) => image.url)
+        .where((url) => url != null && url.isNotEmpty)
+        .firstOrNull;
+
+    Widget placeholder() => Container(
+      color: colors.Color10,
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.apartment_rounded,
+        size: (height * 0.32).clamp(14.0, 24.0),
+        color: colors.ink300,
+      ),
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: imageUrl == null
+            ? placeholder()
+            : Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (_, child, progress) =>
+                    progress == null ? child : Container(color: colors.Color13),
+                errorBuilder: (_, _, _) => placeholder(),
+              ),
+      ),
+    );
+  }
+}
+
 class _NearbyCard extends StatelessWidget {
   final NearbyProjectCardView project;
 
@@ -893,12 +1148,6 @@ class _NearbyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // §9 — a photo whose URL could not be signed arrives with `url: null`,
-    // so the first *displayable* one is picked rather than `images.first`.
-    final imageUrl = project.images
-        .map((image) => image.url)
-        .where((url) => url != null && url.isNotEmpty)
-        .firstOrNull;
 
     return Container(
       width: 150.w,
@@ -915,36 +1164,7 @@ class _NearbyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 68.h,
-            width: double.infinity,
-            child: imageUrl == null
-                ? Container(
-                    color: colors.Color10,
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.apartment_rounded,
-                      size: 22.sp,
-                      color: colors.ink300,
-                    ),
-                  )
-                : Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (_, child, progress) => progress == null
-                        ? child
-                        : Container(color: colors.Color13),
-                    errorBuilder: (_, _, _) => Container(
-                      color: colors.Color10,
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.apartment_rounded,
-                        size: 22.sp,
-                        color: colors.ink300,
-                      ),
-                    ),
-                  ),
-          ),
+          _ProjectThumb(images: project.images, width: 150.w, height: 68.h),
           Padding(
             padding: EdgeInsets.fromLTRB(8.w, 6.h, 8.w, 8.h),
             child: Column(

@@ -363,13 +363,36 @@ enum AccountType {
   company,
   @JsonValue('INDIVIDUAL')
   individual,
+
+  /// Fallback for a value this build does not know.
+  ///
+  /// ⚠️ Not cosmetic. `AccountView.type` is non-nullable, and
+  /// `AccountsListResponse` decodes the whole page in one pass — so a single
+  /// row carrying an unrecognised or null `type` threw out of
+  /// `_$AccountViewFromJson` and failed the **entire search**. The failure
+  /// was then swallowed by the picker, which showed "no results" and offered
+  /// to create a new company. One odd row in the directory could therefore
+  /// make every search look empty.
+  ///
+  /// Excluded from the type pickers via [selectable] — it is a parsing
+  /// fallback, never something a rep chooses.
+  @JsonValue(null)
+  unknown,
 }
 
 extension AccountTypeWire on AccountType {
   String get wireValue => switch (this) {
     AccountType.company => 'COMPANY',
     AccountType.individual => 'INDIVIDUAL',
+    // Never sent deliberately; a value the client could not read must not
+    // be echoed back as a write.
+    AccountType.unknown => 'COMPANY',
   };
+
+  /// The values a rep may actually pick. Use this instead of
+  /// `AccountType.values` in any UI list.
+  static List<AccountType> get selectable =>
+      AccountType.values.where((t) => t != AccountType.unknown).toList();
 }
 
 /// directory-mobile-integration.md §6.3 — what an account currently *is*.
