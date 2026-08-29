@@ -328,6 +328,8 @@ class _CategoryViewState extends State<_CategoryView> {
             sliver: SliverGrid(
               gridDelegate: productGridDelegate(
                 MediaQuery.sizeOf(context).width - 40.w,
+                context: context,
+                products: state.products,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final product = state.products[index];

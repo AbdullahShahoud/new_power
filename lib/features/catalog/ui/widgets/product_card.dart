@@ -26,16 +26,41 @@ import '../../data/models/product_view.dart';
 /// the same room on every screen and the only thing that varies is the
 /// picture, which is exactly the part that *should* scale.
 SliverGridDelegateWithFixedCrossAxisCount productGridDelegate(
-  double availableWidth,
-) {
+  double availableWidth, {
+  /// Needed to measure chip text. Omit only where there is nothing to
+  /// measure — the loading skeletons, which reserve one chip line.
+  BuildContext? context,
+
+  /// The rows about to be laid out. Every product's spec chips are measured
+  /// so the cell height fits the **tallest** block in the batch, which is
+  /// what lets each card show all of its chips without any being cut.
+  List<ProductListItemView> products = const [],
+}) {
   const columns = 2;
   final spacing = 12.w;
   final columnWidth = (availableWidth - spacing * (columns - 1)) / columns;
+
+  // The chips lay out inside the text block's horizontal padding
+  // (`EdgeInsets.fromLTRB(10.w, …, 10.w, …)` on the card).
+  final chipAreaWidth = columnWidth - 20.w;
+
+  var chipLines = 1;
+  if (context != null) {
+    for (final product in products) {
+      final lines = HighlightStrip.lineCount(
+        context,
+        product.highlights,
+        chipAreaWidth,
+      );
+      if (lines > chipLines) chipLines = lines;
+    }
+  }
+
   return SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: columns,
     crossAxisSpacing: spacing,
     mainAxisSpacing: 12.h,
-    mainAxisExtent: columnWidth + kProductTextBlockHeight,
+    mainAxisExtent: columnWidth + productTextBlockHeight(chipLines, context),
   );
 }
 
@@ -50,20 +75,58 @@ SliverGridDelegateWithFixedCrossAxisCount productGridDelegate(
 ///
 /// Adding the parts up in their own units means the box grows with the type
 /// instead of drifting away from it.
-double get kProductTextBlockHeight {
+/// [chipLines] is measured per batch by [productGridDelegate] — every card
+/// in a grid gets the same height, sized to whichever product needs the most
+/// chip rows. Cards with fewer chips carry a little slack, which is the
+/// price of a grid that stays aligned; the alternative is a masonry layout
+/// where no two columns line up.
+double productTextBlockHeight(int chipLines, [BuildContext? context]) {
   const nameLines = 3;
   // `xsBold` is 12sp; the card sets height: 1.35 on it.
   final nameHeight = 12.sp * 1.35 * nameLines;
   // `xsMedium` at 12sp, single line, default leading.
   final codeHeight = 12.sp * 1.3;
-  const chipsHeight = 18.0;
+  // Chip rows: their measured height, plus the Wrap's runSpacing between
+  // them. See [chipRowHeight] for why this is measured rather than fixed.
+  final chipsHeight =
+      chipLines * chipRowHeight(context) + (chipLines - 1) * kChipRunSpacing;
   // 8 top + 10 bottom padding, 4 under the name, 8 above the chips.
-  final spacingTotal = 8.h + 10.h + 4.h + 8.h + chipsHeight.h;
+  final spacingTotal = 8.h + 10.h + 4.h + 8.h + chipsHeight;
   // A line box is not exactly `fontSize * height` — the font's own ascent
   // and descent add a little on top. Without this the last line lands a
   // hair short and gets sliced, which is the whole symptom.
   final safety = 8.h;
   return nameHeight + codeHeight + spacingTotal + safety;
+}
+
+/// Gap between wrapped chip rows. Shared by the strip that draws them and
+/// the delegate that reserves room for them.
+double get kChipRunSpacing => 4.h;
+
+/// Height of one row of spec chips — **measured**, not assumed.
+///
+/// This was a flat `18.h`, and it was wrong: a chip is text sized in `.sp`
+/// inside padding sized in `.h`, and those two scales diverge with the
+/// system font setting. The reserve came out under the real height, so the
+/// bottom row of a wrapped strip was clipped by the grid cell — the same
+/// units mistake [productTextBlockHeight] documents for the name lines,
+/// repeated one widget down.
+///
+/// Measuring the actual line box removes the guess. [context] is optional
+/// only for the loading skeletons, which have no text to measure; they fall
+/// back to an estimate that is deliberately generous rather than tight.
+double chipRowHeight([BuildContext? context]) {
+  final padding = HighlightChip.verticalPadding * 2;
+  if (context == null) return 10.sp * 1.6 + padding;
+  final painter = TextPainter(
+    // Digits and Latin caps bracket the tallest glyphs a chip renders; an
+    // Arabic sample is taller still, so it leads.
+    text: TextSpan(text: 'أ0W', style: HighlightStrip.chipStyle(context)),
+    textDirection: TextDirection.ltr,
+    maxLines: 1,
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  return painter.height + padding;
 }
 
 /// One product in the grid.
@@ -173,32 +236,63 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
-
-/// The row of spec chips under a product name.
+/// Every spec chip a product carries, wrapped onto as many rows as it takes.
 ///
-/// ⚠️ It **measures** rather than clips. The previous version put a `Wrap`
-/// inside an `OverflowBox` and a `ClipRect`: anything past the first line
-/// was cut away, which in practice meant a card showed two chips no matter
-/// how many the product had, and — because the clip is a rectangle, not a
-/// chip boundary — a third could be sliced down its middle and left as a
-/// stray sliver at the card's edge. That is the artefact in the bug report.
+/// **Nothing is dropped and nothing is cut.** Two earlier attempts got this
+/// wrong in opposite directions: the first put a `Wrap` inside a `ClipRect`,
+/// so rows past the first were sliced away mid-chip; the second measured a
+/// single row and summarised the rest as `+N`, which is still a card
+/// refusing to show what it knows.
 ///
-/// Here the chips are laid out only if they fit whole, and anything left
-/// over is reported as a `+N` chip. Nothing is ever half-drawn, and the card
-/// stops silently lying about how much it knows: a fitting with five specs
-/// now says so instead of looking identical to one with two.
-///
-/// A single line by choice. The grid cell reserves a fixed text block
-/// (`kProductTextBlockHeight`), so a second line of chips would have to come
-/// out of the product name — and the name is what a rep scans first.
+/// The height is not guessed here. [productGridDelegate] runs [lineCount]
+/// over the whole batch before the grid is built and reserves the tallest
+/// result for every cell, so the `Wrap` below always has the room it needs.
+/// [lineCount] and this `build` share one spacing constant and one text
+/// style precisely so the reservation and the render cannot disagree.
 class HighlightStrip extends StatelessWidget {
   final List<HighlightView> highlights;
 
   const HighlightStrip({super.key, required this.highlights});
 
-  /// Width a chip occupies: its text plus the horizontal padding
-  /// [HighlightChip] applies. Measured with the same style the chip renders
-  /// with, so the two cannot disagree.
+  static double get _spacing => 4.w;
+
+  /// The text style chips render in. One definition, read by both the
+  /// measurement and the widget.
+  static TextStyle chipStyle(BuildContext context) =>
+      context.textStyles.xsSemibold.copyWith(
+        color: context.colors.textColor70,
+        fontSize: 10.sp,
+      );
+
+  /// How many rows [highlights] needs at [maxWidth]. Mirrors `Wrap`'s own
+  /// greedy line-breaking: a chip that does not fit the current row starts
+  /// the next one.
+  static int lineCount(
+    BuildContext context,
+    List<HighlightView> highlights,
+    double maxWidth,
+  ) {
+    if (highlights.isEmpty || maxWidth <= 0) return 1;
+    final style = chipStyle(context);
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+
+    var lines = 1;
+    var rowWidth = 0.0;
+    for (final highlight in highlights) {
+      final width = _chipWidth(highlight.display.resolve(context), style, scale);
+      // First chip on a row takes no leading gap.
+      final needed = rowWidth == 0 ? width : _spacing + width;
+      if (rowWidth + needed > maxWidth && rowWidth > 0) {
+        lines++;
+        rowWidth = width;
+      } else {
+        rowWidth += needed;
+      }
+    }
+    return lines;
+  }
+
+  /// Rendered width of one chip: its text plus [HighlightChip]'s padding.
   static double _chipWidth(String label, TextStyle style, double textScale) {
     final painter = TextPainter(
       text: TextSpan(text: label, style: style),
@@ -211,114 +305,12 @@ class HighlightStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final style = context.textStyles.xsSemibold.copyWith(
-      color: colors.textColor70,
-      fontSize: 10.sp,
-    );
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final spacing = 4.w;
-
-    return SizedBox(
-      height: 18.h,
-      width: double.infinity,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth;
-          final labels = [
-            for (final h in highlights) h.display.resolve(context),
-          ];
-          final widths = [
-            for (final label in labels) _chipWidth(label, style, textScale),
-          ];
-
-          // Greedy fit, reserving room for the "+N" chip whenever anything
-          // would be left behind. The count is only known once the fit is
-          // decided, so the reservation uses the widest plausible label
-          // ("+" plus the total count) — never narrower than what is drawn.
-          final overflowLabel = '+${highlights.length}';
-          final overflowWidth = _chipWidth(overflowLabel, style, textScale);
-
-          var used = 0.0;
-          var fitted = 0;
-          for (var i = 0; i < widths.length; i++) {
-            final needed = (i == 0 ? 0.0 : spacing) + widths[i];
-            final isLast = i == widths.length - 1;
-            // Every chip after this one still has to be announced, so the
-            // "+N" chip's width is part of the budget unless this is the
-            // final chip and it fits outright.
-            final reserve = isLast ? 0.0 : spacing + overflowWidth;
-            if (used + needed + reserve > maxWidth) break;
-            used += needed;
-            fitted++;
-          }
-
-          final hidden = highlights.length - fitted;
-
-          // Nothing fits — a very narrow card or a very long single spec.
-          // Show one chip clipped by ellipsis rather than an empty band:
-          // a truncated value the rep can tap through to is more use than
-          // no value at all.
-          if (fitted == 0 && highlights.isNotEmpty) {
-            return Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: HighlightChip(
-                highlight: highlights.first,
-                maxWidth: maxWidth,
-              ),
-            );
-          }
-
-          return Row(
-            children: [
-              for (var i = 0; i < fitted; i++) ...[
-                if (i > 0) SizedBox(width: spacing),
-                HighlightChip(highlight: highlights[i]),
-              ],
-              if (hidden > 0) ...[
-                SizedBox(width: spacing),
-                _OverflowChip(label: '+$hidden'),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// The `+N` marker closing a truncated [HighlightStrip].
-///
-/// Deliberately styled as a chip rather than plain text: it sits in a row of
-/// chips, and anything else there reads as a value rather than a count.
-class _OverflowChip extends StatelessWidget {
-  final String label;
-
-  const _OverflowChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: HighlightChip.horizontalPadding,
-        vertical: 2.h,
-      ),
-      decoration: BoxDecoration(
-        color: colors.Color13,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        // The count is a number in both languages; forcing LTR stops "+3"
-        // from being reordered to "3+" under an RTL layout.
-        textDirection: TextDirection.ltr,
-        style: context.textStyles.xsSemibold.copyWith(
-          color: colors.textColor70,
-          fontSize: 10.sp,
-        ),
-      ),
+    return Wrap(
+      spacing: _spacing,
+      runSpacing: kChipRunSpacing,
+      children: [
+        for (final highlight in highlights) HighlightChip(highlight: highlight),
+      ],
     );
   }
 }
@@ -337,6 +329,9 @@ class HighlightChip extends StatelessWidget {
   /// the width this renders can never drift apart.
   static double get horizontalPadding => 7.w;
 
+  /// Vertical padding, shared with [chipRowHeight]'s measurement.
+  static double get verticalPadding => 2.h;
+
   const HighlightChip({super.key, required this.highlight, this.maxWidth});
 
   @override
@@ -345,7 +340,7 @@ class HighlightChip extends StatelessWidget {
     final chip = Container(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
-        vertical: 2.h,
+        vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
         color: colors.Color13,

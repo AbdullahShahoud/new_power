@@ -266,6 +266,8 @@ class _SearchViewState extends State<_SearchView> {
                   sliver: SliverGrid(
                     gridDelegate: productGridDelegate(
                       MediaQuery.sizeOf(context).width - 40.w,
+                      context: context,
+                      products: state.products,
                     ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final product = state.products[index];

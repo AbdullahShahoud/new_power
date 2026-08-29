@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/helpers/spacing.dart';
@@ -111,62 +111,15 @@ class _Header extends StatelessWidget {
                   ),
                   style: context.textStyles.smBold,
                 ),
-                verticalSpace(2.h),
-                _TargetIdRow(targetId: target.targetId),
               ],
             ),
           ),
           horizontalSpace(8.w),
-          TargetLifecycleBadge(closed: target.closed),
-        ],
-      ),
-    );
-  }
-}
-
-/// The target id, truncated, with a copy action.
-///
-/// It is here because it is the only handle a rep has when something looks
-/// wrong: it is what a manager needs to find the same target on their side.
-class _TargetIdRow extends StatelessWidget {
-  final String targetId;
-
-  const _TargetIdRow({required this.targetId});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    if (targetId.isEmpty) return const SizedBox.shrink();
-    final shortened = targetId.length > 18
-        ? '${targetId.substring(0, 18)}…'
-        : targetId;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () async {
-        await Clipboard.setData(ClipboardData(text: targetId));
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              content: Text(context.tr('attainment_target_id_copied')),
-            ),
-          );
-      },
-      child: Row(
-        children: [
-          Flexible(
-            child: Text(
-              '${context.tr('attainment_target_id')} $shortened',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.xsMedium.copyWith(fontSize: 11.sp),
-            ),
-          ),
-          horizontalSpace(6.w),
-          Icon(Icons.copy_rounded, size: 13.sp, color: colors.ink400),
+          // Only a *closed* period is worth badging. "Published" was on
+          // every open target without exception — a label that never varies
+          // carries no information, it just takes the eye first on a card
+          // whose actual news is the number underneath.
+          if (target.closed) const TargetLifecycleBadge(closed: true),
         ],
       ),
     );
@@ -211,7 +164,19 @@ class _TargetAndAttained extends StatelessWidget {
                     label: context.tr('attainment_attained'),
                     value: formatAmount(target.attainedAmount, target.metric),
                     valueColor: colors.statusWon.core,
-                    hint: formatPercentLabel(target.attainedPct),
+                    // Percentage, plus the overshoot when there is one.
+                    // `remaining` floors at zero, so beating a target was
+                    // only ever expressible as attained − target; it used
+                    // to hang off the "Remaining" cell, which is a strange
+                    // place to learn you have exceeded something. It
+                    // belongs to the attained figure.
+                    hint: target.overshoot.isZero
+                        ? formatPercentLabel(target.attainedPct)
+                        : '${formatPercentLabel(target.attainedPct)} · '
+                              '${context.tr('attainment_over_by').replaceAll(
+                                '{amount}',
+                                formatAmount(target.overshoot, target.metric),
+                              )}',
                   ),
                 ),
               ],
@@ -223,19 +188,11 @@ class _TargetAndAttained extends StatelessWidget {
             expectedFraction: target.expectedFraction,
             fillColor: statusPalette(context, target.status).core,
           ),
-          if (target.hasPace && target.expectedToDatePct != null) ...[
-            verticalSpace(2.h),
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Text(
-                '${context.tr('attainment_expected_to_date')} '
-                '${formatPercentLabel(target.expectedToDatePct)}',
-                style: context.textStyles.xsMedium.copyWith(
-                  color: colors.statusNew.core,
-                ),
-              ),
-            ),
-          ],
+          // The "expected to date" caption that used to sit here is gone.
+          // It repeated, as a percentage, exactly what the pace marker on
+          // the bar above already shows as a position — and it sat directly
+          // beneath its own figure in the row below, so the same idea
+          // appeared three times on one card.
         ],
       ),
     );
@@ -314,26 +271,10 @@ class _PaceRow extends StatelessWidget {
                     : null,
               ),
             ),
-            const _MiniDivider(),
-            Expanded(
-              child: _MiniCell(
-                label: context.tr('attainment_remaining'),
-                value: formatAmount(target.remainingAmount, target.metric),
-                valueColor: colors.statusFollowUp.core,
-                // `remaining` never goes negative — the overshoot on an
-                // overachieved target is only expressible as attained −
-                // target, so it is surfaced here explicitly.
-                hint: target.overshoot.isZero
-                    ? null
-                    : context
-                          .tr('attainment_over_by')
-                          .replaceAll(
-                            '{amount}',
-                            formatAmount(target.overshoot, target.metric),
-                          ),
-                hintColor: colors.statusWon.core,
-              ),
-            ),
+            // "Remaining" removed: it is target − attained, and both of
+            // those are already on the card in full, directly above. The
+            // overshoot it also carried now rides on the attained figure,
+            // where an overachieved target is the thing being described.
             const _MiniDivider(),
             Expanded(
               child: _MiniCell(
@@ -377,7 +318,6 @@ class _MiniCell extends StatelessWidget {
   final String? value;
   final Color? valueColor;
   final String? hint;
-  final Color? hintColor;
   final Widget? badge;
 
   const _MiniCell({
@@ -385,7 +325,6 @@ class _MiniCell extends StatelessWidget {
     this.value,
     this.valueColor,
     this.hint,
-    this.hintColor,
     this.badge,
   });
 
@@ -423,7 +362,7 @@ class _MiniCell extends StatelessWidget {
               textAlign: TextAlign.center,
               style: context.textStyles.xsMedium.copyWith(
                 fontSize: 10.sp,
-                color: hintColor ?? colors.ink400,
+                color: colors.ink400,
               ),
             ),
           ],

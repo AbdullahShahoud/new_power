@@ -13,6 +13,20 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// Kept on the SVG because that is the asset the brand owner maintains, but
 /// if the logo ever looks soft on a high-density screen, the fix is a real
 /// vector export from the source file — not anything in this widget.
+///
+/// ## Dark theme
+///
+/// Two files, not a colour filter. The lockup is two-tone — red "NEW",
+/// near-black "POWER" and rule — so on a dark surface the black half simply
+/// disappeared while the red half stayed put, leaving a logo that read as
+/// "NEW" alone. A tint would have flattened both halves to one colour and
+/// lost the mark entirely.
+///
+/// `newpower-logo-dark.svg` lifts only the achromatic ink to a light warm
+/// neutral and leaves the brand red exactly as delivered, so the two files
+/// are the same artwork rather than two different logos. It is generated
+/// from the light asset — regenerate it rather than editing it, and if the
+/// brand owner ships a new lockup, regenerate from that.
 class AppLogo extends StatelessWidget {
   final double height;
 
@@ -25,8 +39,15 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Read from the ambient Theme, not from `AppColors.isDark` directly, so
+    // the logo follows a subtree that overrides brightness (a dark sheet on
+    // a light screen) rather than the app-wide setting.
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SvgPicture.asset(
-      'assets/images/newpower-logo.svg',
+      isDark
+          ? 'assets/images/newpower-logo-dark.svg'
+          : 'assets/images/newpower-logo.svg',
       height: height,
       width: height * _aspectRatio,
       fit: BoxFit.contain,

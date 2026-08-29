@@ -74,6 +74,22 @@ class AppColors {
   /// Cards, sidebar, topbar. Dark mode: derived as ink900.
   Color get surface => isDark ? ink900 : const Color(0xFFFFFFFF);
 
+  /// Background of an unread row (the notification inbox).
+  ///
+  /// ⚠️ Brightness-split, and it has to be. The inbox previously painted
+  /// `brand50` at 40% alpha in both themes — but `brand50` is `#FEF2F2`, a
+  /// near-white pink chosen to sit on a white page. Over the dark `page`
+  /// (`ink950`) that composites to a washed, muddy grey with almost no
+  /// separation from a read row, so the one thing the tint exists to say
+  /// stopped being legible in dark mode.
+  ///
+  /// Dark mode instead goes *lighter and warmer* than the page — the only
+  /// direction that reads as emphasis on a dark ground — and carries the
+  /// brand hue at low saturation so it still reads as "ours" rather than as
+  /// a generic hover state.
+  Color get unreadSurface =>
+      isDark ? const Color(0xFF2A1E1F) : const Color(0xFFFEF6F6);
+
   /// Hairlines, table row dividers. Not brightness-split in the doc.
   Color get chartGrid => const Color(0xFFE7E5E0);
 

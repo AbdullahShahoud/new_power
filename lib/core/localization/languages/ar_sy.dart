@@ -1091,8 +1091,13 @@ final Map<String, String> arSY = {
   'attainment_no_manager': 'لا يوجد مدير مُسنَد',
   'attainment_as_of': 'حتى تاريخ',
   'attainment_target': 'الهدف',
-  'attainment_attained': 'المُنجَز',
-  'attainment_expected_to_date': 'المتوقّع حتى الآن',
+  // المُنجَز reads as a completed *task*, not a figure. المُحقَّق is
+  // the ordinary word for a number a salesperson has actually reached.
+  'attainment_attained': 'المُحقَّق',
+  // Not a forecast — it is the figure the rep should already be at, at
+  // this point in the period. المتوقّع invites reading it as a
+  // prediction of where they will end up; المطلوب says what it is.
+  'attainment_expected_to_date': 'المطلوب حتى الآن',
   'attainment_remaining': 'المتبقّي',
   'attainment_status': 'الحالة',
   'attainment_overall': 'الإنجاز الإجمالي',

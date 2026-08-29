@@ -1151,8 +1151,10 @@ final Map<String, String> enUS = {
   'attainment_no_manager': 'No manager assigned',
   'attainment_as_of': 'As of',
   'attainment_target': 'Target',
-  'attainment_attained': 'Attained',
-  'attainment_expected_to_date': 'Expected to date',
+  'attainment_attained': 'Achieved',
+  // The pace benchmark — where the rep should stand today, not a
+  // forecast of where they will finish.
+  'attainment_expected_to_date': 'Expected by now',
   'attainment_remaining': 'Remaining',
   'attainment_status': 'Status',
   'attainment_overall': 'Overall attainment',
