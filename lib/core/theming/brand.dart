@@ -67,7 +67,12 @@ enum Brand {
     displayNameKey: 'brand_smart_home',
     lightLogo: 'assets/images/logo_smart_1.svg',
     darkLogo: 'assets/images/logo_smart_1.svg',
-    logoAspectRatio: 1,
+    // Same story as OSCO, worse: the export declared a square 1000×1000 box
+    // whose ink filled 87% of the width but only **30%** of the height. At
+    // `height: 28` on the home header that left roughly 9px of actual
+    // artwork. Cropped to the ink, the lockup is a 2.9:1 horizontal mark —
+    // which is what it always was.
+    logoAspectRatio: 873.4 / 300,
     palette: BrandPalette(
       shade50: Color(0xFFF3FAFD),
       shade100: Color(0xFFE5F5FC),

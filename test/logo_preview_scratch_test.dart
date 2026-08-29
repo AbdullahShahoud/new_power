@@ -53,6 +53,6 @@ void main() {
     const light = Color(0xFFF7F6F3);
     const dark = Color(0xFF141412);
 
-    await _shoot(tester, 'assets/images/logo_smart_2.svg', light, 'osco-light.png', 120);
+    await _shoot(tester, 'assets/images/logo_smart_1.svg', light, 'smart-cropped.png', 60);
   });
 }

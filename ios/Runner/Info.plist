@@ -55,7 +55,6 @@
 		<string>NewPower needs access to your photo library to attach existing photos to a project.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>NewPower uses your microphone to record voice notes on a visit or call.</string>
-
 		<!-- Export compliance. NewPower uses only HTTPS/TLS and the platform
 		     keychain — both are exempt under category 5, part 2 of the US
 		     Export Administration Regulations, and neither is proprietary
@@ -67,7 +66,6 @@
 		     distributed. -->
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
-
 		<!-- Languages the app actually ships, so the App Store listing shows
 		     both instead of inferring English alone from
 		     CFBundleDevelopmentRegion. Matches
@@ -77,7 +75,6 @@
 			<string>en</string>
 			<string>ar</string>
 		</array>
-
 		<!-- Lets firebaseBackgroundHandler run for a data message while the
 		     app is backgrounded or terminated. Without it iOS delivers only
 		     the tray notification and the handler never fires, so the badge
