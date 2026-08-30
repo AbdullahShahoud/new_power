@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../../../core/routing/routes.dart';
 import '../../logic/badge_cubit/unread_badge_cubit.dart';
+import 'notification_language_sync.dart';
 import 'notifications_repository.dart';
 
 /// Fired for a data message while the app is terminated or backgrounded.
@@ -39,8 +40,14 @@ class PushService {
   final NotificationsRepository _repository;
   final UnreadBadgeCubit _badge;
   final GlobalKey<NavigatorState> _navigatorKey;
+  final NotificationLanguageSync _languageSync;
 
-  PushService(this._repository, this._badge, this._navigatorKey);
+  PushService(
+    this._repository,
+    this._badge,
+    this._navigatorKey,
+    this._languageSync,
+  );
 
   final _localNotifications = FlutterLocalNotificationsPlugin();
 
@@ -81,6 +88,19 @@ class PushService {
       await _requestPermission();
       await _registerToken();
 
+      // Tell the server which language to render notifications in, and keep
+      // it in step from here on.
+      //
+      // ⚠️ Notification text is rendered **server-side**, at delivery, from
+      // a template key and the reader's stored `language` — so an app in
+      // Arabic whose preference still says `EN` shows English notifications
+      // inside Arabic screens, and a background push cannot be corrected by
+      // any client code at all: the OS draws it straight from the payload.
+      // Reported here because this runs on every authenticated app start,
+      // which is what repairs installs whose language was never sent.
+      _languageSync.start();
+      await _languageSync.sync();
+
       _onMessage = FirebaseMessaging.onMessage.listen(_onForegroundMessage);
       _onTokenRefresh = FirebaseMessaging.instance.onTokenRefresh.listen(
         (token) => _repository.registerFcmToken(token),
@@ -111,6 +131,9 @@ class PushService {
     _onMessage = null;
     _onTokenRefresh = null;
     _initialised = false;
+    // Detached here so the next signed-in user reports their own language
+    // rather than inheriting the previous session's "already synced".
+    _languageSync.stop();
     await _repository.deleteFcmToken();
     try {
       await FirebaseMessaging.instance.deleteToken();

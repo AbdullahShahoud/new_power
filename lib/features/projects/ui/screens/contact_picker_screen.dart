@@ -64,8 +64,13 @@ class _ContactPickerView extends StatelessWidget {
             AppHeader(title: context.tr('contact_picker_title')),
             Padding(
               padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 8.h),
+              // Centred, not start-aligned. This is the screen's one action
+              // and it sits above a list of equally-weighted rows — pinned
+              // to the leading edge it read as a caption on the list rather
+              // than a control, and in Arabic it landed hard against the
+              // right margin under the header's own title.
               child: Align(
-                alignment: AlignmentDirectional.centerStart,
+                alignment: Alignment.center,
                 child: PressableScale(
                   onTap: () => _openAddContact(context),
                   child: Row(
