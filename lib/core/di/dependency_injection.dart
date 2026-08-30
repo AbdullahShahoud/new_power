@@ -9,6 +9,7 @@ import '../../features/catalog/logic/product_detail_bloc/product_detail_bloc.dar
 import '../../features/catalog/logic/products_bloc/products_bloc.dart';
 import '../../features/catalog/logic/search_bloc/search_bloc.dart';
 import '../../features/notifications/data/repo/notifications_repository.dart';
+import '../../features/notifications/data/repo/notification_language_sync.dart';
 import '../../features/notifications/data/repo/push_service.dart';
 import '../../features/notifications/logic/badge_cubit/unread_badge_cubit.dart';
 import '../../features/auth/logic/email_verification_cubit/email_verification_cubit.dart';
@@ -249,11 +250,24 @@ Future<void> setupGetIt() async {
   // it owns stream subscriptions that must outlive any one screen, and
   // because `dispose()` on logout has to reach the same instance that
   // registered the token.
+  // Mirrors the app's language onto the server's notification preference.
+  // Session-scoped like everything else here: it holds "what we last told
+  // the server", which is per-user, and it listens to the app-lifetime
+  // LanguageManager from the base scope.
+  getIt.registerLazySingleton<NotificationLanguageSync>(
+    () => NotificationLanguageSync(
+      getIt<NotificationsRepository>(),
+      getIt<LanguageManager>(),
+    ),
+    dispose: (NotificationLanguageSync sync) => sync.stop(),
+  );
+
   getIt.registerLazySingleton<PushService>(
     () => PushService(
       getIt<NotificationsRepository>(),
       getIt<UnreadBadgeCubit>(),
       navigatorKey,
+      getIt<NotificationLanguageSync>(),
     ),
   );
 

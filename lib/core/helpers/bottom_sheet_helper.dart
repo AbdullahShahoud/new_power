@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theming/app_colors.dart';
@@ -46,45 +45,37 @@ Future<T?> showAnimatedBottomSheet<T>({
     isScrollControlled: true,
     backgroundColor: backgroundColor ?? context.colors.Color13,
     builder: (bottomSheetContext) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: DraggableScrollableSheet(
-          initialChildSize: initialChildSize,
-          minChildSize: minChildSize,
-          maxChildSize: maxChildSize,
-          expand: false,
-          builder: (sheetContext, scrollController) {
-            return ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-              child: Container(
-                decoration: BoxDecoration(
-                  // color: (backgroundColor ?? sheetContext.colors.Color10),
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(24.r),
-                  ),
-                  border: Border(
-                    top: BorderSide(
-                      color: sheetContext.colors.Color10,
-                      width: 1,
-                    ),
-                  ),
+      return DraggableScrollableSheet(
+        initialChildSize: initialChildSize,
+        minChildSize: minChildSize,
+        maxChildSize: maxChildSize,
+        expand: false,
+        builder: (sheetContext, scrollController) {
+          return ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            child: Container(
+              decoration: BoxDecoration(
+                // color: (backgroundColor ?? sheetContext.colors.Color10),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+                border: Border(
+                  top: BorderSide(color: sheetContext.colors.Color10, width: 1),
                 ),
-                child: useScrollWrapper
-                    ? _ScrollableContent(
-                        scrollController: scrollController,
-                        enableGrabber: enableGrabber,
-                        builder: builder,
-                        bottomSheetContext: bottomSheetContext,
-                      )
-                    : _NonScrollableContent(
-                        enableGrabber: enableGrabber,
-                        builder: builder,
-                        bottomSheetContext: bottomSheetContext,
-                      ),
               ),
-            );
-          },
-        ),
+              child: useScrollWrapper
+                  ? _ScrollableContent(
+                      scrollController: scrollController,
+                      enableGrabber: enableGrabber,
+                      builder: builder,
+                      bottomSheetContext: bottomSheetContext,
+                    )
+                  : _NonScrollableContent(
+                      enableGrabber: enableGrabber,
+                      builder: builder,
+                      bottomSheetContext: bottomSheetContext,
+                    ),
+            ),
+          );
+        },
       );
     },
   );

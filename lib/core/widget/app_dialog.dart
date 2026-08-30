@@ -32,10 +32,21 @@ class AppDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.card),
           ),
+          // ⚠️ `textColor` / `textColor70`, not raw ramp steps.
+          //
+          // These were `ink950` and `ink500` — positions on the neutral
+          // ramp, which do not flip with the theme. `ink950` is #141412, and
+          // in dark mode the dialog's own `surface` is `ink900` (#232220):
+          // near-black lettering on a near-black card. The title was
+          // effectively invisible, and the body text only marginally better.
+          //
+          // `textColor` and `textColor70` are the brightness-aware tokens
+          // that exist for exactly this, and they resolve to the same inks
+          // in light mode — so this is a fix in dark and a no-op in light.
           title: Text(
             title,
             style: dialogContext.textStyles.baseBold.copyWith(
-              color: colors.ink950,
+              color: colors.textColor,
             ),
           ),
           content:
@@ -44,7 +55,7 @@ class AppDialog {
                   ? Text(
                       message,
                       style: dialogContext.textStyles.xsMedium.copyWith(
-                        color: colors.ink500,
+                        color: colors.textColor70,
                       ),
                     )
                   : null),
