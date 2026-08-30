@@ -3,7 +3,7 @@ final Map<String, String> enUS = {
   'redemptionCode': 'Redemption Code',
   // Common
   'Balance After': 'Balance After',
-  'app_name': 'NewPower',
+  'app_name': 'Nawara Alkasser',
 
   // Brand selection — first launch only.
   'brand_new_power': 'NewPower',

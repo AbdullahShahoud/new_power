@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>NewPower</string>
+		<string>Nawara Alkasser</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>NewPower</string>
+		<string>Nawara Alkasser</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -48,13 +48,13 @@
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>NewPower uses your location to pin the building you're registering and to record where a visit took place.</string>
+		<string>Nawara Alkasser uses your location to pin the building you're registering and to record where a visit took place.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>NewPower uses your camera to photograph the building and site visits.</string>
+		<string>Nawara Alkasser uses your camera to photograph the building and site visits.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>NewPower needs access to your photo library to attach existing photos to a project.</string>
+		<string>Nawara Alkasser needs access to your photo library to attach existing photos to a project.</string>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>NewPower uses your microphone to record voice notes on a visit or call.</string>
+		<string>Nawara Alkasser uses your microphone to record voice notes on a visit or call.</string>
 		<!-- Export compliance. NewPower uses only HTTPS/TLS and the platform
 		     keychain — both are exempt under category 5, part 2 of the US
 		     Export Administration Regulations, and neither is proprietary

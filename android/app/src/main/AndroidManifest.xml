@@ -62,7 +62,7 @@
          allowBackup/fullBackupContent cover API ≤ 30; dataExtractionRules is
          the API 31+ replacement, and both must agree. -->
     <application
-        android:label="NewPower"
+        android:label="Nawara Alkasser"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"

@@ -3,7 +3,7 @@ final Map<String, String> arSY = {
   'redemptionCode': 'رمز الاسترداد',
   // Common
   'Balance After': 'الرصيد بعد',
-  'app_name': 'نيو باور',
+  'app_name': 'Nawara Alkasser',
 
   // اختيار البراند — عند أول تشغيل فقط.
   // أسماء البراندات لا تُترجم: هي علامات تجارية تُكتب كما هي.

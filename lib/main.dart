@@ -124,7 +124,16 @@ class MyApp extends StatelessWidget {
                     child: MaterialApp(
                       navigatorKey: navigatorKey,
                       debugShowCheckedModeBanner: false,
-                      title: 'NewPower',
+                      // Android's task switcher / recents label. Kept in
+                      // step with `android:label` and iOS's
+                      // CFBundleDisplayName — three separate places name the
+                      // app and nothing enforces that they agree.
+                      //
+                      // Deliberately **not** the selected brand's name: the
+                      // brand switches the logo and the accent ramp inside
+                      // one installed app, while this is the identity of the
+                      // install itself.
+                      title: 'Nawara Alkasser',
                       onGenerateRoute: AppRouter.generateRoute,
                       initialRoute: initialRoute,
                       theme: AppThemes.light(active),
