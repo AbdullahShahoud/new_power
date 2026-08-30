@@ -39,7 +39,10 @@ enum Brand {
     storageKey: 'osco',
     displayNameKey: 'brand_osco',
     lightLogo: 'assets/images/logo_smart_2.svg',
-    darkLogo: 'assets/images/logo_smart_2.svg',
+    // Its "TOOLS" wordline is black and disappears on a dark ground, exactly
+    // like NewPower's. The dark file lifts only those glyphs to a light
+    // neutral; the red mark and the pill are untouched.
+    darkLogo: 'assets/images/logo_smart_2-dark.svg',
     // Measured off the rendered ink, not read off the file's own viewBox.
     // The Illustrator export declared 425.2×330 (1.29:1) but the artwork
     // only occupied 62% of that width and 32% of its height — the rest was

@@ -15,17 +15,19 @@ import '../theming/brand.dart';
 ///
 /// ## Dark theme
 ///
-/// Only NewPower ships a second file. Its wordmark is half near-black, so on
-/// a dark surface that half disappears and the lockup reads as "NEW" alone;
-/// `newpower-logo-dark.svg` lifts just the achromatic ink and leaves the
-/// brand red untouched. It is generated from the light asset — regenerate it
-/// rather than editing it.
+/// Two of the three ship a second file, for the same reason: part of the
+/// lockup is drawn in near-black, which disappears on a dark surface.
+/// NewPower loses the "POWER" half of its wordmark; OSCO loses its "TOOLS"
+/// wordline. Each dark variant lifts only that ink to a light neutral and
+/// leaves the brand colour exactly as delivered.
 ///
-/// The other two are drawn entirely in their own accent (OSCO red, Smart
-/// Home cyan) and read on both grounds, so they point at one file for both
-/// brightnesses. If a future lockup introduces near-black ink, give it a
-/// dark variant in [Brand.darkLogo] rather than tinting it here — a tint
-/// would flatten a two-tone mark to one colour and lose it.
+/// Smart Home genuinely needs one file — it is drawn entirely in its own
+/// cyan and pale teal, with no achromatic ink at all, so it reads on both
+/// grounds unchanged.
+///
+/// If a future lockup introduces near-black ink, give it a dark variant in
+/// [Brand.darkLogo] rather than tinting it here — a tint would flatten a
+/// two-tone mark to one colour and lose it.
 ///
 /// ⚠️ **The NewPower `.svg` is not vector artwork.** It is a base64 PNG
 /// wrapped in an `<svg>` element, so it rasterises and gains no sharpness at
