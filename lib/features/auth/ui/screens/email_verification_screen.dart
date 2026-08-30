@@ -1,4 +1,4 @@
-import 'dart:async';
+import '../../../../core/helpers/countdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,58 +36,63 @@ class _EmailVerificationBody extends StatefulWidget {
   State<_EmailVerificationBody> createState() => _EmailVerificationBodyState();
 }
 
-class _EmailVerificationBodyState extends State<_EmailVerificationBody> {
+class _EmailVerificationBodyState extends State<_EmailVerificationBody>
+    with WidgetsBindingObserver {
   final _pinController = TextEditingController();
   final _focusNode = FocusNode();
 
-  // late String _verificationId;
-  int _remainingSeconds = 60;
-  Timer? _timer;
+  // ⚠️ Both countdowns are held as **deadlines**, not as counters.
+  //
+  // They used to be `int` fields decremented once per `Timer.periodic`
+  // tick. Flutter suspends timers while the app is backgrounded, so a rep
+  // who switched to their mail app to read the code came back to a
+  // countdown frozen exactly where they left it — the resend button stayed
+  // locked for its full 60 seconds *of foreground time*, which could be
+  // minutes of real time. The server's window, meanwhile, runs on wall
+  // clock and had long since opened.
+  //
+  // A deadline is immune: the remaining time is recomputed from
+  // `DateTime.now()` on every tick and on resume, so the tick rate only
+  // controls how often the label refreshes, never what it says.
+  late final _resend = Countdown(() {
+    if (mounted) setState(() {});
+  });
 
-  // Rate-limit countdown
-  int _rateLimitSeconds = 0;
-  Timer? _rateLimitTimer;
+  /// Rate-limit lock, same treatment for the same reason.
+  late final _rateLimit = Countdown(() {
+    if (mounted) setState(() {});
+  });
+
+  int get _remainingSeconds => _resend.secondsLeft;
+  int get _rateLimitSeconds => _rateLimit.secondsLeft;
 
   @override
   void initState() {
     super.initState();
-
+    // Recomputes the moment the app comes back, so the label is correct on
+    // the first frame rather than up to a second stale.
+    WidgetsBinding.instance.addObserver(this);
     _startTimer();
   }
 
-  void _startTimer() {
-    _remainingSeconds = 60;
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_remainingSeconds > 0) {
-          _remainingSeconds--;
-        } else {
-          timer.cancel();
-        }
-      });
-    });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    _resend.refresh();
+    _rateLimit.refresh();
   }
 
-  void _startRateLimitCountdown(int seconds) {
-    _rateLimitTimer?.cancel();
-    setState(() => _rateLimitSeconds = seconds);
-    _rateLimitTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_rateLimitSeconds <= 1) {
-        t.cancel();
-        setState(() => _rateLimitSeconds = 0);
-      } else {
-        setState(() => _rateLimitSeconds--);
-      }
-    });
-  }
+  void _startTimer() => _resend.start(60);
+
+  void _startRateLimitCountdown(int seconds) => _rateLimit.start(seconds);
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pinController.dispose();
     _focusNode.dispose();
-    _timer?.cancel();
-    _rateLimitTimer?.cancel();
+    _resend.dispose();
+    _rateLimit.dispose();
     super.dispose();
   }
 

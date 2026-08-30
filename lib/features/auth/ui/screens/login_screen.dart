@@ -1,4 +1,4 @@
-import 'dart:async';
+import '../../../../core/helpers/countdown.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,26 +42,19 @@ class _LoginScreenBodyState extends State<_LoginScreenBody> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Rate-limit countdown
-  int _rateLimitSeconds = 0;
-  Timer? _rateLimitTimer;
+  // Rate-limit countdown. Wall-clock based — see [Countdown] for why a
+  // tick counter is wrong here.
+  late final _rateLimit = Countdown(() {
+    if (mounted) setState(() {});
+  });
 
-  void _startRateLimitCountdown(int seconds) {
-    _rateLimitTimer?.cancel();
-    setState(() => _rateLimitSeconds = seconds);
-    _rateLimitTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_rateLimitSeconds <= 1) {
-        t.cancel();
-        setState(() => _rateLimitSeconds = 0);
-      } else {
-        setState(() => _rateLimitSeconds--);
-      }
-    });
-  }
+  int get _rateLimitSeconds => _rateLimit.secondsLeft;
+
+  void _startRateLimitCountdown(int seconds) => _rateLimit.start(seconds);
 
   @override
   void dispose() {
-    _rateLimitTimer?.cancel();
+    _rateLimit.dispose();
     _emailController.dispose();
     _passwordController.dispose();
 
