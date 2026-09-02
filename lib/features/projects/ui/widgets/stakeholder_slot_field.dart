@@ -537,24 +537,46 @@ class _SlotSheetState extends State<_SlotSheet> {
           color: colors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
-        padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
+        // ⚠️ Horizontal inset belongs to each child, **not** to this
+        // container.
+        //
+        // `AppTextField` renders its focus ring through `GlowAnimation`,
+        // which is a BoxShadow with `blurRadius: 12` and `spreadRadius: 2` —
+        // ink that lands up to 14px *outside* the field's own box. With the
+        // 20px inset on the container, the ListView below started exactly at
+        // the field's edge, and a ListView clips at `Clip.hardEdge` by
+        // default. So the moment a field took focus its glow was sliced off
+        // flush against the list's boundary, and the field read as cut away
+        // down its side.
+        //
+        // Insetting the children instead leaves the list's clip rectangle at
+        // the sheet's full width, giving the glow 20px of room on each side —
+        // comfortably more than the 14 it needs.
+        padding: EdgeInsets.symmetric(vertical: 12.h),
         child: Column(
           children: [
-            Text(
-              context.tr(widget.labelKey),
-              style: context.textStyles.baseBold,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Text(
+                context.tr(widget.labelKey),
+                style: context.textStyles.baseBold,
+              ),
             ),
             verticalSpace(12.h),
-            AppTextField(
-              hintText: context.tr('add_stakeholder_search_hint'),
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              prefixIcon: Icon(Icons.search, color: colors.textColor70),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: AppTextField(
+                hintText: context.tr('add_stakeholder_search_hint'),
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                prefixIcon: Icon(Icons.search, color: colors.textColor70),
+              ),
             ),
             verticalSpace(8.h),
             Expanded(
               child: ListView(
                 controller: scrollController,
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
                 children: [
                   if (_searching)
                     Padding(
@@ -779,23 +801,27 @@ class _SlotSheetState extends State<_SlotSheet> {
                 ],
               ),
             ),
+            // Carries its own inset now that the container no longer does.
             SafeArea(
               top: false,
-              child: SizedBox(
-                width: double.infinity,
-                child: PressableScale(
-                  onTap: canSubmit ? _submit : null,
-                  child: Container(
-                    height: 46.h,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: canSubmit ? colors.brand500 : colors.ink300,
-                      borderRadius: BorderRadius.circular(AppRadius.field),
-                    ),
-                    child: Text(
-                      context.tr('confirm'),
-                      style: context.textStyles.smBold.copyWith(
-                        color: colors.white,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: PressableScale(
+                    onTap: canSubmit ? _submit : null,
+                    child: Container(
+                      height: 46.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: canSubmit ? colors.brand500 : colors.ink300,
+                        borderRadius: BorderRadius.circular(AppRadius.field),
+                      ),
+                      child: Text(
+                        context.tr('confirm'),
+                        style: context.textStyles.smBold.copyWith(
+                          color: colors.white,
+                        ),
                       ),
                     ),
                   ),
