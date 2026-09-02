@@ -1,0 +1,169 @@
+name: iOS Release → TestFlight
+
+# Manual by default. iOS builds take ~15 minutes of macOS runner time (billed
+# at 10x the Linux rate on private repos), so this is deliberately not wired
+# to every push to main — trigger it when a build is actually wanted.
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Upload to TestFlight (off = build and keep the IPA only)'
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    name: Build, sign and upload
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          # Pinned, not 'stable'. A floating channel means the toolchain can
+          # change under a release build with no commit to explain it — and
+          # this project is on a Dart 3.10 SDK constraint that an older
+          # Flutter cannot satisfy.
+          flutter-version: '3.38.7'
+          channel: 'stable'
+          cache: true
+
+      - name: Resolve Dart dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        # Podfile.lock is not committed yet (this project has never had a
+        # successful pod install — see README_IOS_SETUP.md). The first run
+        # generates it; download it from the artifacts below and commit it,
+        # after which builds become reproducible instead of re-resolving
+        # every time.
+        run: pod install --repo-update
+
+      - name: Register App Store Connect API key
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          # xcodebuild and altool both look for the key at this exact path
+          # and filename. The name must be AuthKey_<KEY_ID>.p8 or neither
+          # tool finds it, and the resulting error only says "authentication
+          # failed".
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$PRIVATE_KEY" | base64 --decode \
+            > ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
+          # Fail loudly here rather than 20 minutes later at the upload step
+          # if the secret was pasted with wrapping or as raw PEM.
+          if ! grep -q "BEGIN PRIVATE KEY" ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8; then
+            echo "::error::APP_STORE_CONNECT_PRIVATE_KEY did not decode to a PEM private key."
+            echo "::error::Re-encode the .p8 with: base64 -i AuthKey_<KEY_ID>.p8"
+            exit 1
+          fi
+
+      - name: Inject Apple Team ID
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$TEAM_ID" ]; then
+            echo "::error::APPLE_TEAM_ID secret is empty."
+            exit 1
+          fi
+          sed -i '' "s/YOUR_TEAM_ID/${TEAM_ID}/g" ios/ExportOptions.plist
+          sed -i '' "s/YOUR_TEAM_ID/${TEAM_ID}/g" ios/Runner.xcodeproj/project.pbxproj
+          # The placeholder must actually have been present. A silent no-op
+          # here is how you get "Signing for Runner requires a development
+          # team" from a workflow that reported success on this step.
+          if grep -q "YOUR_TEAM_ID" ios/ExportOptions.plist ios/Runner.xcodeproj/project.pbxproj; then
+            echo "::error::YOUR_TEAM_ID placeholder still present after substitution."
+            exit 1
+          fi
+          echo "Team ID injected into ExportOptions.plist and project.pbxproj."
+
+      - name: Build unsigned archive
+        env:
+          # The one --dart-define this app reads: ApiConstants.baseUrl is a
+          # String.fromEnvironment. It has a production default, so omitting
+          # this works by accident — which is exactly how a staging URL ships
+          # one day. Passed explicitly so the build states its own target.
+          API_BASE_URL: ${{ vars.API_BASE_URL || 'https://gyrostack.cloud/api/v1' }}
+        run: |
+          set -euo pipefail
+          flutter build ipa \
+            --release \
+            --no-codesign \
+            --build-number=${{ github.run_number }} \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --obfuscate \
+            --split-debug-info=build/symbols
+
+      - name: Export and sign IPA
+        run: |
+          set -euo pipefail
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
+            -authenticationKeyIssuerID "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8"
+
+      - name: Validate binary before upload
+        if: inputs.upload
+        # Catches most rejection reasons (missing icon sizes, bad
+        # entitlements, an unregistered bundle ID) in ~1 minute, instead of
+        # after a full upload and Apple's processing queue.
+        run: |
+          set -euo pipefail
+          xcrun altool --validate-app \
+            --type ios \
+            --file "$(ls build/ios/ipa/*.ipa | head -1)" \
+            --apiKey "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
+            --apiIssuer "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
+
+      - name: Upload to TestFlight
+        if: inputs.upload
+        run: |
+          set -euo pipefail
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$(ls build/ios/ipa/*.ipa | head -1)" \
+            --apiKey "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
+            --apiIssuer "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipa-build-${{ github.run_number }}
+          path: build/ios/ipa/*.ipa
+          retention-days: 14
+
+      - name: Upload obfuscation symbols
+        uses: actions/upload-artifact@v4
+        with:
+          # ⚠️ Keep these for as long as the build exists in the wild.
+          #
+          # --obfuscate renames everything; without the matching symbol files
+          # a Crashlytics stack trace from this exact build is permanently
+          # unreadable. They cannot be regenerated later — a rebuild produces
+          # different symbols. 90 days is the artifact ceiling; archive them
+          # somewhere durable before it lapses.
+          name: debug-symbols-${{ github.run_number }}
+          path: build/symbols/
+          retention-days: 90
+
+      - name: Upload Podfile.lock
+        uses: actions/upload-artifact@v4
+        with:
+          # Commit this to make future builds reproducible. Until it exists
+          # in the repo, every run resolves pods afresh and an upstream bump
+          # can break a build that worked yesterday with no change of yours.
+          name: podfile-lock-${{ github.run_number }}
+          path: ios/Podfile.lock
+          retention-days: 14

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Export settings for `xcodebuild -exportArchive`.
+
+  `YOUR_TEAM_ID` is a deliberate literal, not an oversight: CI substitutes it
+  from the APPLE_TEAM_ID secret at runtime, which keeps the account
+  identifier out of the repository. Do not commit a real team ID here.
+-->
+<plist version="1.0">
+<dict>
+	<key>destination</key>
+	<string>export</string>
+
+	<key>method</key>
+	<string>app-store-connect</string>
+
+	<!-- Automatic signing. Paired with `-allowProvisioningUpdates` on the
+	     xcodebuild call, this lets the runner create and download the
+	     distribution profile itself, so no certificate or .mobileprovision
+	     is ever stored in the repo or in a secret.
+
+	     ⚠️ It can only create a profile for capabilities the App ID already
+	     has. This app ships Runner.entitlements with `aps-environment`, so
+	     Push Notifications must be enabled on the App ID in the Developer
+	     Portal first — otherwise the generated profile lacks the
+	     entitlement and signing fails with a mismatch error that never
+	     mentions push. -->
+	<key>signingStyle</key>
+	<string>automatic</string>
+
+	<key>teamID</key>
+	<string>YOUR_TEAM_ID</string>
+
+	<!-- Upload the dSYMs so Crashlytics can symbolicate. The build passes
+	     --obfuscate, which makes this the difference between a readable
+	     stack trace and a wall of hex. -->
+	<key>uploadSymbols</key>
+	<true/>
+
+	<!-- ⚠️ false, deliberately.
+	     `true` lets Xcode rewrite CFBundleVersion / CFBundleShortVersionString
+	     during export. The workflow sets the build number explicitly from
+	     the CI run number so it increases monotonically; handing Xcode
+	     permission to change it afterwards means the number uploaded is not
+	     the number that was chosen, and a rejected "redundant binary" is
+	     then very hard to explain. -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+
+	<!-- Strips Flutter's arm64 slice for simulators from the archive; the
+	     App Store rejects an IPA containing simulator architectures. -->
+	<key>stripSwiftSymbols</key>
+	<true/>
+</dict>
+</plist>
